@@ -256,6 +256,12 @@ export default function AutismDailySupportToolkit() {
   const [firstTask, setFirstTask] = useState("Shoes");
   const [thenTask, setThenTask] = useState("Car");
   const [timerMinutes, setTimerMinutes] = useState(5);
+  const [timerPurpose, setTimerPurpose] = useState("Homework time");
+  const [timerRemaining, setTimerRemaining] = useState(5 * 60);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [selectedTaskIcon, setSelectedTaskIcon] = useState("✅");
+  const [childPhotoLabel, setChildPhotoLabel] = useState("No photo added yet");
+  const [rewardLog, setRewardLog] = useState([]);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
   const [xp, setXp] = useState(120);
   const [streak, setStreak] = useState(3);
@@ -268,7 +274,35 @@ export default function AutismDailySupportToolkit() {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState("timer");
   const [breathingActive, setBreathingActive] = useState(false);
+  const [breathingPhase, setBreathingPhase] = useState("ready");
+  const [breathingCount, setBreathingCount] = useState(4);
   const [timerVisualMode, setTimerVisualMode] = useState("circle");
+
+  const visualChoices = [
+    ["✅", "General"],
+    ["📚", "Homework"],
+    ["✏️", "Writing"],
+    ["🎒", "School bag"],
+    ["🏫", "Go school"],
+    ["🪥", "Brush teeth"],
+    ["🚽", "Toilet"],
+    ["🍽️", "Eat"],
+    ["🛁", "Bath"],
+    ["🌙", "Sleep"],
+    ["🚗", "Car"],
+    ["🧘", "Break"],
+    ["🎧", "Headphones"],
+    ["🧸", "Toy"],
+    ["📱", "Screen time"],
+  ];
+
+  const rewardDescriptions = [
+    "Asked for help",
+    "Tried one step",
+    "Used calm body",
+    "Waited",
+    "Recovered after a hard moment",
+  ];
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
@@ -295,6 +329,57 @@ export default function AutismDailySupportToolkit() {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
   }, []);
+
+  useEffect(() => {
+    if (!breathingActive) {
+      setBreathingPhase("ready");
+      setBreathingCount(4);
+      return;
+    }
+
+    let phase = "inhale";
+    let count = 4;
+    setBreathingPhase(phase);
+    setBreathingCount(count);
+
+    const interval = window.setInterval(() => {
+      count -= 1;
+
+      if (count <= 0) {
+        if (phase === "inhale") {
+          phase = "hold";
+          count = 2;
+        } else if (phase === "hold") {
+          phase = "exhale";
+          count = 6;
+        } else {
+          phase = "inhale";
+          count = 4;
+        }
+      }
+
+      setBreathingPhase(phase);
+      setBreathingCount(count);
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [breathingActive]);
+
+  useEffect(() => {
+    if (!timerRunning) return;
+
+    const interval = window.setInterval(() => {
+      setTimerRemaining((seconds) => {
+        if (seconds <= 1) {
+          setTimerRunning(false);
+          return 0;
+        }
+        return seconds - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [timerRunning]);
 
   async function installApp() {
     if (installPrompt) {
@@ -333,6 +418,7 @@ export default function AutismDailySupportToolkit() {
   function addTask() {
     const item = createScheduleItem(newTask);
     if (!item) return;
+    item.icon = selectedTaskIcon || item.icon;
     setSchedule((items) => [...items, item]);
     setNewTask("");
     setXp((value) => value + 3);
@@ -340,6 +426,30 @@ export default function AutismDailySupportToolkit() {
 
   function removeTask(id) {
     setSchedule((items) => items.filter((item) => item.id !== id));
+  }
+
+  function saveReward() {
+    setRewardLog((items) => [
+      {
+        id: `reward-${Date.now()}`,
+        date: new Date().toLocaleDateString(),
+        stars,
+        descriptions: rewardDescriptions.slice(0, stars),
+      },
+      ...items,
+    ]);
+    setXp((value) => value + 10);
+  }
+
+  function resetTimer() {
+    setTimerRunning(false);
+    setTimerRemaining(timerMinutes * 60);
+  }
+
+  function updateTimerMinutes(value) {
+    setTimerMinutes(value);
+    setTimerRemaining(value * 60);
+    setTimerRunning(false);
   }
 
   function saveNote() {
@@ -403,6 +513,10 @@ export default function AutismDailySupportToolkit() {
               <div>
                 <label className="text-sm font-bold text-slate-700">Child name</label>
                 <input value={childName} onChange={(e) => setChildName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3" />
+                <label className="mt-4 block text-sm font-bold text-slate-700">Child photo</label>
+                <div className="mt-2 rounded-2xl border border-dashed border-teal-200 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+                  {childPhotoLabel}. For beta, parents can add a name first. Photo upload can be added when login/storage is ready.
+                </div>
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700">Biggest challenge right now</label>
@@ -604,10 +718,17 @@ export default function AutismDailySupportToolkit() {
               </div>
 
               <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
-                <input value={newTask} onChange={(event) => setNewTask(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") addTask(); }} placeholder="Add one simple step, e.g. brush teeth" className="min-w-0 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-teal-500" />
-                <Button onClick={addTask}>Auto-add picture</Button>
+                <div className="grid gap-2 md:grid-cols-[1fr_190px]">
+                  <input value={newTask} onChange={(event) => setNewTask(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") addTask(); }} placeholder="Add one simple step, e.g. brush teeth" className="min-w-0 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-teal-500" />
+                  <select value={selectedTaskIcon} onChange={(event) => setSelectedTaskIcon(event.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500">
+                    {visualChoices.map(([icon, label]) => (
+                      <option key={label} value={icon}>{icon} {label}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button onClick={addTask}>Add step + visual</Button>
               </div>
-              <p className="mt-2 text-xs font-semibold text-slate-500">When you add a step, APC automatically suggests a matching visual icon to make routines easier for your child to follow independently.</p>
+              <p className="mt-2 text-xs font-semibold text-slate-500">You can choose the visual icon yourself. This prevents repeated visuals, such as school bag and go school looking the same.</p>
             </div>
           </Card>
 
@@ -680,50 +801,95 @@ export default function AutismDailySupportToolkit() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <h3 className="text-2xl font-bold">Visual Timer</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">Show the circle. As the time gets shorter, the visual becomes easier for your child to understand.</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">Set what the timer is for, then press start. Show this one screen to your child so they can see how much time is left.</p>
                   </div>
                   <select value={timerVisualMode} onChange={(e)=>setTimerVisualMode(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
                     <option value="circle">Circle timer</option>
                     <option value="bar">Bar timer</option>
                   </select>
                 </div>
-                <input type="range" min="1" max="30" value={timerMinutes} onChange={(e)=>setTimerMinutes(Number(e.target.value))} className="mt-6 w-full" />
+                <div className="mt-5 grid gap-3 md:grid-cols-[1fr_160px]">
+                  <input value={timerPurpose} onChange={(e)=>setTimerPurpose(e.target.value)} placeholder="What is this timer for?" className="rounded-2xl border border-slate-200 px-4 py-3 text-lg font-bold outline-none focus:ring-2 focus:ring-teal-500" />
+                  <select value={timerVisualMode} onChange={(e)=>setTimerVisualMode(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
+                    <option value="circle">Circle timer</option>
+                    <option value="bar">Bar timer</option>
+                  </select>
+                </div>
+                <input type="range" min="1" max="30" value={timerMinutes} onChange={(e)=>updateTimerMinutes(Number(e.target.value))} className="mt-6 w-full" />
                 {timerVisualMode === "circle" ? (
                   <div className="mt-6 flex justify-center">
-                    <div className="relative flex h-56 w-56 items-center justify-center rounded-full bg-white shadow-inner" style={{ background: `conic-gradient(#0f766e ${(timerMinutes / 30) * 360}deg, #dbeafe 0deg)` }}>
+                    <div className="relative flex h-56 w-56 items-center justify-center rounded-full bg-white shadow-inner" style={{ background: `conic-gradient(#0f766e ${(timerRemaining / (timerMinutes * 60 || 1)) * 360}deg, #dbeafe 0deg)` }}>
                       <div className="flex h-40 w-40 flex-col items-center justify-center rounded-full bg-white shadow-lg">
-                        <p className="text-5xl font-black text-teal-800">{timerMinutes}</p>
-                        <p className="text-sm font-bold uppercase tracking-wide text-slate-500">minutes</p>
+                        <p className="text-5xl font-black text-teal-800">{Math.floor(timerRemaining / 60)}:{String(timerRemaining % 60).padStart(2, "0")}</p>
+                        <p className="text-sm font-bold uppercase tracking-wide text-slate-500">{timerPurpose}</p>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="mt-6 rounded-3xl bg-white p-5 shadow-inner">
                     <div className="h-10 overflow-hidden rounded-full bg-sky-100">
-                      <div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${(timerMinutes / 30) * 100}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${(timerRemaining / (timerMinutes * 60 || 1)) * 100}%` }} />
                     </div>
-                    <p className="mt-4 text-center text-4xl font-black text-teal-800">{timerMinutes}:00</p>
+                    <p className="mt-4 text-center text-4xl font-black text-teal-800">{Math.floor(timerRemaining / 60)}:{String(timerRemaining % 60).padStart(2, "0")}</p>
+                    <p className="mt-1 text-center text-sm font-bold text-slate-500">{timerPurpose}</p>
                   </div>
                 )}
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  <Button onClick={() => setTimerRunning((value) => !value)}>{timerRunning ? "Pause timer" : "Start timer"}</Button>
+                  <Button variant="outline" onClick={resetTimer}>Reset timer</Button>
+                </div>
               </div>
             )}
 
             {activeQuickTool === "calm" && (
               <div>
-                <h3 className="text-2xl font-bold">Calm Down Breathing</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Use this yourself first. Then invite your child to watch the circle with you.</p>
+                <h3 className="text-2xl font-bold">Automatic Calm Breathing</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Press start, then follow the circle. It expands for breathe in, pauses for hold, and slowly closes for breathe out.</p>
+
                 <div className="mt-6 flex flex-col items-center justify-center rounded-[2rem] bg-gradient-to-br from-teal-50 to-sky-50 p-8 text-center">
-                  <div className={`flex h-44 w-44 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-sky-500 text-white shadow-2xl transition-all duration-[3000ms] ${breathingActive ? "scale-125" : "scale-90"}`}>
-                    <div className="text-center">
-                      <p className="text-2xl font-black">{breathingActive ? "Breathe in" : "Breathe out"}</p>
-                      <p className="mt-1 text-sm font-semibold opacity-80">slowly</p>
+                  <div className="relative flex h-64 w-64 items-center justify-center">
+                    <div
+                      className={`absolute rounded-full border-8 transition-all ease-in-out ${
+                        breathingPhase === "inhale"
+                          ? "h-64 w-64 border-teal-500 opacity-80 duration-[4000ms]"
+                          : breathingPhase === "hold"
+                          ? "h-64 w-64 border-sky-500 opacity-70 duration-1000"
+                          : breathingPhase === "exhale"
+                          ? "h-36 w-36 border-teal-300 opacity-90 duration-[6000ms]"
+                          : "h-44 w-44 border-slate-300 opacity-60 duration-1000"
+                      }`}
+                    />
+                    <div
+                      className={`absolute rounded-full bg-gradient-to-br from-teal-500 to-sky-500 shadow-2xl transition-all ease-in-out ${
+                        breathingPhase === "inhale"
+                          ? "h-48 w-48 duration-[4000ms]"
+                          : breathingPhase === "hold"
+                          ? "h-48 w-48 duration-1000"
+                          : breathingPhase === "exhale"
+                          ? "h-28 w-28 duration-[6000ms]"
+                          : "h-36 w-36 duration-1000"
+                      }`}
+                    />
+                    <div className="relative z-10 flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white/95 shadow-lg">
+                      <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                        {breathingPhase === "ready" && "Ready"}
+                        {breathingPhase === "inhale" && "Breathe in"}
+                        {breathingPhase === "hold" && "Hold"}
+                        {breathingPhase === "exhale" && "Breathe out"}
+                      </p>
+                      <p className="mt-1 text-5xl font-black text-teal-800">{breathingActive ? breathingCount : ""}</p>
                     </div>
                   </div>
-                  <Button className="mt-8" onClick={() => setBreathingActive((value) => !value)}>{breathingActive ? "Breathe out" : "Breathe in"}</Button>
+
+                  <div className="mt-8 flex flex-wrap justify-center gap-3">
+                    <Button onClick={() => setBreathingActive((value) => !value)}>{breathingActive ? "Stop breathing guide" : "Start breathing guide"}</Button>
+                    <Button variant="outline" onClick={() => { setBreathingActive(false); setBreathingPhase("ready"); setBreathingCount(4); }}>Reset</Button>
+                  </div>
+
                   <div className="mt-5 grid gap-2 text-sm font-semibold text-slate-700 sm:grid-cols-3">
-                    <div className="rounded-2xl bg-white p-3">🌬️ Slow breath</div>
-                    <div className="rounded-2xl bg-white p-3">🎧 Reduce noise</div>
-                    <div className="rounded-2xl bg-white p-3">🧘 Safe space</div>
+                    <div className={`rounded-2xl p-3 ${breathingPhase === "inhale" ? "bg-teal-600 text-white" : "bg-white"}`}>🌬️ Breathe in 4</div>
+                    <div className={`rounded-2xl p-3 ${breathingPhase === "hold" ? "bg-sky-600 text-white" : "bg-white"}`}>⏸️ Hold 2</div>
+                    <div className={`rounded-2xl p-3 ${breathingPhase === "exhale" ? "bg-teal-600 text-white" : "bg-white"}`}>🍃 Breathe out 6</div>
                   </div>
                 </div>
               </div>
@@ -736,7 +902,29 @@ export default function AutismDailySupportToolkit() {
                 <div className="mt-6 rounded-[2rem] bg-amber-50 p-6 text-center">
                   <div className="flex flex-wrap justify-center gap-2 text-5xl">{Array.from({ length: 5 }).map((_, i)=><button key={i} onClick={()=>setStars(i+1)}>{i < stars ? "⭐" : "☆"}</button>)}</div>
                   <p className="mt-5 text-xl font-bold text-amber-900">{stars}/5 tiny wins today</p>
-                  <Button variant="outline" className="mt-4" onClick={() => setStars(0)}>Reset stars</Button>
+                  <div className="mt-4 grid gap-2 text-left">
+                    {rewardDescriptions.map((description, index) => (
+                      <div key={description} className={`rounded-2xl p-3 text-sm font-semibold ${index < stars ? "bg-white text-amber-900" : "bg-white/50 text-slate-400"}`}>
+                        {index < stars ? "⭐" : "☆"} {description}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    <Button onClick={saveReward}>Save reward log</Button>
+                    <Button variant="outline" onClick={() => setStars(0)}>Reset stars</Button>
+                  </div>
+                  {rewardLog.length > 0 && (
+                    <div className="mt-5 rounded-3xl bg-white p-4 text-left shadow-sm">
+                      <p className="text-sm font-bold text-slate-700">Reward log</p>
+                      <div className="mt-3 grid gap-2">
+                        {rewardLog.slice(0, 3).map((item) => (
+                          <div key={item.id} className="rounded-2xl bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+                            {item.date}: {item.stars}/5 stars
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
