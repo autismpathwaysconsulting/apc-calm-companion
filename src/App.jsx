@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const CJ_PHOTO = "cj-photo.JPG";
 
@@ -269,6 +269,8 @@ export default function AutismDailySupportToolkit() {
   const [activeQuickTool, setActiveQuickTool] = useState("timer");
   const [breathingActive, setBreathingActive] = useState(false);
   const [timerVisualMode, setTimerVisualMode] = useState("circle");
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   const reset = calmResets[activeReset];
   const completedCount = useMemo(() => countCompleted(schedule), [schedule]);
@@ -280,6 +282,30 @@ export default function AutismDailySupportToolkit() {
   const shortDate = dateObj.toLocaleDateString("en-MY", { day: "numeric", month: "short" });
   const level = Math.max(1, Math.floor(xp / 100) + 1);
   const levelProgress = xp % 100;
+
+  useEffect(() => {
+    function handleBeforeInstallPrompt(event) {
+      event.preventDefault();
+      setInstallPrompt(event);
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  async function installApp() {
+    if (installPrompt) {
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+      return;
+    }
+
+    setShowInstallHelp((value) => !value);
+  }
 
   function goToSection(id) {
     const element = document.getElementById(id);
@@ -430,11 +456,12 @@ export default function AutismDailySupportToolkit() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">Start calm support</Button>
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Open parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Emergency calm mode</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime mode"}</Button>
+                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install app</Button>
               </div>
             </div>
           </Card>
@@ -455,6 +482,14 @@ export default function AutismDailySupportToolkit() {
               <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
 
               <div className="mt-5 rounded-3xl bg-[#EEF6FF] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName}'s progress</p><p className="text-sm font-bold text-sky-700">🔥 {streak} day streak</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${levelProgress}%` }} /></div><p className="mt-2 text-xs font-semibold text-sky-700">Calmer routines and small wins build confidence over time.</p></div>
+
+              {showInstallHelp && (
+                <div className="mt-5 rounded-3xl bg-sky-50 p-5 text-sm leading-6 text-sky-900">
+                  <p className="font-bold">Install APC Calm Companion on your phone</p>
+                  <p className="mt-2"><strong>iPhone:</strong> Open in Safari → Share → Add to Home Screen.</p>
+                  <p><strong>Android:</strong> Open in Chrome → Menu → Add to Home Screen or Install app.</p>
+                </div>
+              )}
             </div>
           </Card>
         </header>
@@ -737,9 +772,16 @@ export default function AutismDailySupportToolkit() {
               <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
               <a href="https://autismpathwaysconsulting.com/services" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Book parent coaching</a>
               <a href="https://www.instagram.com/autismpathwaysconsulting" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Watch APC tips</a>
+              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Send feedback</a>
             </div>
           </div>
         </section>
+
+        <footer className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 text-center text-sm leading-6 text-slate-600 shadow-sm">
+          <p className="font-bold text-slate-900">© Autism Pathways Consulting</p>
+          <p className="mt-2">APC Calm Companion provides educational support tools only. It is not medical advice, diagnosis, therapy, or crisis intervention.</p>
+          <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
+        </footer>
       </div>
     </main>
   );
