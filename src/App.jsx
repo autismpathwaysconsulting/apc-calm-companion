@@ -305,6 +305,7 @@ export default function AutismDailySupportToolkit() {
   ];
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("Saved on this device");
 
   const reset = calmResets[activeReset];
   const completedCount = useMemo(() => countCompleted(schedule), [schedule]);
