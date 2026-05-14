@@ -544,6 +544,60 @@ function resetSavedData() {
     }, 80);
   }
 
+  function sendSummaryToCJ() {
+    const completedSteps = schedule
+      .filter((item) => item.done)
+      .map((item) => item.title);
+
+    const pendingSteps = schedule
+      .filter((item) => !item.done)
+      .map((item) => item.title);
+
+    const latestNotes = savedNotes
+      .slice(0, 3)
+      .map((item, index) => {
+        return [
+          `Note ${index + 1}:`,
+          `Before: ${item.before || "Not recorded"}`,
+          `During: ${item.during || "Not recorded"}`,
+          `Helped: ${item.helped || "Not recorded"}`,
+        ].join("\n");
+      })
+      .join("\n\n");
+
+    const latestRewards = rewardLog
+      .slice(0, 3)
+      .map((item) => `${item.date}: ${item.stars}/5 stars`)
+      .join("\n");
+
+    const message = [
+      "Hi CJ, I used the APC Calm Companion and would like to share a short summary.",
+      "",
+      `Child name: ${childName || "Not added"}`,
+      `Main challenge: ${mainChallenge || "Not selected"}`,
+      `Selected date: ${todayLabel}`,
+      `Current timer: ${timerPurpose}, ${timerMinutes} minute(s)`,
+      "",
+      "Routine progress:",
+      `Completed: ${completedSteps.length ? completedSteps.join(", ") : "None yet"}`,
+      `Still working on: ${pendingSteps.length ? pendingSteps.join(", ") : "None"}`,
+      "",
+      "Latest pattern notes:",
+      latestNotes || "No pattern notes saved yet.",
+      "",
+      "Reward log:",
+      latestRewards || "No reward log saved yet.",
+      "",
+      "I understand this is not emergency support. I would like guidance on what to try next.",
+    ].join("\n");
+
+    window.open(
+      `https://wa.me/601172998168?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
   return (
     <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-gradient-to-b from-[#F4FBFA] via-white to-[#F7FAFC]"}`}>
       <div className="mx-auto w-full max-w-[430px] px-4 py-6 md:max-w-7xl md:px-8 md:py-10">
@@ -1015,9 +1069,19 @@ function resetSavedData() {
               <p className="text-sm font-bold uppercase tracking-wide text-white/70">Want more support?</p>
               <h2 className="mt-2 text-3xl font-black">Watch APC parent support videos</h2>
               <p className="mt-3 leading-7 text-white/85">I’ll add short videos here for meltdowns, aggression, communication, routines, transitions, and parent overwhelm.</p>
+              <p className="mt-3 text-sm leading-6 text-white/75">
+                Nothing is sent automatically. You choose when to share your summary with CJ.
+              </p>
             </div>
             <div className="grid gap-3">
               <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
+              <button
+                type="button"
+                onClick={sendSummaryToCJ}
+                className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg"
+              >
+                Send summary to CJ
+              </button>
               <a href="https://autismpathwaysconsulting.com/services" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">1:1 Parent Support & Strategy Session</a>
               <a href="https://www.instagram.com/autismpathwaysconsulting" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Watch APC tips</a>
               <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Send feedback</a>
