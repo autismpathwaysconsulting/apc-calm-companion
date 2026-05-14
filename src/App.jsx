@@ -241,37 +241,41 @@ const selfTests = [
   { name: "Parent tools include usable tool types", passed: parentTools.every((tool) => Boolean(tool.toolType)) },
 ];
 
+function getSavedAppData() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const saved = window.localStorage.getItem("apc-calm-companion-data");
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
 export default function AutismDailySupportToolkit() {
-  const [selectedTemplate, setSelectedTemplate] = useState("Morning Routine");
-  const [schedule, setSchedule] = useState(() => cloneRoutine(routineTemplates["Morning Routine"]));
-  const [newTask, setNewTask] = useState("");
+  const savedAppData = getSavedAppData();  const [selectedTemplate, setSelectedTemplate] = useState("Morning Routine");
+const [schedule, setSchedule] = useState(() => savedAppData?.schedule || cloneRoutine(routineTemplates["Morning Routine"]));  const [newTask, setNewTask] = useState("");
   const [activeReset, setActiveReset] = useState("overwhelmed");
-  const [stars, setStars] = useState(3);
-  const [note, setNote] = useState({ before: "", during: "", helped: "" });
-  const [savedNotes, setSavedNotes] = useState([]);
-  const [openEvidence, setOpenEvidence] = useState("Visual supports");
+const [stars, setStars] = useState(savedAppData?.stars ?? 3);  const [note, setNote] = useState({ before: "", during: "", helped: "" });
+const [savedNotes, setSavedNotes] = useState(savedAppData?.savedNotes || []);  const [openEvidence, setOpenEvidence] = useState("Visual supports");
   const [activeTool, setActiveTool] = useState(parentTools[0]);
   const [childMode, setChildMode] = useState("parent-guided");
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [firstTask, setFirstTask] = useState("Shoes");
+const [selectedDate, setSelectedDate] = useState(() => savedAppData?.selectedDate || new Date().toISOString().slice(0, 10));  const [firstTask, setFirstTask] = useState("Shoes");
   const [thenTask, setThenTask] = useState("Car");
-  const [timerMinutes, setTimerMinutes] = useState(5);
-  const [timerPurpose, setTimerPurpose] = useState("Homework time");
-  const [timerRemaining, setTimerRemaining] = useState(5 * 60);
+const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5);  const [timerPurpose, setTimerPurpose] = useState(savedAppData?.timerPurpose || "Homework time");
+  const [timerRemaining, setTimerRemaining] = useState(() => (savedAppData?.timerMinutes || 5) * 60);
   const [timerRunning, setTimerRunning] = useState(false);
   const [selectedTaskIcon, setSelectedTaskIcon] = useState("✅");
   const [childPhotoLabel, setChildPhotoLabel] = useState("No photo added yet");
-  const [rewardLog, setRewardLog] = useState([]);
+const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
-  const [xp, setXp] = useState(120);
-  const [streak, setStreak] = useState(3);
+const [xp, setXp] = useState(savedAppData?.xp || 120);  const [streak, setStreak] = useState(savedAppData?.streak || 3);
   const [focusMode, setFocusMode] = useState(false);
   const [bedtimeMode, setBedtimeMode] = useState(false);
-  const [favouriteTools, setFavouriteTools] = useState(["Calm Down Toolkit"]);
-  const [childName, setChildName] = useState("My Child");
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
-  const [mainChallenge, setMainChallenge] = useState("Aggression / hitting");
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+const [favouriteTools, setFavouriteTools] = useState(savedAppData?.favouriteTools || ["Calm Down Toolkit"]);
+const [onboardingComplete, setOnboardingComplete] = useState(savedAppData?.onboardingComplete || false);
+const [childName, setChildName] = useState(savedAppData?.childName || "My Child");  
+const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge || "Aggression / hitting");  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState("timer");
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState("ready");
@@ -317,6 +321,44 @@ export default function AutismDailySupportToolkit() {
   const shortDate = dateObj.toLocaleDateString("en-MY", { day: "numeric", month: "short" });
   const level = Math.max(1, Math.floor(xp / 100) + 1);
   const levelProgress = xp % 100;
+  useEffect(() => {
+  const appState = {
+    childName,
+    schedule,
+    stars,
+    savedNotes,
+    rewardLog,
+    timerPurpose,
+    timerMinutes,
+    xp,
+    streak,
+    selectedDate,
+    mainChallenge,
+    onboardingComplete,
+    favouriteTools,
+  };
+
+  try {
+    window.localStorage.setItem("apc-calm-companion-data", JSON.stringify(appState));
+    setSaveMessage("Saved on this device");
+  } catch (error) {
+    setSaveMessage("Saving unavailable in this browser");
+  }
+}, [
+  childName,
+  schedule,
+  stars,
+  savedNotes,
+  rewardLog,
+  timerPurpose,
+  timerMinutes,
+  xp,
+  streak,
+  selectedDate,
+  mainChallenge,
+  onboardingComplete,
+  favouriteTools,
+]);
 
   useEffect(() => {
     function handleBeforeInstallPrompt(event) {
@@ -392,7 +434,13 @@ export default function AutismDailySupportToolkit() {
 
     setShowInstallHelp((value) => !value);
   }
+function resetSavedData() {
+  const confirmReset = window.confirm("Reset saved APC Calm Companion data on this device?");
+  if (!confirmReset) return;
 
+  window.localStorage.removeItem("apc-calm-companion-data");
+  window.location.reload();
+}
   function goToSection(id) {
     const element = document.getElementById(id);
     if (!element) return;
@@ -595,6 +643,17 @@ export default function AutismDailySupportToolkit() {
               </div>
 
               <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
+              <div className="mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+  <p className="font-bold">{saveMessage}</p>
+  <p>Your child name, routines, notes, reward log, and timer settings are saved on this phone or computer.</p>
+  <button
+    type="button"
+    onClick={resetSavedData}
+    className="mt-2 text-xs font-bold text-emerald-800 underline"
+  >
+    Reset saved data
+  </button>
+</div>
 
               <div className="mt-5 rounded-3xl bg-[#EEF6FF] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName}'s progress</p><p className="text-sm font-bold text-sky-700">🔥 {streak} day streak</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${levelProgress}%` }} /></div><p className="mt-2 text-xs font-semibold text-sky-700">Calmer routines and small wins build confidence over time.</p></div>
 
@@ -959,7 +1018,7 @@ export default function AutismDailySupportToolkit() {
             </div>
             <div className="grid gap-3">
               <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
-              <a href="https://autismpathwaysconsulting.com/services" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Book parent coaching</a>
+              <a href="https://autismpathwaysconsulting.com/services" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">1:1 Parent Support & Strategy Session</a>
               <a href="https://www.instagram.com/autismpathwaysconsulting" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Watch APC tips</a>
               <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Send feedback</a>
             </div>
