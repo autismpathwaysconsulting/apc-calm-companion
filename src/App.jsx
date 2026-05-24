@@ -605,7 +605,7 @@ function resetSavedData() {
           <section className="mb-6 rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">✨ Welcome to APC Calm Companion</div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">APC Calm Companion</div>
                 <h2 className="mt-3 text-3xl font-bold">Let me personalise support for your family</h2>
                 <p className="mt-2 max-w-2xl leading-7 text-slate-600">This takes less than 30 seconds. I’ll prioritise the tools parents usually need most.</p>
               </div>
@@ -848,8 +848,8 @@ function resetSavedData() {
 
           <Card className="border border-slate-100">
             <div className="p-6">
-              <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Big tap board</h2></div></div>
-              <div className="mb-4 rounded-[2rem] bg-gradient-to-r from-teal-700 to-sky-600 p-5 text-center text-white shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">📱 Fullscreen AAC</Button></div></div>
+              <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
+              <div className="mb-4 rounded-[2rem] bg-gradient-to-r from-teal-700 to-sky-600 p-5 text-center text-white shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">📱 Fullscreen board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {supportCards.map((card) => (
                   <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-32 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
@@ -1068,7 +1068,7 @@ function resetSavedData() {
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-white/70">Want more support?</p>
               <h2 className="mt-2 text-3xl font-black">Watch APC parent support videos</h2>
-              <p className="mt-3 leading-7 text-white/85">I’ll add short videos here for meltdowns, aggression, communication, routines, transitions, and parent overwhelm.</p>
+              <p className="mt-3 leading-7 text-white/85">Short parent support videos will be added here for regulation, communication, routines, transitions, and difficult moments.</p>
               <p className="mt-3 text-sm leading-6 text-white/75">
                 Nothing is sent automatically. You choose when to share your summary with CJ.
               </p>
@@ -1091,7 +1091,7 @@ function resetSavedData() {
 
         <footer className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 text-center text-sm leading-6 text-slate-600 shadow-sm">
           <p className="font-bold text-slate-900">© Autism Pathways Consulting</p>
-          <p className="mt-2">APC Calm Companion provides educational support tools only. It is not medical advice, diagnosis, therapy, or crisis intervention.</p>
+          <p className="mt-2">APC Calm Companion provides educational parent support tools only. It is not medical advice, diagnosis, therapy, or crisis support.</p>
           <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
         </footer>
       </div>
