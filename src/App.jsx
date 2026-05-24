@@ -12,7 +12,7 @@ function Button({ children, onClick, variant = "solid", className = "", type = "
   const style =
     variant === "outline"
       ? "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
-      : "bg-gradient-to-r from-teal-700 to-sky-600 text-white shadow-lg shadow-teal-100 hover:shadow-xl hover:shadow-cyan-100";
+      : "bg-gradient-to-r from-teal-700 to-teal-700 text-white shadow-lg shadow-teal-100 hover:shadow-xl hover:shadow-teal-100";
 
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${style} ${className}`}>
@@ -599,7 +599,7 @@ function resetSavedData() {
   }
 
   return (
-    <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-gradient-to-b from-[#F4FBFA] via-white to-[#F7FAFC]"}`}>
+    <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-[#F7F3EB]"}`}>
       <div className="mx-auto w-full max-w-[430px] px-4 py-6 md:max-w-7xl md:px-8 md:py-10">
         {!onboardingComplete && (
           <section className="mb-6 rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm">
@@ -690,7 +690,7 @@ function resetSavedData() {
                   <p className="text-sm font-medium text-slate-500">Selected day</p>
                   <h2 className="mt-1 text-2xl font-bold">{todayLabel}</h2>
                 </div>
-                <div className="rounded-3xl bg-gradient-to-br from-teal-500 to-cyan-500 px-5 py-4 text-center text-white shadow-lg shadow-cyan-100">
+                <div className="rounded-3xl bg-gradient-to-br from-teal-500 to-cyan-500 px-5 py-4 text-center text-white shadow-lg shadow-teal-100">
                   <p className="text-xs font-bold uppercase tracking-wide opacity-80">Date</p>
                   <p className="text-2xl font-bold">{shortDate}</p>
                 </div>
@@ -709,10 +709,10 @@ function resetSavedData() {
   </button>
 </div>
 
-              <div className="mt-5 rounded-3xl bg-[#EEF6FF] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName}'s progress</p><p className="text-sm font-bold text-sky-700">🔥 {streak} day streak</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${levelProgress}%` }} /></div><p className="mt-2 text-xs font-semibold text-sky-700">Calmer routines and small wins build confidence over time.</p></div>
+              <div className="mt-5 rounded-3xl border border-teal-100 bg-[#F7F3EB] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName}'s progress</p><p className="text-sm font-bold text-teal-700">Small wins saved</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-[#1F6F66]" style={{ width: `${levelProgress}%` }} /></div><p className="mt-2 text-xs font-semibold text-teal-700">Small wins, calmer routines, and clearer communication can build confidence over time.</p></div>
 
               {showInstallHelp && (
-                <div className="mt-5 rounded-3xl bg-sky-50 p-5 text-sm leading-6 text-sky-900">
+                <div className="mt-5 rounded-3xl bg-[#F0F7F3] p-5 text-sm leading-6 text-[#173936]">
                   <p className="font-bold">Install APC Calm Companion on your phone</p>
                   <p className="mt-2"><strong>iPhone:</strong> Open in Safari → Share → Add to Home Screen.</p>
                   <p><strong>Android:</strong> Open in Chrome → Menu → Add to Home Screen or Install app.</p>
@@ -725,7 +725,7 @@ function resetSavedData() {
         <section id="calm-reset" className="mb-8 rounded-[2rem] bg-white p-5 shadow-sm md:p-6">
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.3fr]">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">✨ APC Calm Reset</div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">APC Calm Reset</div>
               <h2 className="text-2xl font-bold md:text-3xl">What should I do right now?</h2>
               <p className="mt-3 text-base leading-7 text-slate-600">Choose the closest situation. I’ll give you what to say, what to avoid, what to do, and which tool to open.</p>
 
@@ -738,7 +738,7 @@ function resetSavedData() {
               </div>
             </div>
 
-            <div id="recommendation-panel" className="scroll-mt-6 rounded-[2rem] bg-gradient-to-br from-slate-50 to-cyan-50 p-5">
+            <div id="recommendation-panel" className="scroll-mt-6 rounded-[2rem] bg-[#F7F3EB] p-5">
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">I recommend</p>
               <div className="mt-4 flex items-start gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white text-4xl shadow-sm">{reset.icon}</div>
@@ -759,12 +759,12 @@ function resetSavedData() {
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Open a tool for this</p>
                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                       {reset.supports.map((support) => (
-                        <button key={support} type="button" onClick={() => openQuickTool(support.toLowerCase().includes("timer") || support.toLowerCase().includes("countdown") ? "timer" : support.toLowerCase().includes("first") ? "firstThen" : support.toLowerCase().includes("break") || support.toLowerCase().includes("calm") || support.toLowerCase().includes("quiet") || support.toLowerCase().includes("sensory") ? "calm" : "communication")} className="rounded-2xl bg-cyan-50 px-4 py-3 text-left text-sm font-semibold text-cyan-900 transition hover:bg-cyan-100">{support}</button>
+                        <button key={support} type="button" onClick={() => openQuickTool(support.toLowerCase().includes("timer") || support.toLowerCase().includes("countdown") ? "timer" : support.toLowerCase().includes("first") ? "firstThen" : support.toLowerCase().includes("break") || support.toLowerCase().includes("calm") || support.toLowerCase().includes("quiet") || support.toLowerCase().includes("sensory") ? "calm" : "communication")} className="rounded-2xl bg-[#F0F7F3] px-4 py-3 text-left text-sm font-semibold text-[#173936] transition hover:bg-[#E3EFE8]">{support}</button>
                       ))}
                     </div>
                   </div>
 
-                  <details className="mt-6 rounded-[2rem] border border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50 p-5">
+                  <details className="mt-6 rounded-[2rem] border border-teal-100 bg-[#F7F3EB] p-5">
                     <summary className="cursor-pointer text-sm font-bold uppercase tracking-wide text-teal-700">Why I recommend this</summary>
                     <h4 className="mt-3 text-lg font-bold text-slate-800">{reset.insight}</h4>
                     <p className="mt-2 leading-7 text-slate-600">{reset.why}</p>
@@ -778,7 +778,7 @@ function resetSavedData() {
         <section className="mb-8 rounded-[2rem] bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">📚 Optional research notes</div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Optional research notes</div>
               <h2 className="mt-3 text-2xl font-bold">Evidence, but only when you want it</h2>
               <p className="mt-2 max-w-3xl leading-7 text-slate-600">You do not need to read research during stressful moments. This section is here if you want reassurance that the strategies are evidence-informed.</p>
             </div>
@@ -788,7 +788,7 @@ function resetSavedData() {
           </div>
 
           {evidenceHighlights.filter((item) => item.title === openEvidence).map((item) => (
-            <div key={item.title} className="mt-6 grid gap-4 rounded-[2rem] border border-teal-100 bg-gradient-to-br from-emerald-50 via-cyan-50 to-white p-5 md:grid-cols-[1fr_0.7fr]">
+            <div key={item.title} className="mt-6 grid gap-4 rounded-[2rem] border border-teal-100 bg-[#F7F3EB] p-5 md:grid-cols-[1fr_0.7fr]">
               <div>
                 <h3 className="text-xl font-bold text-slate-800">{item.title}</h3>
                 <p className="mt-2 leading-7 text-slate-600">{item.summary}</p>
@@ -812,10 +812,10 @@ function resetSavedData() {
 
               <div className="grid gap-3 md:grid-cols-3">
                 {[['parent-guided','1. Parent shows phone'],['child-taps','2. Child taps step'],['fade-prompt','3. Fade prompts']].map(([key,label]) => (
-                  <button key={key} type="button" onClick={() => setChildMode(key)} className={`rounded-3xl p-4 text-left text-sm font-semibold ${childMode === key ? "bg-teal-600 text-white" : "bg-cyan-50 text-cyan-900"}`}>{label}</button>
+                  <button key={key} type="button" onClick={() => setChildMode(key)} className={`rounded-3xl p-4 text-left text-sm font-semibold ${childMode === key ? "bg-teal-600 text-white" : "bg-[#F0F7F3] text-[#173936]"}`}>{label}</button>
                 ))}
               </div>
-              <div className="mt-4 rounded-3xl bg-cyan-50 p-4 text-sm leading-6 text-cyan-900">
+              <div className="mt-4 rounded-3xl bg-[#F0F7F3] p-4 text-sm leading-6 text-[#173936]">
                 {childMode === "parent-guided" && "Start by holding the phone or tablet where your child can see it. Point to the first step and say it once."}
                 {childMode === "child-taps" && "After the step is completed, invite your child to tap the card. This gives a clear finish point."}
                 {childMode === "fade-prompt" && "Once your child understands the routine, stand nearby and wait. Let the visual do more work."}
@@ -824,7 +824,7 @@ function resetSavedData() {
               <div className="mt-5 grid gap-3">
                 {schedule.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
-                    <button type="button" onClick={() => toggleTask(item.id)} className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-3xl shadow-sm transition-all ${item.done ? "bg-teal-100" : "bg-slate-100 hover:bg-cyan-50"}`}>{item.done ? "✅" : item.icon}</button>
+                    <button type="button" onClick={() => toggleTask(item.id)} className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-3xl shadow-sm transition-all ${item.done ? "bg-teal-100" : "bg-slate-100 hover:bg-[#F0F7F3]"}`}>{item.done ? "✅" : item.icon}</button>
                     <button type="button" onClick={() => toggleTask(item.id)} className={`flex-1 text-left text-xl font-bold ${item.done ? "text-slate-400 line-through" : "text-slate-800"}`}>{item.title}</button>
                     <button type="button" onClick={() => removeTask(item.id)} className="rounded-2xl p-3 text-slate-400 hover:bg-slate-100 hover:text-slate-700">🗑️</button>
                   </div>
@@ -849,7 +849,7 @@ function resetSavedData() {
           <Card className="border border-slate-100">
             <div className="p-6">
               <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
-              <div className="mb-4 rounded-[2rem] bg-gradient-to-r from-teal-700 to-sky-600 p-5 text-center text-white shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">📱 Fullscreen board</Button></div></div>
+              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">📱 Fullscreen board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {supportCards.map((card) => (
                   <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-32 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
@@ -882,14 +882,14 @@ function resetSavedData() {
                 key={toolType}
                 type="button"
                 onClick={() => setActiveQuickTool(toolType)}
-                className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${activeQuickTool === toolType ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-cyan-50"}`}
+                className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${activeQuickTool === toolType ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-[#F0F7F3]"}`}
               >
                 {label}
               </button>
             ))}
           </div>
 
-          <div id="active-tool-view" className="scroll-mt-6 rounded-[2rem] border border-teal-100 bg-gradient-to-br from-cyan-50 to-white p-5">
+          <div id="active-tool-view" className="scroll-mt-6 rounded-[2rem] border border-teal-100 bg-white p-5">
             {activeQuickTool === "firstThen" && (
               <div>
                 <h3 className="text-2xl font-bold">First / Then Board</h3>
@@ -901,7 +901,7 @@ function resetSavedData() {
                     <div className="mt-4 text-6xl">{guessIcon(firstTask)}</div>
                   </div>
                   <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-wide text-sky-700">Then</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-teal-700">Then</p>
                     <input value={thenTask} onChange={(e)=>setThenTask(e.target.value)} className="mt-3 w-full rounded-2xl border p-3 text-center text-xl font-bold" />
                     <div className="mt-4 text-6xl">{guessIcon(thenTask)}</div>
                   </div>
@@ -941,8 +941,8 @@ function resetSavedData() {
                   </div>
                 ) : (
                   <div className="mt-6 rounded-3xl bg-white p-5 shadow-inner">
-                    <div className="h-10 overflow-hidden rounded-full bg-sky-100">
-                      <div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-sky-500" style={{ width: `${(timerRemaining / (timerMinutes * 60 || 1)) * 100}%` }} />
+                    <div className="h-10 overflow-hidden rounded-full bg-[#E3EFE8]">
+                      <div className="h-full rounded-full bg-[#1F6F66]" style={{ width: `${(timerRemaining / (timerMinutes * 60 || 1)) * 100}%` }} />
                     </div>
                     <p className="mt-4 text-center text-4xl font-black text-teal-800">{Math.floor(timerRemaining / 60)}:{String(timerRemaining % 60).padStart(2, "0")}</p>
                     <p className="mt-1 text-center text-sm font-bold text-slate-500">{timerPurpose}</p>
@@ -960,21 +960,21 @@ function resetSavedData() {
                 <h3 className="text-2xl font-bold">Automatic Calm Breathing</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">Press start, then follow the circle. It expands for breathe in, pauses for hold, and slowly closes for breathe out.</p>
 
-                <div className="mt-6 flex flex-col items-center justify-center rounded-[2rem] bg-gradient-to-br from-teal-50 to-sky-50 p-8 text-center">
+                <div className="mt-6 flex flex-col items-center justify-center rounded-[2rem] bg-[#F0F7F3] p-8 text-center">
                   <div className="relative flex h-64 w-64 items-center justify-center">
                     <div
                       className={`absolute rounded-full border-8 transition-all ease-in-out ${
                         breathingPhase === "inhale"
                           ? "h-64 w-64 border-teal-500 opacity-80 duration-[4000ms]"
                           : breathingPhase === "hold"
-                          ? "h-64 w-64 border-sky-500 opacity-70 duration-1000"
+                          ? "h-64 w-64 border-teal-600 opacity-70 duration-1000"
                           : breathingPhase === "exhale"
                           ? "h-36 w-36 border-teal-300 opacity-90 duration-[6000ms]"
                           : "h-44 w-44 border-slate-300 opacity-60 duration-1000"
                       }`}
                     />
                     <div
-                      className={`absolute rounded-full bg-gradient-to-br from-teal-500 to-sky-500 shadow-2xl transition-all ease-in-out ${
+                      className={`absolute rounded-full bg-gradient-to-br from-teal-500 to-teal-700 shadow-2xl transition-all ease-in-out ${
                         breathingPhase === "inhale"
                           ? "h-48 w-48 duration-[4000ms]"
                           : breathingPhase === "hold"
@@ -1002,7 +1002,7 @@ function resetSavedData() {
 
                   <div className="mt-5 grid gap-2 text-sm font-semibold text-slate-700 sm:grid-cols-3">
                     <div className={`rounded-2xl p-3 ${breathingPhase === "inhale" ? "bg-teal-600 text-white" : "bg-white"}`}>🌬️ Breathe in 4</div>
-                    <div className={`rounded-2xl p-3 ${breathingPhase === "hold" ? "bg-sky-600 text-white" : "bg-white"}`}>⏸️ Hold 2</div>
+                    <div className={`rounded-2xl p-3 ${breathingPhase === "hold" ? "bg-[#1F6F66] text-white" : "bg-white"}`}>⏸️ Hold 2</div>
                     <div className={`rounded-2xl p-3 ${breathingPhase === "exhale" ? "bg-teal-600 text-white" : "bg-white"}`}>🍃 Breathe out 6</div>
                   </div>
                 </div>
@@ -1050,8 +1050,8 @@ function resetSavedData() {
             <div className="p-6">
               <div className="mb-5 flex items-center gap-3"><IconBadge label="🧰" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div>
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-600 text-white shadow-lg" : "bg-slate-50 hover:bg-cyan-50"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white/85" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
-                <div className="rounded-[2rem] bg-gradient-to-br from-cyan-50 to-teal-50 p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
+                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-600 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white/85" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
+                <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
               </div>
             </div>
           </Card>
@@ -1061,9 +1061,9 @@ function resetSavedData() {
           </Card>
         </section>
 
-        <Card className="border border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Simple support parents can actually use</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Parents often do not need more information. They need calmer next steps during hard moments.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app focuses on routines, communication, regulation, transitions, and everyday independence.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Tiny wins, calmer moments, and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
+        <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Simple support parents can actually use</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Parents often do not need more information. They need calmer next steps during hard moments.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app focuses on routines, communication, regulation, transitions, and everyday independence.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Tiny wins, calmer moments, and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
-        <section className="mt-8 rounded-[2rem] border border-teal-100 bg-gradient-to-br from-teal-700 to-sky-700 p-6 text-white shadow-xl">
+        <section className="mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
           <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-white/70">Want more support?</p>
