@@ -206,6 +206,10 @@ const supportCards = [
   { title: "Quiet place", icon: "🏡", words: "Quiet place", color: "from-emerald-100 to-teal-100", speak: "I want a quiet place." },
 ];
 
+const essentialCommunicationCards = supportCards.filter((card) =>
+  ["Help", "Break", "Wait", "All done", "Yes", "No", "Toilet", "Pain"].includes(card.title)
+);
+
 const evidenceHighlights = [
   { title: "Visual supports", summary: "Visual schedules, first-then boards, and visual cues can support understanding, predictability, and independence for autistic children.", reference: "AFIRM Team. Visual Supports Evidence-Based Practice Brief. University of North Carolina at Chapel Hill.", link: "https://afirm.fpg.unc.edu/visual-supports" },
   { title: "Functional communication", summary: "When children are taught an easier way to communicate needs such as help, break, wait, or all done, challenging behaviour may reduce because the child has a clearer replacement response.", reference: "AFIRM Team. Functional Communication Training Evidence-Based Practice Brief. University of North Carolina at Chapel Hill.", link: "https://afirm.fpg.unc.edu/functional-communication-training" },
@@ -719,17 +723,17 @@ function resetSavedData() {
                 <div>
                   <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">APC Calm Companion</h1>
                   <p className="mx-auto mt-3 max-w-2xl text-lg leading-8 text-slate-600 md:mx-0 md:text-lg">
-                    I’ll help you choose one calm next step, give you the words to say, and open the right tool when you need it.
+                    Choose one calm next step, find words to say, and open the right tool when you need it.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">Start calm support</Button>
-                <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Open parent tools</Button>
-                <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Emergency calm mode</Button>
-                <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime mode"}</Button>
-                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install app</Button>
+                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">Start calm</Button>
+                <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
+                <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
+                <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
+                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install</Button>
               </div>
             </div>
           </Card>
@@ -766,7 +770,7 @@ function resetSavedData() {
                 <div className="mt-5 rounded-3xl bg-[#F0F7F3] p-5 text-sm leading-6 text-[#173936]">
                   <p className="font-bold">Install APC Calm Companion on your phone</p>
                   <p className="mt-2"><strong>iPhone:</strong> Open in Safari → Share → Add to Home Screen.</p>
-                  <p><strong>Android:</strong> Open in Chrome → Menu → Add to Home Screen or Install app.</p>
+                  <p><strong>Android:</strong> Open in Chrome → Menu → Add to Home Screen or Install.</p>
                 </div>
               )}
             </div>
@@ -893,7 +897,7 @@ function resetSavedData() {
                 </div>
                 <Button onClick={addTask}>Add step + visual</Button>
               </div>
-              <p className="mt-2 text-xs font-semibold text-slate-500">You can choose the visual icon yourself. This prevents repeated visuals, such as school bag and go school looking the same.</p>
+              <p className="mt-2 text-xs font-semibold text-slate-500">You can choose the visual icon yourself. This prevents repeated visuals, such as school bag and going to school looking the same.</p>
             </div>
           </Card>
 
@@ -902,9 +906,9 @@ function resetSavedData() {
               <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
               <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
-                {supportCards.map((card) => (
-                  <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-32 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
-                    <div className="text-5xl">{card.icon}</div><h3 className="mt-2 text-lg font-extrabold">{card.title}</h3><p className="text-sm font-semibold text-slate-700">{card.words}</p>
+                {essentialCommunicationCards.map((card) => (
+                  <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
+                    <div className="text-3xl">{card.icon}</div><h3 className="mt-1 text-base font-extrabold">{card.title}</h3><p className="text-xs font-semibold text-slate-700">{card.words}</p>
                   </button>
                 ))}
               </div>
@@ -1158,24 +1162,16 @@ function resetSavedData() {
         <section className="mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
           <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-white/70">Want more support?</p>
-              <h2 className="mt-2 text-3xl font-black">Watch APC parent support videos</h2>
-              <p className="mt-3 leading-7 text-white/85">Short parent support videos will be added here for practical home support.</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-white/70">Need clearer guidance?</p>
+              <h2 className="mt-2 text-3xl font-black">Need clearer guidance?</h2>
+              <p className="mt-3 leading-7 text-white/85">If the same difficulty keeps repeating, start here to explore the most suitable next step.</p>
               <p className="mt-3 text-sm leading-6 text-white/75">
-                Nothing is sent automatically. You choose when to share your summary with CJ.
+                
               </p>
             </div>
             <div className="grid gap-3">
-              <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
-              <button
-                type="button"
-                onClick={sendSummaryToCJ}
-                className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg"
-              >
-                Send summary to CJ
-              </button>
-              <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Visit Start Here</a>
-              <a href="https://www.instagram.com/autismpathwaysconsulting" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Watch APC tips</a>
+              <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start Here</a>
+              
               <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>
             </div>
           </div>
