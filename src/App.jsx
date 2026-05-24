@@ -158,17 +158,52 @@ const calmResets = {
 
 const supportCards = [
   { title: "Help", icon: "🙋", words: "I need help", color: "from-amber-100 to-yellow-100", speak: "I need help please." },
-  { title: "Break", icon: "🧘", words: "Break please", color: "from-sky-100 to-cyan-100", speak: "I need a break." },
+  { title: "Break", icon: "🧘", words: "Break please", color: "from-emerald-100 to-teal-100", speak: "I need a break." },
+  { title: "Wait", icon: "⏳", words: "Wait please", color: "from-stone-100 to-amber-100", speak: "Wait please." },
   { title: "All done", icon: "✅", words: "All done", color: "from-emerald-100 to-teal-100", speak: "I am all done." },
-  { title: "More", icon: "🙌", words: "More please", color: "from-blue-100 to-cyan-100", speak: "More please." },
-  { title: "Too loud", icon: "🔊", words: "Too loud", color: "from-orange-100 to-red-100", speak: "It is too loud." },
-  { title: "No", icon: "❌", words: "No", color: "from-rose-100 to-pink-100", speak: "No." },
+  { title: "More", icon: "🙌", words: "More please", color: "from-teal-100 to-emerald-100", speak: "More please." },
+  { title: "Again", icon: "🔁", words: "Again please", color: "from-teal-100 to-emerald-100", speak: "Again please." },
+
   { title: "Yes", icon: "✔️", words: "Yes", color: "from-green-100 to-emerald-100", speak: "Yes." },
-  { title: "Hungry", icon: "🍽️", words: "I’m hungry", color: "from-purple-100 to-fuchsia-100", speak: "I am hungry." },
-  { title: "Thirsty", icon: "🥤", words: "I’m thirsty", color: "from-cyan-100 to-blue-100", speak: "I am thirsty." },
-  { title: "Toilet", icon: "🚽", words: "Toilet", color: "from-teal-100 to-cyan-100", speak: "I need the toilet." },
+  { title: "No", icon: "❌", words: "No", color: "from-rose-100 to-pink-100", speak: "No." },
+  { title: "I don’t know", icon: "🤔", words: "I don’t know", color: "from-stone-100 to-slate-100", speak: "I do not know." },
+  { title: "Show me", icon: "👀", words: "Show me", color: "from-stone-100 to-amber-100", speak: "Show me please." },
+  { title: "I can’t", icon: "🛑", words: "I can’t", color: "from-rose-100 to-orange-100", speak: "I cannot do it right now." },
+  { title: "Different", icon: "🔄", words: "Something different", color: "from-teal-100 to-emerald-100", speak: "I want something different." },
+
+  { title: "Hungry", icon: "🍽️", words: "I’m hungry", color: "from-orange-100 to-amber-100", speak: "I am hungry." },
+  { title: "Thirsty", icon: "🥤", words: "I’m thirsty", color: "from-teal-100 to-emerald-100", speak: "I am thirsty." },
+  { title: "Toilet", icon: "🚽", words: "Toilet", color: "from-teal-100 to-emerald-100", speak: "I need the toilet." },
+  { title: "Pain", icon: "🩹", words: "My body hurts", color: "from-rose-100 to-orange-100", speak: "My body hurts." },
   { title: "Tired", icon: "😴", words: "I’m tired", color: "from-indigo-100 to-violet-100", speak: "I am tired." },
+  { title: "Sick", icon: "🤒", words: "I feel sick", color: "from-rose-100 to-orange-100", speak: "I feel sick." },
+  { title: "Hot", icon: "🥵", words: "Too hot", color: "from-orange-100 to-red-100", speak: "I feel too hot." },
+  { title: "Cold", icon: "🥶", words: "Too cold", color: "from-blue-100 to-slate-100", speak: "I feel too cold." },
+
+  { title: "Too loud", icon: "🔊", words: "Too loud", color: "from-orange-100 to-red-100", speak: "It is too loud." },
+  { title: "Too bright", icon: "💡", words: "Too bright", color: "from-yellow-100 to-amber-100", speak: "It is too bright." },
+  { title: "Too many people", icon: "👥", words: "Too many people", color: "from-stone-100 to-slate-100", speak: "There are too many people." },
+  { title: "Itchy", icon: "🧦", words: "It feels itchy", color: "from-stone-100 to-amber-100", speak: "It feels itchy." },
+  { title: "Smelly", icon: "👃", words: "Bad smell", color: "from-stone-100 to-slate-100", speak: "There is a bad smell." },
+  { title: "Quiet", icon: "🤫", words: "Quiet please", color: "from-emerald-100 to-teal-100", speak: "Quiet please." },
+
+  { title: "Scared", icon: "😟", words: "I’m scared", color: "from-purple-100 to-violet-100", speak: "I am scared." },
+  { title: "Angry", icon: "😠", words: "I’m angry", color: "from-red-100 to-orange-100", speak: "I am angry." },
+  { title: "Sad", icon: "😢", words: "I’m sad", color: "from-blue-100 to-slate-100", speak: "I am sad." },
   { title: "Happy", icon: "😊", words: "I’m happy", color: "from-yellow-100 to-amber-100", speak: "I am happy." },
+  { title: "Worried", icon: "😰", words: "I’m worried", color: "from-purple-100 to-violet-100", speak: "I am worried." },
+
+  { title: "Stop", icon: "✋", words: "Stop please", color: "from-rose-100 to-pink-100", speak: "Stop please." },
+  { title: "Space", icon: "🌿", words: "I need space", color: "from-emerald-100 to-teal-100", speak: "I need space." },
+  { title: "Don’t touch", icon: "🚫", words: "Don’t touch me", color: "from-rose-100 to-pink-100", speak: "Do not touch me please." },
+  { title: "Go away", icon: "↩️", words: "Go away please", color: "from-stone-100 to-slate-100", speak: "Go away please." },
+  { title: "Parent", icon: "👨‍👩‍👧", words: "I need my parent", color: "from-stone-100 to-amber-100", speak: "I need my parent." },
+
+  { title: "Breathe", icon: "🌬️", words: "Breathe with me", color: "from-teal-100 to-emerald-100", speak: "Breathe with me please." },
+  { title: "Hug", icon: "🤗", words: "I want a hug", color: "from-purple-100 to-violet-100", speak: "I want a hug." },
+  { title: "Pressure", icon: "👐", words: "Deep pressure", color: "from-emerald-100 to-teal-100", speak: "I want deep pressure." },
+  { title: "Walk", icon: "🚶", words: "Walk please", color: "from-teal-100 to-emerald-100", speak: "I want to walk." },
+  { title: "Quiet place", icon: "🏡", words: "Quiet place", color: "from-emerald-100 to-teal-100", speak: "I want a quiet place." },
 ];
 
 const evidenceHighlights = [
@@ -269,13 +304,14 @@ const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5
   const [childPhotoLabel, setChildPhotoLabel] = useState("No photo added yet");
 const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
+  const [communicationBoardOpen, setCommunicationBoardOpen] = useState(false);
 const [xp, setXp] = useState(savedAppData?.xp || 120);  const [streak, setStreak] = useState(savedAppData?.streak || 3);
   const [focusMode, setFocusMode] = useState(false);
   const [bedtimeMode, setBedtimeMode] = useState(false);
 const [favouriteTools, setFavouriteTools] = useState(savedAppData?.favouriteTools || ["Calm Down Toolkit"]);
 const [onboardingComplete, setOnboardingComplete] = useState(savedAppData?.onboardingComplete || false);
 const [childName, setChildName] = useState(savedAppData?.childName || "My Child");  
-const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge || "Aggression / hitting");  const [voiceEnabled, setVoiceEnabled] = useState(false);
+const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge || "Aggression / hitting");  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [activeQuickTool, setActiveQuickTool] = useState("timer");
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState("ready");
@@ -510,16 +546,31 @@ function resetSavedData() {
   }
 
   function useCommunicationCard(card) {
-    setCommunicationPhrase(card.speak);
+    const phrase = card.speak || card.words || card.title || "I need help.";
+
+    setCommunicationPhrase(phrase);
     setXp((value) => value + 2);
 
-    if (voiceEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(card.speak);
-      utterance.rate = 0.9;
+    if (!voiceEnabled) return;
+
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    try {
       window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(phrase);
+      utterance.rate = 0.85;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
       window.speechSynthesis.speak(utterance);
+    } catch {
+      // Some browsers block speech output. Keep the selected phrase visible and fail silently.
     }
   }
+
 
   function toggleFavourite(toolTitle) {
     setFavouriteTools((current) =>
@@ -849,7 +900,7 @@ function resetSavedData() {
           <Card className="border border-slate-100">
             <div className="p-6">
               <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
-              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20">📱 Fullscreen board</Button></div></div>
+              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {supportCards.map((card) => (
                   <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-32 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
@@ -860,6 +911,47 @@ function resetSavedData() {
             </div>
           </Card>
         </section>
+
+        {communicationBoardOpen && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-[#F7F3EB] p-4 text-slate-900">
+            <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col gap-4">
+              <div className="sticky top-0 z-10 rounded-[2rem] border border-teal-100 bg-white/95 p-4 shadow-sm backdrop-blur">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-700">Child communication</p>
+                    <h2 className="text-3xl font-black md:text-5xl">Quick communication board</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" onClick={() => setVoiceEnabled((value) => !value)}>
+                      {voiceEnabled ? "Voice on" : "Voice off"}
+                    </Button>
+                    <Button onClick={() => setCommunicationBoardOpen(false)}>Close board</Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/70">Selected phrase</p>
+                <p className="mt-2 text-4xl font-black leading-tight md:text-6xl">{communicationPhrase}</p>
+              </div>
+
+              <div className="grid flex-1 grid-cols-2 gap-3 pb-6 sm:grid-cols-3 lg:grid-cols-4">
+                {supportCards.map((card) => (
+                  <button
+                    key={`fullscreen-${card.title}`}
+                    type="button"
+                    onClick={() => useCommunicationCard(card)}
+                    className={`min-h-32 rounded-[2rem] bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-lg md:min-h-40`}
+                  >
+                    <div className="text-4xl md:text-5xl">{card.icon}</div>
+                    <h3 className="mt-2 text-xl font-black md:text-2xl">{card.title}</h3>
+                    <p className="mt-1 text-sm font-bold text-slate-700 md:text-base">{card.words}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <section id="quick-tools" className="mb-8 rounded-[2rem] bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
