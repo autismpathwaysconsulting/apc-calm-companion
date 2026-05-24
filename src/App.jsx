@@ -308,6 +308,7 @@ const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5
   const [childPhotoLabel, setChildPhotoLabel] = useState("No photo added yet");
 const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
+  const [researchOpen, setResearchOpen] = useState(false);
   const [communicationBoardOpen, setCommunicationBoardOpen] = useState(false);
 const [xp, setXp] = useState(savedAppData?.xp || 120);  const [streak, setStreak] = useState(savedAppData?.streak || 3);
   const [focusMode, setFocusMode] = useState(false);
@@ -831,31 +832,45 @@ function resetSavedData() {
         </section>
 
         <section className="mb-8 rounded-[2rem] bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Optional research notes</div>
               <h2 className="mt-3 text-2xl font-bold">Optional research notes</h2>
-              <p className="mt-2 max-w-3xl leading-7 text-slate-600">You do not need to read research during stressful moments. This section is here if you want reassurance that the strategies are evidence-informed.</p>
-            </div>
-            <select value={openEvidence} onChange={(event) => setOpenEvidence(event.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500">
-              {evidenceHighlights.map((item) => <option key={item.title} value={item.title}>{item.title}</option>)}
-            </select>
-          </div>
+              <p className="mt-2 max-w-3xl leading-7 text-slate-600">Open this only if you want to read the evidence notes behind the strategies.</p>
 
-          {evidenceHighlights.filter((item) => item.title === openEvidence).map((item) => (
-            <div key={item.title} className="mt-6 grid gap-4 rounded-[2rem] border border-teal-100 bg-[#F7F3EB] p-5 md:grid-cols-[1fr_0.7fr]">
-              <div>
-                <h3 className="text-xl font-bold text-slate-800">{item.title}</h3>
-                <p className="mt-2 leading-7 text-slate-600">{item.summary}</p>
-                <p className="mt-4 text-sm font-semibold text-slate-500">Reference: {item.reference}</p>
-                <a className="mt-2 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-teal-700 shadow-sm underline" href={item.link} target="_blank" rel="noreferrer">Open source</a>
+              <button
+                type="button"
+                onClick={() => setResearchOpen((value) => !value)}
+                className="mt-5 w-full rounded-2xl border border-teal-100 bg-[#F7F3EB] px-5 py-4 text-left text-sm font-bold text-teal-800 shadow-sm"
+              >
+                {researchOpen ? "Hide research notes" : "Show research notes"}
+              </button>
+            </div>
+
+            {researchOpen && (
+              <div className="mt-5">
+                <select
+                  value={openEvidence}
+                  onChange={(event) => setOpenEvidence(event.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  {evidenceHighlights.map((item) => (
+                    <option key={item.title} value={item.title}>{item.title}</option>
+                  ))}
+                </select>
+
+                {evidenceHighlights.filter((item) => item.title === openEvidence).map((item) => (
+                  <div key={item.title} className="mt-4 rounded-[2rem] border border-teal-100 bg-[#F7F3EB] p-5">
+                    <h3 className="text-xl font-bold text-slate-800">{item.title}</h3>
+                    <p className="mt-2 leading-7 text-slate-600">{item.summary}</p>
+                    <p className="mt-4 text-sm font-semibold text-slate-500">Reference: {item.reference}</p>
+                    <a className="mt-2 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-teal-700 shadow-sm underline" href={item.link} target="_blank" rel="noreferrer">Open source</a>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center justify-center rounded-[2rem] bg-white/70 p-6 text-7xl shadow-inner">📘</div>
-            </div>
-          ))}
-        </section>
+            )}
+          </section>
 
-        <section id="independence" className="mb-8 grid gap-6 lg:grid-cols-3">
+          <section id="independence" className="mb-8 grid gap-6 lg:grid-cols-3">
           <Card className="border border-teal-100 lg:col-span-2">
             <div className="p-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
