@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-const CJ_PHOTO = "cj-photo.JPG";
+const APC_LOGO = "/icon-512.png";
 
 const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
@@ -665,12 +665,20 @@ function resetSavedData() {
           <Card className="border border-teal-100">
             <div className="p-6 md:p-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-medium text-teal-700">
-                <IconBadge label="🤝" className="h-7 w-7 text-base" />
+                <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#FFF9F1]">
+                  <img src={APC_LOGO} alt="" className="h-full w-full scale-[1.25] object-cover" />
+                </span>
                 Autism Pathways Consulting
               </div>
 
               <div className="grid gap-5 text-center md:grid-cols-[116px_1fr] md:items-center md:text-left">
-                <img src={CJ_PHOTO} alt="CJ from Autism Pathways Consulting" className="mx-auto h-28 w-28 rounded-[2rem] object-cover shadow-lg ring-4 ring-white md:mx-0" />
+                <div className="mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-[#FFF9F1] shadow-lg ring-4 ring-white md:mx-0">
+                  <img
+                    src={APC_LOGO}
+                    alt="Autism Pathways Consulting logo"
+                    className="h-full w-full scale-[1.25] object-cover"
+                  />
+                </div>
                 <div>
                   <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">APC Calm Companion</h1>
                   <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">
