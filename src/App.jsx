@@ -665,8 +665,8 @@ function resetSavedData() {
           <Card className="border border-teal-100">
             <div className="p-6 md:p-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-medium text-teal-700">
-                <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#FFF9F1]">
-                  <img src={APC_LOGO} alt="" className="h-full w-full scale-[1.25] object-cover" />
+                <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#FFF9F1] ring-1 ring-teal-100">
+                  <img src={APC_LOGO} alt="" className="h-full w-full object-contain" />
                 </span>
                 Autism Pathways Consulting
               </div>
@@ -676,7 +676,7 @@ function resetSavedData() {
                   <img
                     src={APC_LOGO}
                     alt="Autism Pathways Consulting logo"
-                    className="h-full w-full scale-[1.25] object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
                 <div>
