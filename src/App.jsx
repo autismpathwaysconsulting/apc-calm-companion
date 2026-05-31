@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import APC_LOGO from "./assets/apc-logo.png";
 
-const APC_LOGO = "/icon-512.png";
 
 const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
@@ -671,15 +671,15 @@ function resetSavedData() {
                 Autism Pathways Consulting
               </div>
 
-              <div className="grid gap-5 text-center md:grid-cols-[116px_1fr] md:items-center md:text-left">
-                <div className="mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-[#FFF9F1] shadow-lg ring-4 ring-white md:mx-0">
+              <div className="grid gap-5 text-center md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-7 md:text-left">
+                <div className="mx-auto flex h-24 w-32 items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#FFF9F1] px-3 shadow-lg ring-4 ring-white md:mx-0">
                   <img
                     src={APC_LOGO}
                     alt="Autism Pathways Consulting logo"
                     className="h-full w-full object-contain"
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">APC Calm Companion</h1>
                   <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">
                     Quick support for routines, communication, transitions, emotional regulation, and difficult moments at home.
@@ -691,7 +691,7 @@ function resetSavedData() {
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">What is happening now?</Button>
+                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">Get calm support</Button>
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
