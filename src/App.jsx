@@ -2,6 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const CJ_PHOTO = "cj-photo.JPG";
 
+const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
+const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
+const APC_WEBSITE_URL = "https://autismpathwaysconsulting.com";
+
 function Card({ children, className = "" }) {
   return <section className={`rounded-3xl bg-white shadow-sm ${className}`}>{children}</section>;
 }
@@ -657,60 +661,6 @@ function resetSavedData() {
   return (
     <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-[#F7F3EB]"}`}>
       <div className="mx-auto w-full max-w-[430px] px-4 py-6 md:max-w-7xl md:px-8 md:py-10">
-        {!onboardingComplete && (
-          <section className="mb-6 rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">APC Calm Companion</div>
-                <h2 className="mt-3 text-3xl font-bold">Let me personalise support for your family</h2>
-                <p className="mt-2 max-w-2xl leading-7 text-slate-600">This takes less than 30 seconds. I’ll prioritise the tools parents usually need most.</p>
-              </div>
-              <Button onClick={() => setOnboardingComplete(true)}>Save preferences</Button>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="text-sm font-bold text-slate-700">Child name</label>
-                <input value={childName} onChange={(e) => setChildName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3" />
-                <label className="mt-4 block text-sm font-bold text-slate-700">Child photo</label>
-                <div className="mt-2 rounded-2xl border border-dashed border-teal-200 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-                  {childPhotoLabel}. For beta, parents can add a name first. Photo upload can be added when login/storage is ready.
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-bold text-slate-700">Biggest challenge right now</label>
-                <select value={mainChallenge} onChange={(e) => setMainChallenge(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
-                  <option>Aggression / hitting</option>
-                  <option>Speech / communication</option>
-                  <option>Meltdowns</option>
-                  <option>Transitions</option>
-                  <option>Sleep</option>
-                  <option>Sensory overload</option>
-                </select>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {focusMode && (
-          <section className="mb-6 rounded-[2rem] border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-6 shadow-lg">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-bold text-rose-600">🚨 Focus Mode Active</div>
-                <h2 className="mt-3 text-3xl font-bold text-slate-900">Things are escalating</h2>
-                <p className="mt-2 max-w-2xl text-lg leading-7 text-slate-700">Lower demands. Use fewer words. Focus on safety first. You do not need to solve everything immediately.</p>
-              </div>
-              <Button variant="outline" onClick={() => setFocusMode(false)}>Exit focus mode</Button>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🧘</div><h3 className="mt-3 text-lg font-bold">Say less</h3><p className="mt-2 text-sm leading-6 text-slate-600">Short phrases are easier to process during distress.</p></div>
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🎧</div><h3 className="mt-3 text-lg font-bold">Reduce sensory input</h3><p className="mt-2 text-sm leading-6 text-slate-600">Lower noise, lights, crowding, and pressure.</p></div>
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">💜</div><h3 className="mt-3 text-lg font-bold">Connection first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Regulation before reasoning.</p></div>
-            </div>
-          </section>
-        )}
-
         <header className="mb-8 grid gap-4 lg:grid-cols-[1.45fr_0.95fr]">
           <Card className="border border-teal-100">
             <div className="p-6 md:p-8">
@@ -723,14 +673,17 @@ function resetSavedData() {
                 <img src={CJ_PHOTO} alt="CJ from Autism Pathways Consulting" className="mx-auto h-28 w-28 rounded-[2rem] object-cover shadow-lg ring-4 ring-white md:mx-0" />
                 <div>
                   <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">APC Calm Companion</h1>
-                  <p className="mx-auto mt-3 max-w-2xl text-lg leading-8 text-slate-600 md:mx-0 md:text-lg">
-                    Choose one calm next step, find words to say, and open the right tool when you need it.
+                  <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">
+                    Quick support for routines, communication, transitions, emotional regulation, and difficult moments at home.
+                  </p>
+                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-teal-700">
+                    Start with the closest situation, then choose one calm next step.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">Start calm</Button>
+                <Button onClick={() => goToSection("calm-reset")} className="h-14 w-full text-base">What is happening now?</Button>
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
@@ -777,6 +730,62 @@ function resetSavedData() {
             </div>
           </Card>
         </header>
+
+        
+
+        {!onboardingComplete && (
+          <section className="mb-6 rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">APC Calm Companion · Free parent tool</div>
+                <h2 className="mt-3 text-3xl font-bold">Personalise this tool for your family</h2>
+                <p className="mt-2 max-w-2xl leading-7 text-slate-600">Optional. This helps the app prioritise the tools your family may need most.</p>
+              </div>
+              <Button onClick={() => setOnboardingComplete(true)}>Save preferences</Button>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-bold text-slate-700">Child name</label>
+                <input value={childName} onChange={(e) => setChildName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3" />
+                <label className="mt-4 block text-sm font-bold text-slate-700">Child photo</label>
+                <div className="mt-2 rounded-2xl border border-dashed border-teal-200 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+                  {childPhotoLabel}. For beta, parents can add a name first. Photo upload can be added when login/storage is ready.
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700">Biggest challenge right now</label>
+                <select value={mainChallenge} onChange={(e) => setMainChallenge(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
+                  <option>Aggression / hitting</option>
+                  <option>Speech / communication</option>
+                  <option>Meltdowns</option>
+                  <option>Transitions</option>
+                  <option>Sleep</option>
+                  <option>Sensory overload</option>
+                </select>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {focusMode && (
+          <section className="mb-6 rounded-[2rem] border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-6 shadow-lg">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-bold text-rose-600">🚨 Focus Mode Active</div>
+                <h2 className="mt-3 text-3xl font-bold text-slate-900">Things are escalating</h2>
+                <p className="mt-2 max-w-2xl text-lg leading-7 text-slate-700">Lower demands. Use fewer words. Focus on safety first. You do not need to solve everything immediately.</p>
+              </div>
+              <Button variant="outline" onClick={() => setFocusMode(false)}>Exit focus mode</Button>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🧘</div><h3 className="mt-3 text-lg font-bold">Say less</h3><p className="mt-2 text-sm leading-6 text-slate-600">Short phrases are easier to process during distress.</p></div>
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🎧</div><h3 className="mt-3 text-lg font-bold">Reduce sensory input</h3><p className="mt-2 text-sm leading-6 text-slate-600">Lower noise, lights, crowding, and pressure.</p></div>
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">💜</div><h3 className="mt-3 text-lg font-bold">Connection first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Regulation before reasoning.</p></div>
+            </div>
+          </section>
+        )}
 
         <section id="calm-reset" className="mb-8 rounded-[2rem] bg-white p-5 shadow-sm md:p-6">
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.3fr]">
@@ -1172,6 +1181,35 @@ function resetSavedData() {
           </Card>
         </section>
 
+        
+        <Card className="border border-teal-100 bg-white">
+          <div className="p-6">
+            <div className="flex items-start gap-3">
+              <IconBadge label="🧭" />
+              <div>
+                <p className="text-sm font-medium text-slate-500">Need more personalised guidance?</p>
+                <h2 className="text-2xl font-bold">Seeing the same pattern again and again?</h2>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              APC Calm Companion can help in the moment. If the same struggle keeps repeating, CJ can help you look at the pattern and choose one clearer next step.
+            </p>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              <a href={APC_FREE_CALL_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-teal-700 px-5 py-4 text-center font-bold text-white shadow-lg shadow-teal-100">
+                Start with Free 15-Min Call
+              </a>
+              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-teal-200 bg-white px-5 py-4 text-center font-bold text-teal-800">
+                View Parent Support Options
+              </a>
+            </div>
+
+            <p className="mt-4 rounded-2xl bg-[#F7F3EB] p-4 text-xs font-semibold leading-6 text-slate-600">
+              APC Calm Companion is an educational support tool for parents. It does not replace therapy, diagnosis, medical advice, or crisis support.
+            </p>
+          </div>
+        </Card>
         <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
         <section className="mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
@@ -1187,14 +1225,14 @@ function resetSavedData() {
             <div className="grid gap-3">
               <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start Here</a>
               
-              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>
+              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>\n              <a href={APC_WEBSITE_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
             </div>
           </div>
         </section>
 
         <footer className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 text-center text-sm leading-6 text-slate-600 shadow-sm">
           <p className="font-bold text-slate-900">© Autism Pathways Consulting</p>
-          <p className="mt-2">APC Calm Companion provides educational parent support tools only. It is not medical advice, diagnosis, therapy, or crisis support.</p>
+          <p className="mt-2">APC Calm Companion provides educational parent support tools only. It does not replace therapy, diagnosis, medical advice, or crisis support.</p>
           <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
         </footer>
       </div>
