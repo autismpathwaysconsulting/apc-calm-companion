@@ -1,23 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import APC_LOGO from "./assets/apc-logo.png";
 
 
 const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
 const APC_WEBSITE_URL = "https://autismpathwaysconsulting.com";
-
-
-function formatCompactDate(dateString) {
-  if (!dateString) return "Change date";
-  const date = new Date(`${dateString}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return "Change date";
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 
 
 
@@ -729,24 +716,7 @@ function resetSavedData() {
                 </div>
               </div>
 
-              <div className="apc-clean-date-control">
-                <button
-                  type="button"
-                  className="apc-clean-date-button"
-                  onClick={() => dateInputRef.current?.showPicker ? dateInputRef.current.showPicker() : dateInputRef.current?.click()}
-                >
-                  <span>{formatCompactDate(selectedDate)}</span>
-                  <small>Change date</small>
-                </button>
-                <input
-                  ref={dateInputRef}
-                  value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                  type="date"
-                  className="apc-clean-date-native"
-                  aria-label="Select date"
-                />
-              </div>
+              <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-ios-date-compact mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
               <div className="mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
   <p className="font-bold">{saveMessage}</p>
   <p>Your child name, routines, notes, reward log, and timer settings are saved on this phone or computer.</p>
