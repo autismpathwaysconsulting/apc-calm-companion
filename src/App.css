@@ -264,3 +264,23 @@
     font-size: 0.68rem;
   }
 }
+
+/* APC iOS date compact fix: keep native date picker but stop it overflowing the card */
+.apc-ios-date-compact {
+  display: block !important;
+  width: calc(100% - 28px) !important;
+  max-width: calc(100% - 28px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+  .apc-ios-date-compact {
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    min-height: 52px !important;
+    border-radius: 1rem !important;
+    text-align: center;
+  }
+}

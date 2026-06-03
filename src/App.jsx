@@ -716,7 +716,7 @@ function resetSavedData() {
                 </div>
               </div>
 
-              <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
+              <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-ios-date-compact mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
               <div className="mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
   <p className="font-bold">{saveMessage}</p>
   <p>Your child name, routines, notes, reward log, and timer settings are saved on this phone or computer.</p>
