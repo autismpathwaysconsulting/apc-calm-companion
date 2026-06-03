@@ -1193,34 +1193,7 @@ function resetSavedData() {
         </section>
 
         
-        <Card className="border border-teal-100 bg-white">
-          <div className="p-6">
-            <div className="flex items-start gap-3">
-              <IconBadge label="🧭" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">Need more personalised guidance?</p>
-                <h2 className="text-2xl font-bold">Seeing the same pattern again and again?</h2>
-              </div>
-            </div>
 
-            <p className="mt-4 text-sm leading-7 text-slate-600">
-              APC Calm Companion can help in the moment. If the same struggle keeps repeating, CJ can help you look at the pattern and choose one clearer next step.
-            </p>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <a href={APC_FREE_CALL_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-teal-700 px-5 py-4 text-center font-bold text-white shadow-lg shadow-teal-100">
-                Start with Free 15-Min Call
-              </a>
-              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-teal-200 bg-white px-5 py-4 text-center font-bold text-teal-800">
-                View Parent Support Options
-              </a>
-            </div>
-
-            <p className="mt-4 rounded-2xl bg-[#F7F3EB] p-4 text-xs font-semibold leading-6 text-slate-600">
-              APC Calm Companion is an educational support tool for parents. It does not replace therapy, diagnosis, medical advice, or crisis support.
-            </p>
-          </div>
-        </Card>
         <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
         <section className="mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
