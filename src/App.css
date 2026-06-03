@@ -183,18 +183,6 @@
   }
 }
 
-/* APC mobile cleanup: keep date input controlled and prevent iOS grey overlay styling */
-.apc-date-input,
-input[type="date"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-radius: 1rem;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
 
 .apc-date-input::-webkit-date-and-time-value {
   text-align: left;
@@ -215,23 +203,6 @@ input[type="date"] {
   }
 }
 
-/* APC exact mobile date fix: custom visible date button, hidden native picker */
-.apc-date-select {
-  position: relative;
-  display: flex;
-  width: 100%;
-  min-height: 58px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  overflow: hidden;
-  border: 1px solid #dbe5ef;
-  border-radius: 1rem;
-  background: #ffffff;
-  box-sizing: border-box;
-  cursor: pointer;
-}
 
 .apc-date-select-main {
   color: #0f172a;
