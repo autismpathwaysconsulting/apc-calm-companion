@@ -621,14 +621,14 @@ function resetSavedData() {
           `Before: ${item.before || "Not recorded"}`,
           `During: ${item.during || "Not recorded"}`,
           `Helped: ${item.helped || "Not recorded"}`,
-        ].join("\n");
+        ].join("");
       })
-      .join("\n\n");
+      .join("");
 
     const latestRewards = rewardLog
       .slice(0, 3)
       .map((item) => `${item.date}: ${item.stars}/5 stars`)
-      .join("\n");
+      .join("");
 
     const message = [
       "Hi CJ, I used the APC Calm Companion and would like to share a short summary.",
@@ -649,7 +649,7 @@ function resetSavedData() {
       latestRewards || "No reward log saved yet.",
       "",
       "I understand this is not emergency support. I would like guidance on what to try next.",
-    ].join("\n");
+    ].join("");
 
     window.open(
       `https://wa.me/601172998168?text=${encodeURIComponent(message)}`,
@@ -1223,17 +1223,17 @@ function resetSavedData() {
         <section className="mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
           <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-white/70">Need clearer guidance?</p>
-              <h2 className="mt-2 text-3xl font-black">Need clearer guidance?</h2>
-              <p className="mt-3 leading-7 text-white/85">If the same difficulty keeps repeating, start here to explore the most suitable next step.</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-white/70">Seeing the same pattern repeat?</p>
+              <h2 className="mt-2 text-3xl font-black">Seeing the same pattern repeat?</h2>
+              <p className="mt-3 leading-7 text-white/85">If the same difficulty keeps coming back, use the app in the moment, then start with one clearer next step.</p>
               <p className="mt-3 text-sm leading-6 text-white/75">
                 
               </p>
             </div>
             <div className="grid gap-3">
-              <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start Here</a>
+              <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start with Free Call</a>
               
-              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>\n              <a href={APC_WEBSITE_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Visit APC website</a>
+              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
             </div>
           </div>
         </section>

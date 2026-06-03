@@ -182,3 +182,35 @@
     border-right-color: var(--border);
   }
 }
+
+/* APC mobile cleanup: keep date input controlled and prevent iOS grey overlay styling */
+.apc-date-input,
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-radius: 1rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.apc-date-input::-webkit-date-and-time-value {
+  text-align: left;
+  color: #0f172a;
+}
+
+.apc-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .apc-date-input,
+  input[type="date"] {
+    width: 100% !important;
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+    padding: 0.9rem 1rem !important;
+  }
+}
