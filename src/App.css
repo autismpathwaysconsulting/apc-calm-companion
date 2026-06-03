@@ -214,3 +214,82 @@ input[type="date"] {
     padding: 0.9rem 1rem !important;
   }
 }
+
+/* APC exact mobile date fix: custom visible date button, hidden native picker */
+.apc-date-select {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 58px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
+  border: 1px solid #dbe5ef;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.apc-date-select-main {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.apc-date-select-sub {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.apc-date-select-native {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  color: transparent !important;
+  border: 0 !important;
+  font-size: 16px !important;
+}
+
+.apc-date-select-native::-webkit-date-and-time-value {
+  color: transparent !important;
+}
+
+.apc-date-select-native::-webkit-calendar-picker-indicator {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+}
+
+@media (max-width: 640px) {
+  .apc-date-select {
+    min-height: 56px;
+    border-radius: 0.95rem;
+  }
+
+  .apc-date-select-main {
+    font-size: 0.95rem;
+  }
+
+  .apc-date-select-sub {
+    font-size: 0.68rem;
+  }
+}

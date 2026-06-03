@@ -6,6 +6,19 @@ const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discove
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
 const APC_WEBSITE_URL = "https://autismpathwaysconsulting.com";
 
+
+function formatDisplayDateInput(dateString) {
+  if (!dateString) return "Change date";
+  const date = new Date(`${dateString}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "Change date";
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+
 function Card({ children, className = "" }) {
   return <section className={`rounded-3xl bg-white shadow-sm ${className}`}>{children}</section>;
 }
@@ -713,7 +726,17 @@ function resetSavedData() {
                 </div>
               </div>
 
-              <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
+              <label className="apc-date-select">
+                <span className="apc-date-select-main">{formatDisplayDateInput(selectedDate)}</span>
+                <span className="apc-date-select-sub">Tap to change date</span>
+                <input
+                  value={selectedDate}
+                  onChange={(event) => setSelectedDate(event.target.value)}
+                  type="date"
+                  className="apc-date-select-native"
+                  aria-label="Select date"
+                />
+              </label>
               <div className="mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
   <p className="font-bold">{saveMessage}</p>
   <p>Your child name, routines, notes, reward log, and timer settings are saved on this phone or computer.</p>
