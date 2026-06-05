@@ -297,3 +297,63 @@
     text-align: center;
   }
 }
+
+
+/* APC install help card */
+.apc-install-help-card {
+  margin-top: 1.25rem;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  border-radius: 1.5rem;
+  background: #f0fdfa;
+  padding: 1.25rem;
+  color: #0f172a;
+}
+
+.apc-install-help-card h3 {
+  margin: 0.25rem 0 0.5rem;
+  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.apc-install-help-card p {
+  margin: 0;
+  color: #334155;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.apc-install-help-card ol {
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+  color: #0f766e;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.apc-install-help-label {
+  color: #0f766e !important;
+  font-size: 0.8rem;
+  font-weight: 850 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.apc-install-help-small {
+  color: #64748b !important;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .apc-install-help-card {
+    margin-top: 1rem;
+    border-radius: 1.25rem;
+    padding: 1rem;
+  }
+
+  .apc-install-help-card h3 {
+    font-size: 1.1rem;
+  }
+}
+
