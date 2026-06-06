@@ -698,7 +698,7 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
-                <button variant="outline" onClick={handleInstallClick} className="h-14 w-full text-base">Install</button>
+                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install</Button>
               </div>
             </div>
           </Card>
@@ -1193,30 +1193,6 @@ function resetSavedData() {
         </section>
 
         
-
-
-        {showInstallHelp && (
-          <div className="apc-install-help-card">
-            <p className="apc-install-help-label">Install APC Calm Companion</p>
-            <h3>Add this tool to your Home Screen</h3>
-            <p>
-              On iPhone or iPad, your browser may not allow one-tap install from this button.
-              Use the browser menu or Share menu instead.
-            </p>
-
-            <ol>
-              <li>Tap the browser menu or Share button.</li>
-              <li>Choose <strong>Add to Home Screen</strong>.</li>
-              <li>Name it <strong>APC Calm Companion</strong>.</li>
-              <li>Tap <strong>Add</strong>.</li>
-            </ol>
-
-            <p className="apc-install-help-small">
-              On Android or desktop, this button may open the install prompt automatically when supported.
-            </p>
-          </div>
-        )}
-
 
         <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
