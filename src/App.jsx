@@ -306,7 +306,20 @@ const [stars, setStars] = useState(savedAppData?.stars ?? 3);  const [note, setN
 const [savedNotes, setSavedNotes] = useState(savedAppData?.savedNotes || []);  const [openEvidence, setOpenEvidence] = useState("Visual supports");
   const [activeTool, setActiveTool] = useState(parentTools[0]);
   const [childMode, setChildMode] = useState("parent-guided");
-const [selectedDate, setSelectedDate] = useState(() => savedAppData?.selectedDate || new Date().toISOString().slice(0, 10));  const [firstTask, setFirstTask] = useState("Shoes");
+const [selectedDate, setSelectedDate] = useState(getTodayISODate);
+
+  // APC fix: keep selected day aligned with today's date on app open.
+  useEffect(() => {
+    const syncToday = () => {
+      setSelectedDate(getTodayISODate());
+    };
+
+    syncToday();
+    const timer = window.setTimeout(syncToday, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+  const [firstTask, setFirstTask] = useState("Shoes");
   const [thenTask, setThenTask] = useState("Car");
 const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5);  const [timerPurpose, setTimerPurpose] = useState(savedAppData?.timerPurpose || "Homework time");
   const [timerRemaining, setTimerRemaining] = useState(() => (savedAppData?.timerMinutes || 5) * 60);
@@ -698,7 +711,7 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
-                <a href="#install-guide" variant="outline" className="h-14 w-full text-base">Install</a>
+                <a href="#install-guide" className="apc-install-tab-link">Install</a>
               </div>
             </div>
           </Card>
