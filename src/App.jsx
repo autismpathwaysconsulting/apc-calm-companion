@@ -704,6 +704,14 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
                 <a
                   href="#install-guide"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    const guide = document.getElementById("install-guide");
+                    if (guide) {
+                      guide.scrollIntoView({ behavior: "smooth", block: "start" });
+                      window.history.replaceState(null, "", "#install-guide");
+                    }
+                  }}
                   className="flex h-14 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-center text-base font-extrabold text-slate-900 no-underline shadow-sm transition hover:border-teal-200 hover:bg-teal-50"
                 >
                   Install
