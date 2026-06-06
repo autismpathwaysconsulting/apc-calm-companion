@@ -306,7 +306,11 @@ const [stars, setStars] = useState(savedAppData?.stars ?? 3);  const [note, setN
 const [savedNotes, setSavedNotes] = useState(savedAppData?.savedNotes || []);  const [openEvidence, setOpenEvidence] = useState("Visual supports");
   const [activeTool, setActiveTool] = useState(parentTools[0]);
   const [childMode, setChildMode] = useState("parent-guided");
-const [selectedDate, setSelectedDate] = useState(() => savedAppData?.selectedDate || new Date().toISOString().slice(0, 10));  const [firstTask, setFirstTask] = useState("Shoes");
+const [selectedDate, setSelectedDate] = useState(() => {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
+});  const [firstTask, setFirstTask] = useState("Shoes");
   const [thenTask, setThenTask] = useState("Car");
 const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5);  const [timerPurpose, setTimerPurpose] = useState(savedAppData?.timerPurpose || "Homework time");
   const [timerRemaining, setTimerRemaining] = useState(() => (savedAppData?.timerMinutes || 5) * 60);
