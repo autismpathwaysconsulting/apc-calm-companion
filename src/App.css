@@ -370,39 +370,3 @@ a[href="#install-guide"]:focus-visible {
   outline: 3px solid rgba(20, 184, 166, 0.45);
   outline-offset: 3px;
 }
-
-/* APC install tab link styling */
-.apc-install-tab-link {
-  display: flex !important;
-  width: 100% !important;
-  min-height: 3.5rem !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1px solid #dbe5ef !important;
-  border-radius: 999px !important;
-  background: #ffffff !important;
-  color: #0f172a !important;
-  font-size: 1rem !important;
-  font-weight: 850 !important;
-  line-height: 1.2 !important;
-  text-align: center !important;
-  text-decoration: none !important;
-  box-sizing: border-box !important;
-}
-
-.apc-install-tab-link:hover {
-  border-color: rgba(15, 118, 110, 0.35) !important;
-  background: #f8fffd !important;
-}
-
-.apc-install-tab-link:focus-visible {
-  outline: 3px solid rgba(20, 184, 166, 0.35) !important;
-  outline-offset: 3px !important;
-}
-
-@media (max-width: 640px) {
-  .apc-install-tab-link {
-    min-height: 3.6rem !important;
-    border-radius: 999px !important;
-  }
-}
