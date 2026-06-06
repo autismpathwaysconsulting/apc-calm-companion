@@ -698,7 +698,7 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
-                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install</Button>
+                <a href="#install-guide" variant="outline" className="h-14 w-full text-base">Install</a>
               </div>
             </div>
           </Card>
@@ -1193,6 +1193,45 @@ function resetSavedData() {
         </section>
 
         
+
+        <Card className="border border-teal-100 bg-[#F0FDFA]" id="install-guide">
+          <div className="p-6">
+            <div className="flex items-start gap-3">
+              <IconBadge label="📲" />
+              <div>
+                <p className="text-sm font-medium text-slate-500">Install APC Calm Companion</p>
+                <h2 className="text-2xl font-bold">Add this tool to your Home Screen</h2>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              Some mobile browsers do not allow one-tap install from inside the app. If the install prompt does not appear, use your browser menu instead.
+            </p>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">iPhone or iPad</p>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm font-semibold leading-6 text-slate-700">
+                  <li>Open this app in Safari if possible.</li>
+                  <li>Tap the Share button.</li>
+                  <li>Choose <strong>Add to Home Screen</strong>.</li>
+                  <li>Name it <strong>APC Calm Companion</strong>, then tap <strong>Add</strong>.</li>
+                </ol>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Android or desktop</p>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm font-semibold leading-6 text-slate-700">
+                  <li>Tap the browser menu.</li>
+                  <li>Look for <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+                  <li>Confirm the install.</li>
+                  <li>Open it from your Home Screen or app list.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </Card>
+
 
         <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
