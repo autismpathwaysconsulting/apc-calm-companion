@@ -56,3 +56,26 @@ test("the app source contains no persistence, analytics or app-origin submission
     assert.equal(source.includes(token), false, `unexpected data mechanism: ${token}`);
   }
 });
+
+test("the skip link target is focusable and selected action descriptions meet text contrast", async () => {
+  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.css", import.meta.url), "utf8");
+
+  assert.ok(source.includes('<main id="main-content" tabIndex="-1">'));
+
+  const foreground = css.match(/\.guide-choice small\s*\{[^}]*color:\s*(#[0-9a-f]{6})/i)?.[1];
+  const background = css.match(/\.guide-choice\.selected\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i)?.[1];
+  assert.ok(foreground && background, "selected guide colours could not be read");
+
+  function luminance(hex) {
+    return [1, 3, 5]
+      .map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255)
+      .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      .reduce((total, value, index) => total + value * [0.2126, 0.7152, 0.0722][index], 0);
+  }
+
+  const first = luminance(foreground);
+  const second = luminance(background);
+  const ratio = (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+  assert.ok(ratio >= 4.5, `selected action description contrast is ${ratio.toFixed(2)}:1`);
+});

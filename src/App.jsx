@@ -144,7 +144,7 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main-content">
+      <main id="main-content" tabIndex="-1">
         <section className="hero page-width" aria-labelledby="page-title">
           <div className="hero-copy">
             <p className="eyebrow">Parent-facing support for everyday moments</p>
