@@ -36,6 +36,7 @@ export default function App() {
   const [showInstallSteps, setShowInstallSteps] = useState(false);
   const viewHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
+  const shouldMoveFocusRef = useRef(false);
   const speechAvailable = "speechSynthesis" in window;
 
   useEffect(() => {
@@ -61,23 +62,30 @@ export default function App() {
     return () => window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
   }, []);
 
+  useEffect(() => {
+    if (!shouldMoveFocusRef.current) return;
+    shouldMoveFocusRef.current = false;
+    if (activeView === "actions" && activeGuide) guidePanelRef.current?.focus();
+    else viewHeadingRef.current?.focus();
+  }, [activeGuide, activeView]);
+
   function chooseGuide(guide) {
+    shouldMoveFocusRef.current = true;
     setActiveGuide(guide);
-    window.requestAnimationFrame(() => guidePanelRef.current?.focus());
   }
 
   function openView(view) {
+    shouldMoveFocusRef.current = true;
     setActiveView(view);
     if (view === "actions") setActiveGuide(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    window.requestAnimationFrame(() => viewHeadingRef.current?.focus());
   }
 
   function openRelatedTool(tool) {
+    shouldMoveFocusRef.current = true;
     setActiveTool(tool);
     setActiveView("tools");
     window.scrollTo({ top: 0, behavior: "smooth" });
-    window.requestAnimationFrame(() => viewHeadingRef.current?.focus());
   }
 
   function updateMinutes(value) {
@@ -174,7 +182,7 @@ export default function App() {
             </div>
           ) : (
             <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
-              <button type="button" className="back-button" onClick={() => { setActiveGuide(null); window.requestAnimationFrame(() => viewHeadingRef.current?.focus()); }}>← All actions</button>
+              <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); }}>← All actions</button>
               <p className="guide-kicker">Try one action</p>
               <h3 id="guide-panel-title">{activeGuide.title}</h3>
               <ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol>
