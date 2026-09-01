@@ -3,7 +3,6 @@ import "./App.css";
 import APC_LOGO from "./assets/apc-logo.png";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes } from "./content.js";
 
-const APP_URL = "https://calm.autismpathwaysconsulting.com/";
 const APC_URL = "https://autismpathwaysconsulting.com/";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
 const TERMS_URL = "https://autismpathwaysconsulting.com/terms";
@@ -19,7 +18,8 @@ function ToolButton({ active, children, onClick, controls }) {
 }
 
 export default function App() {
-  const [activeGuide, setActiveGuide] = useState(guideOptions[0]);
+  const [activeView, setActiveView] = useState("actions");
+  const [activeGuide, setActiveGuide] = useState(null);
   const [activeTool, setActiveTool] = useState("first-then");
   const [firstStep, setFirstStep] = useState("Shoes on");
   const [thenStep, setThenStep] = useState("Go to the car");
@@ -34,6 +34,7 @@ export default function App() {
   const [copyStatus, setCopyStatus] = useState("");
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallSteps, setShowInstallSteps] = useState(false);
+  const viewHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
   const speechAvailable = "speechSynthesis" in window;
 
@@ -63,6 +64,20 @@ export default function App() {
   function chooseGuide(guide) {
     setActiveGuide(guide);
     window.requestAnimationFrame(() => guidePanelRef.current?.focus());
+  }
+
+  function openView(view) {
+    setActiveView(view);
+    if (view === "actions") setActiveGuide(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.requestAnimationFrame(() => viewHeadingRef.current?.focus());
+  }
+
+  function openRelatedTool(tool) {
+    setActiveTool(tool);
+    setActiveView("tools");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.requestAnimationFrame(() => viewHeadingRef.current?.focus());
   }
 
   function updateMinutes(value) {
@@ -121,87 +136,64 @@ export default function App() {
         <div className="page-width safety-inner">
           <div>
             <strong id="safety-title">Not for emergencies.</strong>{" "}
-            If anyone is in immediate danger, seriously injured, unable to breathe, at risk of running into danger, or you cannot keep people safe, call 999 in Malaysia or your local emergency service.
+            Immediate danger or serious injury: call 999 in Malaysia or your local emergency service.
           </div>
-          <div className="safety-links">
-            <a href="tel:999">Call 999</a>
-            <a href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a>
-          </div>
+          <a className="safety-detail" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a>
         </div>
       </aside>
 
       <header className="site-header">
         <div className="page-width header-inner">
-          <a className="brand" href={APP_URL} aria-label="APC Calm Companion home">
+          <button className="brand" type="button" onClick={() => openView("actions")} aria-label="Open Calm Companion actions">
             <img src={APC_LOGO} alt="" />
             <span><strong>APC Calm Companion</strong><small>Autism Pathways Consulting</small></span>
-          </a>
-          <nav aria-label="Main navigation">
-            <a href="#choose">Choose a step</a>
-            <a href="#tools">Visual tools</a>
-            <a href="#about">About</a>
+          </button>
+          <nav className="app-nav" aria-label="Main navigation">
+            <button type="button" aria-current={activeView === "actions" ? "page" : undefined} onClick={() => openView("actions")}>Actions</button>
+            <button type="button" aria-current={activeView === "tools" ? "page" : undefined} onClick={() => openView("tools")}>Tools</button>
+            <button type="button" aria-current={activeView === "about" ? "page" : undefined} onClick={() => openView("about")}>About &amp; Safety</button>
           </nav>
         </div>
       </header>
 
       <main id="main-content" tabIndex="-1">
-        <section className="hero page-width" aria-labelledby="page-title">
-          <div className="hero-copy">
-            <p className="eyebrow">Parent-facing support for everyday moments</p>
-            <h1 id="page-title">One clear next step when the moment feels difficult</h1>
-            <p className="hero-lead">Choose the closest situation. Try one small parent action, then notice what becomes easier or remains difficult.</p>
-            <div className="hero-actions">
-              <a className="button primary" href="#choose">Choose a step</a>
-              <a className="button secondary" href="#tools">Open a visual tool</a>
-            </div>
-          </div>
-          <div className="boundary-card">
-            <p className="boundary-label">Use this app for</p>
-            <ul>
-              <li>everyday transitions and routines;</li>
-              <li>reducing verbal load;</li>
-              <li>showing one next step;</li>
-              <li>offering simple communication options.</li>
-            </ul>
-            <p className="boundary-note">This is general educational support. It is not therapy, diagnosis, assessment, medical advice or crisis support. It cannot explain why one child is having difficulty.</p>
-          </div>
-        </section>
-
-        <section id="choose" className="section page-width" aria-labelledby="choose-title">
+        {activeView === "actions" && <section id="choose" className="section page-width view-section" aria-labelledby="choose-title">
           <div className="section-heading">
             <p className="eyebrow">Start here</p>
-            <h2 id="choose-title">What would be most useful right now?</h2>
+            <h1 id="choose-title" ref={!activeGuide ? viewHeadingRef : undefined} tabIndex="-1">What would help right now?</h1>
             <p>Choose what you can observe. You do not need to decide the cause first.</p>
           </div>
-          <div className="guide-layout">
+          {!activeGuide ? (
             <div className="guide-grid" aria-label="Parent action choices">
               {guideOptions.map((guide) => (
-                <button type="button" key={guide.id} className={`guide-choice ${activeGuide.id === guide.id ? "selected" : ""}`} aria-pressed={activeGuide.id === guide.id} onClick={() => chooseGuide(guide)}>
+                <button type="button" key={guide.id} className="guide-choice" onClick={() => chooseGuide(guide)}>
                   <span className="guide-number" aria-hidden="true">{guide.number}</span>
                   <span><strong>{guide.label}</strong><small>{guide.short}</small></span>
                 </button>
               ))}
             </div>
-            <article ref={guidePanelRef} className="guide-panel" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
+          ) : (
+            <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
+              <button type="button" className="back-button" onClick={() => { setActiveGuide(null); window.requestAnimationFrame(() => viewHeadingRef.current?.focus()); }}>← All actions</button>
               <p className="guide-kicker">Try one action</p>
               <h3 id="guide-panel-title">{activeGuide.title}</h3>
               <ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol>
               <div className="say-box"><span>You could say</span><strong>“{activeGuide.say}”</strong></div>
               <p className="notice-line"><strong>Notice:</strong> {activeGuide.notice}</p>
               {activeGuide.tool && (
-                <button type="button" className="text-button" onClick={() => { setActiveTool(activeGuide.tool); document.getElementById("tools")?.scrollIntoView({ behavior: "smooth" }); }}>
+                <button type="button" className="text-button" onClick={() => openRelatedTool(activeGuide.tool)}>
                   Open the related visual tool
                 </button>
               )}
             </article>
-          </div>
-        </section>
+          )}
+        </section>}
 
-        <section id="tools" className="section tools-section" aria-labelledby="tools-title">
+        {activeView === "tools" && <section id="tools" className="section tools-section view-section" aria-labelledby="tools-title">
           <div className="page-width">
             <div className="section-heading">
               <p className="eyebrow">Optional visual tools</p>
-              <h2 id="tools-title">Show one simple screen at a time</h2>
+              <h1 id="tools-title" ref={viewHeadingRef} tabIndex="-1">Choose one visual tool</h1>
               <p>These tools support understanding and communication. They do not require a child to respond in a particular way.</p>
             </div>
             <div className="tool-tabs" role="group" aria-label="Choose a visual tool">
@@ -292,14 +284,21 @@ export default function App() {
               )}
             </div>
           </div>
-        </section>
+        </section>}
 
-        <section id="about" className="section page-width" aria-labelledby="about-title">
+        {activeView === "about" && <div className="about-view">
+        <section id="about" className="section page-width view-section" aria-labelledby="about-title">
           <div className="section-heading">
             <p className="eyebrow">Evidence and boundaries</p>
-            <h2 id="about-title">Support principles, not conclusions about one child</h2>
+            <h1 id="about-title" ref={viewHeadingRef} tabIndex="-1">About and safety</h1>
+            <p className="working-boundary">This is general educational support for everyday situations. It is not therapy, diagnosis, assessment, medical advice or crisis support.</p>
             <p>These sources support the general use of visual, communication and antecedent-based supports. They do not establish why a particular situation occurred or guarantee an outcome.</p>
           </div>
+          <aside className="emergency-card" aria-labelledby="emergency-card-title">
+            <h2 id="emergency-card-title">When not to use this app</h2>
+            <p>If anyone is in immediate danger, seriously injured, unable to breathe, at risk of running into danger, or you cannot keep people safe, call 999 in Malaysia or your local emergency service.</p>
+            <div className="button-row"><a className="button emergency" href="tel:999">Call 999</a><a className="button secondary" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a></div>
+          </aside>
           <div className="evidence-grid">
             {evidenceNotes.map((item) => (
               <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer">Read the evidence brief</a></article>
@@ -329,6 +328,7 @@ export default function App() {
           <div><p className="eyebrow">Need personalised support?</p><h2 id="support-title">Repeated difficulties may need a closer individual review</h2><p>APC can help parents examine routines, communication, environment and support needs without treating the app as an assessment.</p></div>
           <a className="button primary" href={`${APC_URL}start`} target="_blank" rel="noreferrer">View APC support</a>
         </section>
+        </div>}
       </main>
 
       <footer className="site-footer">
