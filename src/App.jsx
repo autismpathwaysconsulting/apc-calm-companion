@@ -9,18 +9,18 @@ const TERMS_URL = "https://autismpathwaysconsulting.com/terms";
 const EMERGENCY_URL = "https://www.malaysia.gov.my/en/categories/safety-and-community/public-safety/mers-999-emergency-line";
 const BEFRIENDERS_URL = "https://befrienders.org.my/contact-us/";
 
-function ToolButton({ active, children, onClick, controls }) {
-  return (
-    <button type="button" className="tool-tab" aria-pressed={active} aria-controls={controls} onClick={onClick}>
-      {children}
-    </button>
-  );
-}
+const toolOptions = [
+  { id: "first-then", label: "First, then", summary: "Show one step and what genuinely follows." },
+  { id: "choices", label: "Two choices", summary: "Show two options that are both available." },
+  { id: "timer", label: "Timer", summary: "Make the remaining time visible." },
+  { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech." },
+  { id: "observe", label: "Observe", summary: "Notice what became easier or remained difficult." },
+];
 
 export default function App() {
   const [activeView, setActiveView] = useState("actions");
   const [activeGuide, setActiveGuide] = useState(null);
-  const [activeTool, setActiveTool] = useState("first-then");
+  const [activeTool, setActiveTool] = useState(null);
   const [firstStep, setFirstStep] = useState("Shoes on");
   const [thenStep, setThenStep] = useState("Go to the car");
   const [choiceA, setChoiceA] = useState("Blue shirt");
@@ -36,7 +36,9 @@ export default function App() {
   const [showInstallSteps, setShowInstallSteps] = useState(false);
   const viewHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
+  const toolPanelRef = useRef(null);
   const shouldMoveFocusRef = useRef(false);
+  const shouldFocusToolRef = useRef(false);
   const speechAvailable = "speechSynthesis" in window;
 
   useEffect(() => {
@@ -67,7 +69,13 @@ export default function App() {
     shouldMoveFocusRef.current = false;
     if (activeView === "actions" && activeGuide) guidePanelRef.current?.focus();
     else viewHeadingRef.current?.focus();
-  }, [activeGuide, activeView]);
+  }, [activeGuide, activeTool, activeView]);
+
+  useEffect(() => {
+    if (!shouldFocusToolRef.current || activeView !== "tools" || !activeTool) return;
+    shouldFocusToolRef.current = false;
+    toolPanelRef.current?.focus();
+  }, [activeTool, activeView]);
 
   function chooseGuide(guide) {
     shouldMoveFocusRef.current = true;
@@ -78,14 +86,25 @@ export default function App() {
     shouldMoveFocusRef.current = true;
     setActiveView(view);
     if (view === "actions") setActiveGuide(null);
+    if (view === "tools") setActiveTool(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openRelatedTool(tool) {
-    shouldMoveFocusRef.current = true;
+    shouldFocusToolRef.current = true;
     setActiveTool(tool);
     setActiveView("tools");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openTool(tool) {
+    shouldFocusToolRef.current = true;
+    setActiveTool(tool);
+  }
+
+  function returnToTools() {
+    shouldMoveFocusRef.current = true;
+    setActiveTool(null);
   }
 
   function updateMinutes(value) {
@@ -144,7 +163,7 @@ export default function App() {
         <div className="page-width safety-inner">
           <div>
             <strong id="safety-title">Not for emergencies.</strong>{" "}
-            Immediate danger or serious injury: call 999 in Malaysia or your local emergency service.
+            Immediate danger or serious injury: <a className="safety-call" href="tel:999">call 999 in Malaysia</a> or your local emergency service.
           </div>
           <a className="safety-detail" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a>
         </div>
@@ -175,24 +194,27 @@ export default function App() {
             <div className="guide-grid" aria-label="Parent action choices">
               {guideOptions.map((guide) => (
                 <button type="button" key={guide.id} className="guide-choice" onClick={() => chooseGuide(guide)}>
-                  <span className="guide-number" aria-hidden="true">{guide.number}</span>
-                  <span><strong>{guide.label}</strong><small>{guide.short}</small></span>
+                  <span><strong>{guide.prompt}</strong><small>{guide.short}</small></span>
                 </button>
               ))}
             </div>
           ) : (
             <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
               <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); }}>← All actions</button>
-              <p className="guide-kicker">Try one action</p>
+              <p className="guide-kicker">Recommended action</p>
               <h3 id="guide-panel-title">{activeGuide.title}</h3>
-              <ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+              <div className="now-box"><span>Try this now</span><strong>{activeGuide.now}</strong></div>
               <div className="say-box"><span>You could say</span><strong>“{activeGuide.say}”</strong></div>
-              <p className="notice-line"><strong>Notice:</strong> {activeGuide.notice}</p>
               {activeGuide.tool && (
                 <button type="button" className="text-button" onClick={() => openRelatedTool(activeGuide.tool)}>
                   Open the related visual tool
                 </button>
               )}
+              <details className="more-guidance">
+                <summary>More guidance</summary>
+                <ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol>
+                <p className="notice-line"><strong>Notice:</strong> {activeGuide.notice}</p>
+              </details>
             </article>
           )}
         </section>}
@@ -204,15 +226,17 @@ export default function App() {
               <h1 id="tools-title" ref={viewHeadingRef} tabIndex="-1">Choose one visual tool</h1>
               <p>These tools support understanding and communication. They do not require a child to respond in a particular way.</p>
             </div>
-            <div className="tool-tabs" role="group" aria-label="Choose a visual tool">
-              <ToolButton active={activeTool === "first-then"} controls="first-then-panel" onClick={() => setActiveTool("first-then")}>First, then</ToolButton>
-              <ToolButton active={activeTool === "choices"} controls="choices-panel" onClick={() => setActiveTool("choices")}>Two choices</ToolButton>
-              <ToolButton active={activeTool === "timer"} controls="timer-panel" onClick={() => setActiveTool("timer")}>Timer</ToolButton>
-              <ToolButton active={activeTool === "communication"} controls="communication-panel" onClick={() => setActiveTool("communication")}>Communication</ToolButton>
-              <ToolButton active={activeTool === "observe"} controls="observe-panel" onClick={() => setActiveTool("observe")}>Observe</ToolButton>
-            </div>
-
-            <div className="tool-panel">
+            {!activeTool ? (
+              <div className="tool-menu" aria-label="Visual tool choices">
+                {toolOptions.map((tool) => (
+                  <button type="button" key={tool.id} onClick={() => openTool(tool.id)}>
+                    <strong>{tool.label}</strong><small>{tool.summary}</small>
+                  </button>
+                ))}
+              </div>
+            ) : (<>
+            <button type="button" className="all-tools-button" onClick={returnToTools}>← All tools</button>
+            <div ref={toolPanelRef} className="tool-panel" tabIndex="-1">
               {activeTool === "first-then" && (
                 <div id="first-then-panel" className="tool-content">
                   <div className="tool-intro"><h3>First, then</h3><p>Use two short, concrete steps. “Then” should be accurate and realistically available.</p></div>
@@ -291,6 +315,7 @@ export default function App() {
                 </div>
               )}
             </div>
+            </>)}
           </div>
         </section>}
 

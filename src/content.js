@@ -2,9 +2,11 @@ export const guideOptions = [
   {
     id: "pause",
     number: "01",
+    prompt: "I’ve already said a lot",
     label: "Pause before adding more",
-    short: "You have already given several words or instructions.",
+    short: "Several words or instructions have already been given.",
     title: "Pause before another instruction",
+    now: "Stop adding questions or instructions and allow a moment for a response.",
     steps: [
       "Check for immediate safety, pain, illness or another urgent need.",
       "Stop adding questions or instructions for a moment.",
@@ -16,9 +18,11 @@ export const guideOptions = [
   {
     id: "less-language",
     number: "02",
+    prompt: "The instruction is too long",
     label: "Use fewer words",
-    short: "You have used a longer message or repeated it several times.",
+    short: "The message has become long or has been repeated several times.",
     title: "Reduce the verbal load",
+    now: "Use one short phrase once, then pause.",
     steps: [
       "Choose one short phrase.",
       "Pair it with a gesture, object or visual when useful.",
@@ -30,9 +34,11 @@ export const guideOptions = [
   {
     id: "one-step",
     number: "03",
+    prompt: "They need one clear next step",
     label: "Show one next step",
-    short: "The next action has not started or needs to be shown more clearly.",
+    short: "The next action has not started or is not yet clear.",
     title: "Make the next step visible",
+    now: "Show the smallest useful next action.",
     steps: [
       "Choose the smallest useful next action.",
       "Show or point to that action.",
@@ -45,9 +51,11 @@ export const guideOptions = [
   {
     id: "first-then",
     number: "04",
+    prompt: "They need to know what comes next",
     label: "Use first, then",
-    short: "The person is asking what happens next or the sequence has changed.",
+    short: "The sequence is unclear, has changed or needs to be shown.",
     title: "Show what happens first and what follows",
+    now: "Show one accurate first step and what genuinely happens next.",
     steps: [
       "Choose one accurate first step.",
       "Show what will genuinely happen next.",
@@ -60,9 +68,11 @@ export const guideOptions = [
   {
     id: "choices",
     number: "05",
+    prompt: "A choice might help",
     label: "Offer two choices",
-    short: "Two genuinely available ways to continue can be shown.",
+    short: "Two genuinely available ways to continue can be offered.",
     title: "Offer two manageable choices",
+    now: "Show two choices that are both genuinely available.",
     steps: [
       "Choose two options that are both possible.",
       "Show the options together without adding more choices.",
@@ -75,9 +85,11 @@ export const guideOptions = [
   {
     id: "communication",
     number: "06",
+    prompt: "No spoken response yet",
     label: "Make responding easier",
     short: "A spoken response has not come yet.",
     title: "Offer a simple communication response",
+    now: "Show a few relevant communication options without requiring speech.",
     steps: [
       "Show only a few relevant options.",
       "Model the response without demanding repetition.",
@@ -90,9 +102,11 @@ export const guideOptions = [
   {
     id: "environment",
     number: "07",
+    prompt: "Something here may be difficult",
     label: "Check the situation",
-    short: "There is noise, bright light, crowding, discomfort, sudden change or a difficult task.",
+    short: "There may be discomfort, noise, crowding, sudden change or a difficult task.",
     title: "Observe before deciding what the behaviour means",
+    now: "Check pain, illness and the surroundings, then change one reasonable factor.",
     steps: [
       "Check for pain, illness, hunger, tiredness or a sudden change.",
       "Notice noise, light, crowding, temperature, clothing and task difficulty.",
@@ -105,9 +119,11 @@ export const guideOptions = [
   {
     id: "parent-pause",
     number: "08",
+    prompt: "I need to slow down",
     label: "I need a pause",
-    short: "You notice yourself adding words, speaking faster or struggling to choose one next step.",
+    short: "You are adding words, speaking faster or struggling to choose one next step.",
     title: "Pause before solving",
+    now: "Check everyone is safe, then pause and choose only one next action.",
     steps: [
       "Check that everyone is safe.",
       "Take one ordinary breath and lower your own verbal load.",

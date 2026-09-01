@@ -6,7 +6,7 @@ import { communicationOptions, evidenceNotes, formatTime, guideOptions, normalis
 test("the parent guide contains exactly eight bounded actions", () => {
   assert.equal(guideOptions.length, 8);
   assert.equal(new Set(guideOptions.map((item) => item.id)).size, 8);
-  assert.ok(guideOptions.every((item) => item.title && item.steps.length === 3 && item.notice));
+  assert.ok(guideOptions.every((item) => item.prompt && item.title && item.now && item.steps.length === 3 && item.notice));
 });
 
 test("communication options include essential refusal and health responses", () => {
@@ -83,7 +83,18 @@ test("the skip link target is focusable and action descriptions meet text contra
 test("the app defaults to a focused three-view navigation model", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   assert.ok(source.includes('useState("actions")'));
-  assert.ok(source.includes("useState(null)"));
+  assert.ok(source.includes('const [activeGuide, setActiveGuide] = useState(null)'));
+  assert.ok(source.includes('const [activeTool, setActiveTool] = useState(null)'));
   for (const label of ["Actions", "Tools", "About &amp; Safety"]) assert.ok(source.includes(label));
   assert.equal(source.includes('className="hero page-width"'), false);
+});
+
+test("action and tool details use progressive disclosure", async () => {
+  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  for (const phrase of ["Try this now", "More guidance", "← All actions", "← All tools", "tool-menu"]) {
+    assert.ok(source.includes(phrase), `missing progressive-disclosure element: ${phrase}`);
+  }
+  assert.ok(source.includes('ref={toolPanelRef} className="tool-panel" tabIndex="-1"'));
+  assert.ok(source.includes("shouldFocusToolRef.current = true"));
+  assert.equal(source.includes("function ToolButton"), false);
 });
