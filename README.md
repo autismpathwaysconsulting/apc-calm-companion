@@ -57,3 +57,9 @@ Before enabling production submissions:
 4. Confirm that feedback is not queued by the service worker when offline.
 5. Follow `operations/feedback-retention.md` every month and retain the audit evidence.
 6. Test export, reference-based deletion and restricted reviewer access through the authenticated Cloudflare D1 dashboard.
+
+Controlled-beta operations:
+
+- `GATES.md` records the release decision gates.
+- `operations/cloudflare-preview-setup.md` gives the isolated preview configuration and end-to-end feedback checks.
+- `operations/beta-test-plan.md` defines the five-parent usability and safeguarding test.
