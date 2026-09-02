@@ -32,11 +32,12 @@ Add these to the preview environment only:
 | --- | --- | --- |
 | `VITE_TURNSTILE_SITE_KEY` | Build variable | `1x00000000000000000000AA` |
 | `TURNSTILE_SECRET_KEY` | Encrypted secret | `1x0000000000000000000000000000000AA` |
+| `FEEDBACK_TURNSTILE_TEST_MODE` | Runtime variable | `true` |
 | `FEEDBACK_APP_VERSION` | Runtime variable | `1.0.0-beta.1` |
 | `FEEDBACK_ALLOWED_ORIGIN` | Runtime variable | `https://codex-commercial-redesign.apc-calm-companion.pages.dev` |
 | `FEEDBACK_ALLOWED_HOSTNAME` | Runtime variable | `codex-commercial-redesign.apc-calm-companion.pages.dev` |
 
-The listed Turnstile keys are Cloudflare's public always-pass testing keys. They are suitable for a controlled preview only and must never be used for production.
+The listed Turnstile keys are Cloudflare's public always-pass testing keys. `FEEDBACK_TURNSTILE_TEST_MODE` permits their fixed dummy token only when the published test secret is also present. These settings are suitable for a controlled preview only and must never be used for production.
 
 ## 4. Redeploy and test
 
