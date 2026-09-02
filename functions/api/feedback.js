@@ -1,6 +1,8 @@
 const MAX_BODY_BYTES = 4096;
 const MAX_COMMENT_LENGTH = 300;
 const TURNSTILE_TIMEOUT_MS = 8000;
+const TURNSTILE_ALWAYS_PASS_TEST_SECRET = "1x0000000000000000000000000000000AA";
+const TURNSTILE_DUMMY_TOKEN = "XXXX.DUMMY.TOKEN.XXXX";
 const helpfulnessValues = new Set(["yes", "a-little", "not-yet"]);
 const categoryValues = new Set(["", "wording", "too-many-choices", "could-not-find-tool", "tool-did-not-work", "accessibility", "something-else"]);
 const allowedKeys = new Set(["helpfulness", "category", "comment", "website", "turnstileToken"]);
@@ -44,6 +46,8 @@ export function validateFeedbackPayload(payload) {
 async function verifyTurnstile(token, env) {
   const secret = env.TURNSTILE_SECRET_KEY;
   const expectedHostname = typeof env.FEEDBACK_ALLOWED_HOSTNAME === "string" ? env.FEEDBACK_ALLOWED_HOSTNAME.trim() : "";
+  const testMode = env.FEEDBACK_TURNSTILE_TEST_MODE === "true"
+    && secret === TURNSTILE_ALWAYS_PASS_TEST_SECRET;
   if (!secret || !expectedHostname) return { ok: false, unavailable: true };
   if (!token) return { ok: false };
 
@@ -61,6 +65,9 @@ async function verifyTurnstile(token, env) {
     });
     if (!verification.ok) return { ok: false, unavailable: true };
     const result = await verification.json();
+    if (testMode) {
+      return { ok: result.success === true && token === TURNSTILE_DUMMY_TOKEN };
+    }
     return { ok: result.success === true && result.action === "feedback" && result.hostname === expectedHostname };
   } finally {
     clearTimeout(timeout);
