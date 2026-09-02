@@ -183,6 +183,45 @@ test("Turnstile hostname and action must match before insertion", { concurrency:
   }
 });
 
+test("official Turnstile dummy credentials work only in explicit preview test mode", { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => ({
+      ok: true,
+      json: async () => ({ success: true, hostname: "example.com", action: null }),
+    });
+
+    const testSecret = "1x0000000000000000000000000000000AA";
+    const dummyPayload = validPayload({ turnstileToken: "XXXX.DUMMY.TOKEN.XXXX" });
+
+    const previewDatabase = createDatabase();
+    const previewEnv = configuredEnv(previewDatabase, {
+      TURNSTILE_SECRET_KEY: testSecret,
+      FEEDBACK_TURNSTILE_TEST_MODE: "true",
+    });
+    const accepted = await onRequest(makeContext(dummyPayload, { env: previewEnv }));
+    assert.equal(accepted.status, 201);
+    assert.equal(previewDatabase.rows.length, 1);
+
+    const unflaggedDatabase = createDatabase();
+    const unflaggedEnv = configuredEnv(unflaggedDatabase, { TURNSTILE_SECRET_KEY: testSecret });
+    const unflagged = await onRequest(makeContext(dummyPayload, { env: unflaggedEnv }));
+    assert.equal(unflagged.status, 400);
+    assert.equal(unflaggedDatabase.rows.length, 0);
+
+    const wrongTokenDatabase = createDatabase();
+    const wrongTokenEnv = configuredEnv(wrongTokenDatabase, {
+      TURNSTILE_SECRET_KEY: testSecret,
+      FEEDBACK_TURNSTILE_TEST_MODE: "true",
+    });
+    const wrongToken = await onRequest(makeContext(validPayload({ turnstileToken: "not-the-dummy-token" }), { env: wrongTokenEnv }));
+    assert.equal(wrongToken.status, 400);
+    assert.equal(wrongTokenDatabase.rows.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Function responses include their own security headers", async () => {
   const response = await onRequest(makeContext(validPayload(), { origin: null, env: configuredEnv(createDatabase()) }));
   assert.equal(response.status, 403);
