@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.modern.css";
 import APC_LOGO from "./assets/apc-logo.png";
 import FeedbackForm from "./FeedbackForm.jsx";
-import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause } from "./content.js";
+import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "./content.js";
 
 const APC_URL = "https://autismpathwaysconsulting.com/";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
@@ -15,6 +15,14 @@ const toolOptions = [
   { id: "choices", label: "Two choices", summary: "Show two options that are both available.", marker: "A / B" },
   { id: "timer", label: "Timer", summary: "Make the remaining time visible.", marker: "5:00" },
   { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech.", marker: "Yes / No" },
+];
+
+const moreSections = [
+  { id: "safety", label: "Safety" },
+  { id: "feedback", label: "Feedback" },
+  { id: "privacy", label: "Privacy" },
+  { id: "evidence", label: "Evidence" },
+  { id: "install", label: "Install" },
 ];
 
 function GuideIcon({ name }) {
@@ -49,10 +57,22 @@ function GuideIcon({ name }) {
   );
 }
 
+function focusHeading(headingRef) {
+  window.requestAnimationFrame(() => {
+    headingRef?.current?.focus();
+    headingRef?.current?.scrollIntoView({ block: "start" });
+  });
+}
+
+function isRunningInstalled() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
 export default function App() {
   const [activeView, setActiveView] = useState("actions");
   const [activeGuide, setActiveGuide] = useState(null);
   const [activeTool, setActiveTool] = useState(null);
+  const [activeMoreSection, setActiveMoreSection] = useState("safety");
   const [firstStep, setFirstStep] = useState("Shoes on");
   const [thenStep, setThenStep] = useState("Go to the car");
   const [choiceA, setChoiceA] = useState("Blue shirt");
@@ -64,27 +84,40 @@ export default function App() {
   const [voiceOn, setVoiceOn] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallSteps, setShowInstallSteps] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(isRunningInstalled);
   const viewHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
   const toolPanelRef = useRef(null);
+  const safetyHeadingRef = useRef(null);
   const feedbackHeadingRef = useRef(null);
+  const privacyHeadingRef = useRef(null);
+  const evidenceHeadingRef = useRef(null);
+  const installHeadingRef = useRef(null);
   const shouldMoveFocusRef = useRef(false);
   const shouldFocusToolRef = useRef(false);
-  const shouldFocusFeedbackRef = useRef(false);
+  const shouldFocusMoreSectionRef = useRef(null);
+  const timerDeadlineRef = useRef(null);
   const speechAvailable = "speechSynthesis" in window;
 
   useEffect(() => {
     if (!timerRunning) return undefined;
-    const timerId = window.setInterval(() => {
-      setRemaining((current) => {
-        if (current <= 1) {
-          setTimerRunning(false);
-          return 0;
-        }
-        return current - 1;
-      });
-    }, 1000);
-    return () => window.clearInterval(timerId);
+    function updateTimer() {
+      const deadline = timerDeadlineRef.current;
+      if (!Number.isFinite(deadline)) return;
+      const nextRemaining = secondsUntilDeadline(deadline);
+      setRemaining(nextRemaining);
+      if (nextRemaining === 0) {
+        timerDeadlineRef.current = null;
+        setTimerRunning(false);
+      }
+    }
+    updateTimer();
+    const timerId = window.setInterval(updateTimer, 250);
+    document.addEventListener("visibilitychange", updateTimer);
+    return () => {
+      window.clearInterval(timerId);
+      document.removeEventListener("visibilitychange", updateTimer);
+    };
   }, [timerRunning]);
 
   useEffect(() => {
@@ -94,6 +127,20 @@ export default function App() {
     }
     window.addEventListener("beforeinstallprompt", captureInstallPrompt);
     return () => window.removeEventListener("beforeinstallprompt", captureInstallPrompt);
+  }, []);
+
+  useEffect(() => {
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+    const updateDisplayMode = () => setIsInstalled(isRunningInstalled());
+    const markInstalled = () => setIsInstalled(true);
+    if (displayMode.addEventListener) displayMode.addEventListener("change", updateDisplayMode);
+    else displayMode.addListener(updateDisplayMode);
+    window.addEventListener("appinstalled", markInstalled);
+    return () => {
+      if (displayMode.removeEventListener) displayMode.removeEventListener("change", updateDisplayMode);
+      else displayMode.removeListener(updateDisplayMode);
+      window.removeEventListener("appinstalled", markInstalled);
+    };
   }, []);
 
   useEffect(() => {
@@ -110,13 +157,18 @@ export default function App() {
   }, [activeTool, activeView]);
 
   useEffect(() => {
-    if (!shouldFocusFeedbackRef.current || activeView !== "about") return;
-    shouldFocusFeedbackRef.current = false;
-    window.requestAnimationFrame(() => {
-      feedbackHeadingRef.current?.focus();
-      feedbackHeadingRef.current?.scrollIntoView({ block: "start" });
-    });
-  }, [activeView]);
+    const requestedSection = shouldFocusMoreSectionRef.current;
+    if (!requestedSection || activeView !== "about" || requestedSection !== activeMoreSection) return;
+    shouldFocusMoreSectionRef.current = null;
+    const headingBySection = {
+      safety: safetyHeadingRef,
+      feedback: feedbackHeadingRef,
+      privacy: privacyHeadingRef,
+      evidence: evidenceHeadingRef,
+      install: installHeadingRef,
+    };
+    focusHeading(headingBySection[requestedSection]);
+  }, [activeMoreSection, activeView]);
 
   function chooseGuide(guide) {
     shouldMoveFocusRef.current = true;
@@ -129,6 +181,24 @@ export default function App() {
     if (view === "actions") setActiveGuide(null);
     if (view === "tools") setActiveTool(null);
     window.scrollTo({ top: 0 });
+  }
+
+  function openMoreSection(section, moveFocus = false) {
+    if (moveFocus && activeView === "about" && activeMoreSection === section) {
+      const headingBySection = {
+        safety: safetyHeadingRef,
+        feedback: feedbackHeadingRef,
+        privacy: privacyHeadingRef,
+        evidence: evidenceHeadingRef,
+        install: installHeadingRef,
+      };
+      focusHeading(headingBySection[section]);
+      return;
+    }
+    if (moveFocus) shouldFocusMoreSectionRef.current = section;
+    setActiveMoreSection(section);
+    setActiveView("about");
+    if (!moveFocus) window.scrollTo({ top: 0 });
   }
 
   function openRelatedTool(tool) {
@@ -149,27 +219,33 @@ export default function App() {
   }
 
   function openFeedback() {
-    if (activeView === "about") {
-      window.requestAnimationFrame(() => {
-        feedbackHeadingRef.current?.focus();
-        feedbackHeadingRef.current?.scrollIntoView({ block: "start" });
-      });
-      return;
-    }
-    shouldFocusFeedbackRef.current = true;
-    setActiveView("about");
+    openMoreSection("feedback", true);
   }
 
   function updateMinutes(value) {
     const nextMinutes = normaliseMinutes(value);
+    timerDeadlineRef.current = null;
     setMinutes(nextMinutes);
     setRemaining(nextMinutes * 60);
     setTimerRunning(false);
   }
 
   function resetTimer() {
+    timerDeadlineRef.current = null;
     setTimerRunning(false);
     setRemaining(minutes * 60);
+  }
+
+  function toggleTimer() {
+    if (timerRunning) {
+      setRemaining(secondsUntilDeadline(timerDeadlineRef.current));
+      timerDeadlineRef.current = null;
+      setTimerRunning(false);
+      return;
+    }
+    if (remaining <= 0) return;
+    timerDeadlineRef.current = Date.now() + remaining * 1000;
+    setTimerRunning(true);
   }
 
   function selectCommunicationOption(option) {
@@ -203,7 +279,7 @@ export default function App() {
             <strong id="safety-title">Not for emergencies.</strong>{" "}
             Immediate danger or serious injury: <a className="safety-call" href="tel:999">call 999 in Malaysia</a>.
           </div>
-          <button className="safety-detail" type="button" onClick={() => openView("about")}>Safety information</button>
+          <button className="safety-detail" type="button" onClick={() => openMoreSection("safety", true)}>Safety information</button>
         </div>
       </aside>
 
@@ -323,9 +399,10 @@ export default function App() {
                     <div className="timer-track" aria-hidden="true"><span style={{ width: `${timerProgress}%` }} /></div>
                     <strong>{formatTime(remaining)}</strong><span>remaining</span>
                   </div>
+                  <p className="timer-note">This timer has no alarm or notification. Return to this screen to check it.</p>
                   <p className="sr-only" aria-live="polite">{remaining === 0 ? "Timer finished." : ""}</p>
                   <div className="button-row">
-                    <button className="button primary" type="button" onClick={() => setTimerRunning((value) => !value)} disabled={remaining === 0}>{timerRunning ? "Pause" : "Start"}</button>
+                    <button className="button primary" type="button" onClick={toggleTimer} disabled={remaining === 0}>{timerRunning ? "Pause" : "Start"}</button>
                     <button className="button secondary" type="button" onClick={resetTimer}>Reset</button>
                   </div>
                 </div>
@@ -355,57 +432,94 @@ export default function App() {
           </div>
         </section>}
 
-        {activeView === "about" && <div className="about-view">
-        <section id="about" className="section page-width view-section" aria-labelledby="about-title">
-          <div className="section-heading">
-            <h1 id="about-title" ref={viewHeadingRef} tabIndex="-1">Safety, privacy and feedback</h1>
-            <p className="working-boundary">This is general educational support for everyday situations. It is not therapy, diagnosis, assessment, medical advice or crisis support.</p>
-          </div>
-          <aside className="emergency-card" aria-labelledby="emergency-card-title">
-            <h2 id="emergency-card-title">When not to use this app</h2>
-            <p>If anyone is in immediate danger, seriously injured, unable to breathe, at risk of running into danger, or you cannot keep people safe, call 999 in Malaysia or your local emergency service.</p>
-            <div className="button-row"><a className="button emergency" href="tel:999">Call 999</a><a className="button secondary" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a></div>
-          </aside>
-        </section>
-
-        <FeedbackForm headingRef={feedbackHeadingRef} />
-
-        <section className="section page-width evidence-section" aria-labelledby="evidence-title">
-          <div className="section-heading compact-heading">
-            <p className="section-label">Evidence and privacy</p>
-            <h2 id="evidence-title">Why these ideas are included</h2>
-            <p>These sources support the general use of visual, communication and antecedent-based supports. They do not establish why a particular situation occurred or guarantee an outcome.</p>
-          </div>
-          <div className="evidence-grid">
-            {evidenceNotes.map((item) => (
-              <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer">Read the evidence brief</a></article>
-            ))}
-          </div>
-          <aside className="privacy-note" aria-labelledby="privacy-note-title">
-            <div>
-              <p className="section-label">App privacy</p>
-              <h2 id="privacy-note-title">Tool entries stay on this page</h2>
-              <p>First-Then, Choices, Timer and Communication entries are not saved or sent. Feedback is sent only when you choose Submit. APC receives your selected answers, optional comment, app version and submission date. APC does not request a name or email and does not store IP addresses in its feedback database.</p>
+        <div className="about-view" hidden={activeView !== "about"}>
+          <section id="about" className="more-header" aria-labelledby="about-title">
+            <div className="page-width">
+              <div className="section-heading more-heading">
+                <h1 id="about-title" ref={viewHeadingRef} tabIndex="-1">More</h1>
+                <p>Safety, feedback and app information.</p>
+              </div>
+              <nav className="more-section-nav" aria-label="More sections">
+                {moreSections.map((section) => (
+                  <button
+                    key={section.id}
+                    type="button"
+                    aria-current={activeMoreSection === section.id ? "page" : undefined}
+                    onClick={() => openMoreSection(section.id, true)}
+                  >
+                    {section.label}
+                  </button>
+                ))}
+              </nav>
             </div>
-            <div className="privacy-links"><a href={PRIVACY_URL}>Read APC privacy information</a><a href={TERMS_URL}>Read APC terms</a></div>
-          </aside>
-        </section>
+          </section>
 
-        <section className="section install-section" aria-labelledby="install-title">
-          <div className="page-width install-card">
-            <div><p className="section-label">Optional</p><h2 id="install-title">Keep the companion on your device</h2><p>The app can be installed from a supported browser. It does not require an account or save information entered into the tools. After one complete online visit, the core app can be reopened without a connection on the same device.</p></div>
-            <button className="button primary" type="button" onClick={installApp}>Install or show instructions</button>
-            {showInstallSteps && (
-              <div className="install-steps" role="status"><p><strong>iPhone or iPad:</strong> open in Safari, tap Share, then Add to Home Screen.</p><p><strong>Android or desktop:</strong> open the browser menu and choose Install app or Add to Home screen.</p></div>
-            )}
-          </div>
-        </section>
+          <section id="more-safety" className="section page-width more-panel" aria-labelledby="more-safety-title" hidden={activeMoreSection !== "safety"}>
+            <div className="section-heading compact-heading">
+              <p className="section-label">Safety</p>
+              <h2 id="more-safety-title" ref={safetyHeadingRef} tabIndex="-1">Know when to stop using the app</h2>
+              <p className="working-boundary">This is general educational support for everyday situations. It is not therapy, diagnosis, assessment, medical advice or crisis support.</p>
+            </div>
+            <aside className="emergency-card" aria-labelledby="emergency-card-title">
+              <h3 id="emergency-card-title">When not to use this app</h3>
+              <p>If anyone is in immediate danger, seriously injured, unable to breathe, at risk of running into danger, or you cannot keep people safe, call 999 in Malaysia or your local emergency service.</p>
+              <div className="button-row"><a className="button emergency" href="tel:999">Call 999</a><a className="button secondary" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a></div>
+            </aside>
+          </section>
 
-        <section className="section page-width support-section" aria-labelledby="support-title">
-          <div><p className="section-label">Need personalised support?</p><h2 id="support-title">Repeated difficulties may need a closer individual review</h2><p>APC can help parents examine routines, communication, environment and support needs without treating the app as an assessment.</p></div>
-          <a className="button primary" href={`${APC_URL}start`} target="_blank" rel="noreferrer">View APC support</a>
-        </section>
-        </div>}
+          <FeedbackForm headingRef={feedbackHeadingRef} hidden={activeMoreSection !== "feedback"} />
+
+          <section id="more-privacy" className="section page-width more-panel" aria-labelledby="more-privacy-title" hidden={activeMoreSection !== "privacy"}>
+            <div className="section-heading compact-heading">
+              <p className="section-label">Privacy</p>
+              <h2 id="more-privacy-title" ref={privacyHeadingRef} tabIndex="-1">Tool entries stay on this page</h2>
+              <p>First-Then, Choices, Timer and Communication entries are not saved or sent.</p>
+            </div>
+            <aside className="privacy-note" aria-labelledby="feedback-destination-title">
+              <div>
+                <p className="section-label">Where feedback goes</p>
+                <h3 id="feedback-destination-title">Submitted feedback goes to APC</h3>
+                <p>When you press Submit, your answers and optional comment go to APC’s feedback database on Cloudflare, together with the app version and date. They are not posted publicly or emailed automatically. APC does not ask for your name or email, and its feedback database does not store your IP address.</p>
+              </div>
+              <div className="privacy-links"><a href={PRIVACY_URL}>Read APC privacy information</a><a href={TERMS_URL}>Read APC terms</a></div>
+            </aside>
+          </section>
+
+          <section id="more-evidence" className="section page-width more-panel evidence-section" aria-labelledby="more-evidence-title" hidden={activeMoreSection !== "evidence"}>
+            <div className="section-heading compact-heading">
+              <p className="section-label">Evidence</p>
+              <h2 id="more-evidence-title" ref={evidenceHeadingRef} tabIndex="-1">Why these ideas are included</h2>
+              <p>These sources support the general use of visual, communication and antecedent-based supports. They do not establish why a particular situation occurred or guarantee an outcome.</p>
+            </div>
+            <div className="evidence-grid">
+              {evidenceNotes.map((item) => (
+                <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer">Read the evidence brief</a></article>
+              ))}
+            </div>
+          </section>
+
+          <section id="more-install" className="section page-width more-panel" aria-labelledby="more-install-title" hidden={activeMoreSection !== "install"}>
+            <div className="section-heading compact-heading">
+              <p className="section-label">Install and support</p>
+              <h2 id="more-install-title" ref={installHeadingRef} tabIndex="-1">Keep the companion easy to reach</h2>
+            </div>
+            <div className="more-install-grid">
+              <article className="more-card install-card">
+                <div><h3>Install on this device</h3><p>No account is needed, and anything you type into the tools is not saved. Once the app has loaded online, its main tools can be reopened on this device without internet.</p></div>
+                {isInstalled
+                  ? <p className="installed-state" role="status">Installed on this device</p>
+                  : <button className="button primary" type="button" onClick={installApp}>Install or show instructions</button>}
+                {showInstallSteps && (
+                  <div className="install-steps" role="status"><p><strong>iPhone or iPad:</strong> open in Safari, tap Share, then Add to Home Screen.</p><p><strong>Android or desktop:</strong> open the browser menu and choose Install app or Add to Home screen.</p></div>
+                )}
+              </article>
+              <article className="more-card support-card">
+                <div><h3>Need personalised support?</h3><p>If the same difficulties keep happening, general tips may not be enough. APC can look with you at routines, communication, surroundings and support needs. The app itself is not an assessment.</p></div>
+                <a className="button secondary" href={`${APC_URL}start`} target="_blank" rel="noreferrer">View APC support</a>
+              </article>
+            </div>
+          </section>
+        </div>
       </main>
 
       <footer className="site-footer">

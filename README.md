@@ -34,7 +34,7 @@ The static host must honour `public/_headers`. Test the generated `dist` folder 
 
 ## Feedback service
 
-The parent feedback form posts only to the same-origin `/api/feedback` Pages Function. The Function validates a strict data allow-list, always requires Turnstile and inserts through a prepared D1 statement. The form does not request names, email addresses or child information. The database does not include fields for IP addresses, user agents, cookies, device identifiers, selected actions or tool contents. Restricted reviewers must still treat optional comments as potentially containing personal information entered accidentally.
+The parent feedback form posts only to the same-origin `/api/feedback` Pages Function. The Function validates a strict data allow-list, always requires Turnstile and inserts through a prepared D1 statement. Feedback is not emailed or published; an authorised APC reviewer reads it in Cloudflare D1. The form does not request names, email addresses or child information. The database does not include fields for IP addresses, user agents, cookies, device identifiers, selected actions or tool contents. Restricted reviewers must still treat optional comments as potentially containing personal information entered accidentally.
 
 Required production configuration:
 
@@ -44,6 +44,8 @@ Required production configuration:
 - Variable: `FEEDBACK_APP_VERSION`, for example `1.0.0-beta.1`; this is stamped by the server
 - Variable: `FEEDBACK_ALLOWED_ORIGIN=https://calm.autismpathwaysconsulting.com`
 - Variable: `FEEDBACK_ALLOWED_HOSTNAME=calm.autismpathwaysconsulting.com`
+
+If any required binding or variable is missing, the endpoint fails closed and stores nothing.
 
 Apply `migrations/0001_feedback.sql` to separate preview and production D1 databases. Use Cloudflare's official Turnstile test keys in automated or preview testing. Never place the Turnstile secret in a `VITE_` variable.
 

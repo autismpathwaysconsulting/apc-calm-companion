@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { turnstileSizeForWidth } from "./feedback-utils.js";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
@@ -21,7 +22,7 @@ const improvementOptions = [
 
 const emptyFeedback = { helpfulness: "", category: "", comment: "", website: "" };
 
-export default function FeedbackForm({ headingRef }) {
+export default function FeedbackForm({ headingRef, hidden = false }) {
   const [feedback, setFeedback] = useState(emptyFeedback);
   const [status, setStatus] = useState({ state: "idle", message: "", field: "" });
   const [reference, setReference] = useState("");
@@ -36,7 +37,7 @@ export default function FeedbackForm({ headingRef }) {
   const submitInFlightRef = useRef(false);
 
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || !sectionRef.current) return undefined;
+    if (hidden || !TURNSTILE_SITE_KEY || !sectionRef.current) return undefined;
     if (!("IntersectionObserver" in window)) {
       const frame = window.requestAnimationFrame(() => setShouldLoadSecurity(true));
       return () => window.cancelAnimationFrame(frame);
@@ -48,7 +49,7 @@ export default function FeedbackForm({ headingRef }) {
     }, { rootMargin: "300px" });
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [hidden]);
 
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY || !shouldLoadSecurity) return undefined;
@@ -62,10 +63,12 @@ export default function FeedbackForm({ headingRef }) {
     function renderTurnstile() {
       if (cancelled || turnstileWidgetRef.current !== null || !window.turnstile?.render || !turnstileContainerRef.current) return;
       try {
+        const widgetSize = turnstileSizeForWidth(turnstileContainerRef.current.clientWidth);
+        turnstileContainerRef.current.dataset.widgetSize = widgetSize;
         turnstileWidgetRef.current = window.turnstile.render(turnstileContainerRef.current, {
           sitekey: TURNSTILE_SITE_KEY,
           action: "feedback",
-          size: "flexible",
+          size: widgetSize,
           callback: (token) => {
             setTurnstileToken(token);
             setSecurityState("ready");
@@ -195,7 +198,7 @@ export default function FeedbackForm({ headingRef }) {
   const submissionUnavailable = !TURNSTILE_SITE_KEY || securityState !== "ready" || !turnstileToken;
 
   return (
-    <section ref={sectionRef} id="feedback" className="section feedback-section" aria-labelledby="feedback-title">
+    <section ref={sectionRef} id="feedback" className="section feedback-section more-panel" aria-labelledby="feedback-title" hidden={hidden}>
       <div className="page-width feedback-layout">
         <div className="feedback-intro">
           <p className="section-label">Help improve this app</p>

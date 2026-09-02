@@ -126,3 +126,8 @@ export function formatTime(totalSeconds) {
   const seconds = String(safeSeconds % 60).padStart(2, "0");
   return `${minutes}:${seconds}`;
 }
+
+export function secondsUntilDeadline(deadlineMs, nowMs = Date.now()) {
+  if (!Number.isFinite(deadlineMs) || !Number.isFinite(nowMs)) return 0;
+  return Math.max(0, Math.ceil((deadlineMs - nowMs) / 1000));
+}

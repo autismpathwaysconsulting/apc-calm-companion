@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause } from "../src/content.js";
+import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "../src/content.js";
+import { turnstileSizeForWidth } from "../src/feedback-utils.js";
 
 test("the parent guide contains four routes and one separate parent pause", () => {
   assert.equal(guideOptions.length, 4);
@@ -30,6 +31,20 @@ test("timer formats remaining seconds", () => {
   assert.equal(formatTime(0), "0:00");
   assert.equal(formatTime(65), "1:05");
   assert.equal(formatTime(-10), "0:00");
+});
+
+test("timer uses a deadline so background time is not lost", () => {
+  assert.equal(secondsUntilDeadline(400_000, 100_000), 300);
+  assert.equal(secondsUntilDeadline(400_000, 250_500), 150);
+  assert.equal(secondsUntilDeadline(400_000, 401_000), 0);
+  assert.equal(secondsUntilDeadline(Number.NaN, 100_000), 0);
+});
+
+test("Turnstile uses its compact mobile layout below 300 pixels", () => {
+  assert.equal(turnstileSizeForWidth(254), "compact");
+  assert.equal(turnstileSizeForWidth(299), "compact");
+  assert.equal(turnstileSizeForWidth(300), "flexible");
+  assert.equal(turnstileSizeForWidth(420), "flexible");
 });
 
 test("parent guidance excludes unsafe or overconfident wording", () => {
@@ -109,6 +124,40 @@ test("the app defaults to a focused three-view navigation model", async () => {
   assert.equal(source.includes('className="hero page-width"'), false);
 });
 
+test("More shows one section at a time without discarding a feedback draft", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+
+  assert.ok(appSource.includes('const [activeMoreSection, setActiveMoreSection] = useState("safety")'));
+  for (const section of ["safety", "feedback", "privacy", "evidence", "install"]) {
+    assert.ok(appSource.includes(`id: "${section}"`), `missing More section: ${section}`);
+  }
+  assert.ok(appSource.includes('aria-label="More sections"'));
+  assert.ok(appSource.includes('hidden={activeMoreSection !== "safety"}'));
+  assert.ok(appSource.includes('hidden={activeMoreSection !== "feedback"}'));
+  assert.ok(feedbackSource.includes("hidden={hidden}"), "feedback must remain mounted while hidden");
+  assert.ok(appSource.includes('<div className="about-view" hidden={activeView !== "about"}>'), "More must remain mounted when another main view is open");
+  assert.ok(appSource.includes('openMoreSection("safety", true)'));
+  assert.ok(appSource.includes('openMoreSection("feedback", true)'));
+  assert.ok(appSource.includes("openMoreSection(section.id, true)"));
+  for (const rule of ["overflow-x: auto", "scroll-snap-type: inline proximity", "min-height: 44px", '.more-panel[hidden]']) {
+    assert.ok(css.includes(rule), `missing More mobile rule: ${rule}`);
+  }
+});
+
+test("mobile timing and safe-area behavior are explicit", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+
+  assert.ok(appSource.includes("secondsUntilDeadline(timerDeadlineRef.current)"));
+  assert.ok(appSource.includes('document.addEventListener("visibilitychange", updateTimer)'));
+  assert.ok(html.includes("viewport-fit=cover"));
+  assert.ok(css.includes("env(safe-area-inset-bottom)"));
+  assert.ok(css.includes("100dvh"));
+});
+
 test("action and tool details use progressive disclosure", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   for (const phrase of ["Try this now", "More guidance", "← All actions", "← All tools", "tool-menu"]) {
@@ -135,7 +184,8 @@ test("feedback is voluntary, bounded and separated from urgent support", async (
 test("feedback exposes secure loading, accessible errors and a removal reference", async () => {
   const source = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   for (const marker of [
-    'size: "flexible"',
+    "turnstileSizeForWidth",
+    "size: widgetSize",
     'aria-required="true"',
     "firstHelpfulnessRef.current?.focus()",
     "REQUEST_TIMEOUT_MS",
