@@ -3,6 +3,7 @@ import "./App.modern.css";
 import APC_LOGO from "./assets/apc-logo.png";
 import FeedbackForm from "./FeedbackForm.jsx";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "./content.js";
+import { formatToday, loadProfileName, saveProfileName } from "./profile.js";
 
 const APC_URL = "https://autismpathwaysconsulting.com/";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
@@ -18,6 +19,7 @@ const toolOptions = [
 ];
 
 const moreSections = [
+  { id: "profile", label: "Profile" },
   { id: "safety", label: "Safety" },
   { id: "feedback", label: "Feedback" },
   { id: "privacy", label: "Privacy" },
@@ -85,6 +87,10 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallSteps, setShowInstallSteps] = useState(false);
   const [isInstalled, setIsInstalled] = useState(isRunningInstalled);
+  const [today, setToday] = useState(() => new Date());
+  const [profileName, setProfileName] = useState(loadProfileName);
+  const [profileDraft, setProfileDraft] = useState(profileName);
+  const [profileStatus, setProfileStatus] = useState("");
   const viewHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
   const toolPanelRef = useRef(null);
@@ -93,11 +99,17 @@ export default function App() {
   const privacyHeadingRef = useRef(null);
   const evidenceHeadingRef = useRef(null);
   const installHeadingRef = useRef(null);
+  const profileHeadingRef = useRef(null);
   const shouldMoveFocusRef = useRef(false);
   const shouldFocusToolRef = useRef(false);
   const shouldFocusMoreSectionRef = useRef(null);
   const timerDeadlineRef = useRef(null);
   const speechAvailable = "speechSynthesis" in window;
+
+  useEffect(() => {
+    const clockId = window.setInterval(() => setToday(new Date()), 60_000);
+    return () => window.clearInterval(clockId);
+  }, []);
 
   useEffect(() => {
     if (!timerRunning) return undefined;
@@ -161,6 +173,7 @@ export default function App() {
     if (!requestedSection || activeView !== "about" || requestedSection !== activeMoreSection) return;
     shouldFocusMoreSectionRef.current = null;
     const headingBySection = {
+      profile: profileHeadingRef,
       safety: safetyHeadingRef,
       feedback: feedbackHeadingRef,
       privacy: privacyHeadingRef,
@@ -186,6 +199,7 @@ export default function App() {
   function openMoreSection(section, moveFocus = false) {
     if (moveFocus && activeView === "about" && activeMoreSection === section) {
       const headingBySection = {
+        profile: profileHeadingRef,
         safety: safetyHeadingRef,
         feedback: feedbackHeadingRef,
         privacy: privacyHeadingRef,
@@ -220,6 +234,27 @@ export default function App() {
 
   function openFeedback() {
     openMoreSection("feedback", true);
+  }
+
+  function openProfile() {
+    setProfileDraft(profileName);
+    setProfileStatus("");
+    openMoreSection("profile", true);
+  }
+
+  function updateProfile(event) {
+    event.preventDefault();
+    const savedName = saveProfileName(profileDraft);
+    setProfileName(savedName);
+    setProfileDraft(savedName);
+    setProfileStatus(savedName ? "Saved on this device." : "The app is now being used without a name.");
+  }
+
+  function removeProfile() {
+    saveProfileName("");
+    setProfileName("");
+    setProfileDraft("");
+    setProfileStatus("Name removed from this device.");
   }
 
   function updateMinutes(value) {
@@ -268,6 +303,8 @@ export default function App() {
   }
 
   const timerProgress = Math.max(0, Math.min(100, (remaining / (minutes * 60)) * 100));
+  const todayLabel = formatToday(today);
+  const profileLabel = profileName || "My child";
 
   return (
     <div className="app-shell">
@@ -299,9 +336,17 @@ export default function App() {
 
       <main id="main-content" tabIndex="-1">
         {activeView === "actions" && <section id="choose" className="section page-width view-section" aria-labelledby="choose-title">
-          <div className="section-heading">
-            <h1 id="choose-title" ref={!activeGuide ? viewHeadingRef : undefined} tabIndex="-1">What would help right now?</h1>
-            <p>Choose the closest match. You do not need to work out the cause first.</p>
+          <div className="action-heading-row">
+            <div className="section-heading">
+              <p className="today-label"><span>Today</span>{todayLabel}</p>
+              <h1 id="choose-title" ref={!activeGuide ? viewHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
+              <p>Choose the closest match. You do not need to work out the cause first.</p>
+            </div>
+            <button className="profile-shortcut" type="button" onClick={openProfile} aria-label={`Open profile settings. Currently supporting ${profileLabel}`}>
+              <span className="profile-avatar" aria-hidden="true">{profileName ? profileName.charAt(0).toUpperCase() : "＋"}</span>
+              <span><small>Supporting</small><strong>{profileLabel}</strong></span>
+              <span className="profile-edit">Edit</span>
+            </button>
           </div>
           {!activeGuide ? (
             <>
@@ -454,6 +499,26 @@ export default function App() {
             </div>
           </section>
 
+          <section id="more-profile" className="section page-width more-panel" aria-labelledby="more-profile-title" hidden={activeMoreSection !== "profile"}>
+            <div className="profile-layout">
+              <div className="section-heading compact-heading">
+                <p className="section-label">Optional profile</p>
+                <h2 id="more-profile-title" ref={profileHeadingRef} tabIndex="-1">Make the app feel familiar</h2>
+                <p>Add only a name or nickname if seeing it helps. The app works exactly the same without one.</p>
+              </div>
+              <form className="profile-card" onSubmit={updateProfile}>
+                <label htmlFor="profile-name">Name or nickname</label>
+                <input id="profile-name" value={profileDraft} maxLength="24" autoComplete="off" onChange={(event) => setProfileDraft(event.target.value)} placeholder="For example, Aina" />
+                <p className="profile-privacy">Saved only in this browser on this device. It is never included with feedback. Avoid using a full legal name on a shared device.</p>
+                <div className="button-row profile-actions">
+                  <button className="button primary" type="submit">Save profile</button>
+                  {profileName && <button className="button secondary" type="button" onClick={removeProfile}>Remove name</button>}
+                </div>
+                <p className="profile-status" role="status" aria-live="polite">{profileStatus}</p>
+              </form>
+            </div>
+          </section>
+
           <section id="more-safety" className="section page-width more-panel" aria-labelledby="more-safety-title" hidden={activeMoreSection !== "safety"}>
             <div className="section-heading compact-heading">
               <p className="section-label">Safety</p>
@@ -473,7 +538,7 @@ export default function App() {
             <div className="section-heading compact-heading">
               <p className="section-label">Privacy</p>
               <h2 id="more-privacy-title" ref={privacyHeadingRef} tabIndex="-1">Tool entries stay on this page</h2>
-              <p>First-Then, Choices, Timer and Communication entries are not saved or sent.</p>
+              <p>The optional profile name stays in this browser on this device. First-Then, Choices, Timer and Communication entries are not saved or sent.</p>
             </div>
             <aside className="privacy-note" aria-labelledby="feedback-destination-title">
               <div>

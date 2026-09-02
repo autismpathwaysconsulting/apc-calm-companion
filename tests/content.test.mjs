@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "../src/content.js";
 import { turnstileSizeForWidth } from "../src/feedback-utils.js";
+import { formatToday, loadProfileName, normaliseProfileName, PROFILE_STORAGE_KEY, saveProfileName } from "../src/profile.js";
 
 test("the parent guide contains four routes and one separate parent pause", () => {
   assert.equal(guideOptions.length, 4);
@@ -66,7 +67,7 @@ test("parent guidance excludes unsafe or overconfident wording", () => {
   }
 });
 
-test("the app has no persistence or analytics and submits only to the feedback endpoint", async () => {
+test("tool content has no persistence or analytics and submits only to the feedback endpoint", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   const source = `${appSource}\n${feedbackSource}`;
@@ -77,6 +78,40 @@ test("the app has no persistence or analytics and submits only to the feedback e
   assert.ok(source.includes('fetch("/api/feedback"'));
   assert.equal(source.includes("activeGuide.id"), false);
   assert.equal(source.includes("innerHTML"), false);
+});
+
+test("the optional profile stores only a short display name on the device", () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+
+  assert.equal(normaliseProfileName("  Aina   Sofea  "), "Aina Sofea");
+  assert.equal(normaliseProfileName("x".repeat(40)).length, 24);
+  assert.equal(saveProfileName("  Aina  ", storage), "Aina");
+  assert.deepEqual(JSON.parse(values.get(PROFILE_STORAGE_KEY)), { version: 1, displayName: "Aina" });
+  assert.equal(loadProfileName(storage), "Aina");
+  assert.equal(saveProfileName("", storage), "");
+  assert.equal(values.has(PROFILE_STORAGE_KEY), false);
+});
+
+test("today uses the device date without storing a selected date", () => {
+  const value = formatToday(new Date(2026, 8, 2), "en-MY");
+  assert.match(value, /Wednesday/);
+  assert.match(value, /2 September/);
+});
+
+test("profile data is not attached to feedback", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
+  const profileSource = await readFile(new URL("../src/profile.js", import.meta.url), "utf8");
+  for (const privateField of ["diagnosis", "birthDate", "dateOfBirth", "school", "photo"]) {
+    assert.equal(profileSource.includes(privateField), false, `unexpected profile field: ${privateField}`);
+  }
+  assert.equal(feedbackSource.includes("profileName"), false);
+  assert.ok(appSource.includes("It is never included with feedback"));
 });
 
 test("the skip link target is focusable and action descriptions meet text contrast", async () => {
@@ -130,7 +165,7 @@ test("More shows one section at a time without discarding a feedback draft", asy
   const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
   assert.ok(appSource.includes('const [activeMoreSection, setActiveMoreSection] = useState("safety")'));
-  for (const section of ["safety", "feedback", "privacy", "evidence", "install"]) {
+  for (const section of ["profile", "safety", "feedback", "privacy", "evidence", "install"]) {
     assert.ok(appSource.includes(`id: "${section}"`), `missing More section: ${section}`);
   }
   assert.ok(appSource.includes('aria-label="More sections"'));
