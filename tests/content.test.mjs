@@ -1,12 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes } from "../src/content.js";
+import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause } from "../src/content.js";
 
-test("the parent guide contains exactly eight bounded actions", () => {
-  assert.equal(guideOptions.length, 8);
-  assert.equal(new Set(guideOptions.map((item) => item.id)).size, 8);
+test("the parent guide contains four routes and one separate parent pause", () => {
+  assert.equal(guideOptions.length, 4);
+  assert.equal(new Set(guideOptions.map((item) => item.id)).size, 4);
   assert.ok(guideOptions.every((item) => item.prompt && item.title && item.now && item.steps.length === 3 && item.notice));
+  assert.ok(parentPause.prompt && parentPause.title && parentPause.steps.length === 3);
 });
 
 test("communication options include essential refusal and health responses", () => {
@@ -32,7 +33,7 @@ test("timer formats remaining seconds", () => {
 });
 
 test("parent guidance excludes unsafe or overconfident wording", () => {
-  const text = JSON.stringify(guideOptions).toLowerCase();
+  const text = JSON.stringify([...guideOptions, parentPause]).toLowerCase();
   for (const phrase of [
     "block safely",
     "deep pressure",
@@ -50,21 +51,27 @@ test("parent guidance excludes unsafe or overconfident wording", () => {
   }
 });
 
-test("the app source contains no persistence, analytics or app-origin submission", async () => {
-  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  for (const token of ["localStorage", "sessionStorage", "indexedDB", "sendBeacon", "fetch(", "XMLHttpRequest", "gtag(", "fbq("]) {
+test("the app has no persistence or analytics and submits only to the feedback endpoint", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
+  const source = `${appSource}\n${feedbackSource}`;
+  for (const token of ["localStorage", "sessionStorage", "indexedDB", "sendBeacon", "XMLHttpRequest", "gtag(", "fbq("]) {
     assert.equal(source.includes(token), false, `unexpected data mechanism: ${token}`);
   }
+  assert.equal((source.match(/fetch\(/g) || []).length, 1);
+  assert.ok(source.includes('fetch("/api/feedback"'));
+  assert.equal(source.includes("activeGuide.id"), false);
+  assert.equal(source.includes("innerHTML"), false);
 });
 
 test("the skip link target is focusable and action descriptions meet text contrast", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  const css = await readFile(new URL("../src/App.css", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
   assert.ok(source.includes('<main id="main-content" tabIndex="-1">'));
 
   const foreground = css.match(/\.guide-choice small\s*\{[^}]*color:\s*(#[0-9a-f]{6})/i)?.[1];
-  const background = css.match(/\.guide-choice\s*\{[^}]*background:\s*(#[0-9a-f]{6})/i)?.[1];
+  const background = css.match(/--surface:\s*(#[0-9a-f]{6})/i)?.[1];
   assert.ok(foreground && background, "guide colours could not be read");
 
   function luminance(hex) {
@@ -77,7 +84,20 @@ test("the skip link target is focusable and action descriptions meet text contra
   const first = luminance(foreground);
   const second = luminance(background);
   const ratio = (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
-  assert.ok(ratio >= 4.5, `action description contrast is ${ratio.toFixed(2)}:1`);
+  assert.ok(ratio >= 4.5, `action description contrast on ${background} is ${ratio.toFixed(2)}:1`);
+
+  const tokens = Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/gi)].map((match) => [match[1], match[2]]));
+  for (const [foregroundName, backgroundName] of [
+    ["primary", "surface"],
+    ["primary-hover", "primary-tint"],
+    ["danger-text", "danger-surface"],
+    ["warm-text", "warm"],
+  ]) {
+    const foregroundLight = luminance(tokens[foregroundName]);
+    const backgroundLight = luminance(tokens[backgroundName]);
+    const tokenRatio = (Math.max(foregroundLight, backgroundLight) + 0.05) / (Math.min(foregroundLight, backgroundLight) + 0.05);
+    assert.ok(tokenRatio >= 4.5, `${foregroundName} contrast is ${tokenRatio.toFixed(2)}:1`);
+  }
 });
 
 test("the app defaults to a focused three-view navigation model", async () => {
@@ -85,7 +105,7 @@ test("the app defaults to a focused three-view navigation model", async () => {
   assert.ok(source.includes('useState("actions")'));
   assert.ok(source.includes('const [activeGuide, setActiveGuide] = useState(null)'));
   assert.ok(source.includes('const [activeTool, setActiveTool] = useState(null)'));
-  for (const label of ["Actions", "Tools", "About &amp; Safety"]) assert.ok(source.includes(label));
+  for (const label of ["Actions", "Tools", "More"]) assert.ok(source.includes(label));
   assert.equal(source.includes('className="hero page-width"'), false);
 });
 
@@ -97,4 +117,32 @@ test("action and tool details use progressive disclosure", async () => {
   assert.ok(source.includes('ref={toolPanelRef} className="tool-panel" tabIndex="-1"'));
   assert.ok(source.includes("shouldFocusToolRef.current = true"));
   assert.equal(source.includes("function ToolButton"), false);
+});
+
+test("feedback is voluntary, bounded and separated from urgent support", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
+  for (const phrase of [
+    "Was this useful? Send feedback",
+    "Help improve this app",
+    "Feedback is not monitored for urgent help",
+    "Please do not include names, diagnoses, schools, contact details or private information about a child.",
+    'maxLength="300"',
+  ]) assert.ok(`${appSource}\n${feedbackSource}`.includes(phrase), `missing feedback safeguard: ${phrase}`);
+  assert.equal(feedbackSource.includes("email"), true, "the no-email disclosure must remain visible");
+});
+
+test("feedback exposes secure loading, accessible errors and a removal reference", async () => {
+  const source = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
+  for (const marker of [
+    'size: "flexible"',
+    'aria-required="true"',
+    "firstHelpfulnessRef.current?.focus()",
+    "REQUEST_TIMEOUT_MS",
+    'setSecurityState("expired")',
+    "Submission reference",
+    "Comments older than 90 days are removed during APC’s monthly review",
+    "Cloudflare Turnstile processes technical security data",
+    "Secure feedback submission is not available in this preview",
+  ]) assert.ok(source.includes(marker), `missing feedback readiness marker: ${marker}`);
 });
