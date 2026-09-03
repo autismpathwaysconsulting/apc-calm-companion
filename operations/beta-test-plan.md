@@ -36,6 +36,8 @@ Give the participant the preview link without teaching the interface first. Ask 
 9. **Privacy:** Ask what happens to words entered into the tools and where submitted feedback goes.
 10. **Feedback:** Submit one short test response without personal information and note the submission reference.
 
+Before the first session, export `apc-calm-feedback-preview` and record the existing row count without copying comment text. After all five sessions, double-click `Export Calm Companion Beta Feedback.command`. Match each P1 to P5 reference to exactly one new preview-database row.
+
 ## Record for each participant
 
 | Measure | Allowed entry |
@@ -48,6 +50,8 @@ Give the participant the preview link without teaching the interface first. Ask 
 | Correctly explains tool-entry privacy | Yes / No |
 | Correctly explains feedback destination | Yes / No |
 | Feedback submission completed | Yes / No |
+| Feedback reference | Reference only |
+| Exactly one matching preview row | Yes / No |
 | Ease rating | 1 very difficult to 5 very easy |
 | One confusing point | Short note without child information |
 | One useful point | Short note without child information |
