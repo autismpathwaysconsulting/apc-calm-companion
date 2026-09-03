@@ -105,6 +105,14 @@ test("the profile badge uses first and last initials", () => {
   assert.equal(profileInitials(""), "");
 });
 
+test("visible button labels remain part of their accessible names", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  assert.ok(appSource.includes('<span className="sr-only">Open Actions</span>'));
+  assert.ok(appSource.includes('<span className="sr-only">Open profile settings</span>'));
+  assert.equal(appSource.includes('aria-label="Open Calm Companion actions"'), false);
+  assert.equal(appSource.includes("aria-label={`Open profile settings."), false);
+});
+
 test("today uses the device date without storing a selected date", () => {
   const value = formatToday(new Date(2026, 8, 2), "en-MY");
   assert.match(value, /Wednesday/);

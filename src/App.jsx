@@ -413,9 +413,10 @@ export default function App() {
 
       <header className="site-header">
         <div className="page-width header-inner">
-          <button className="brand" type="button" onClick={() => openView("actions")} aria-label="Open Calm Companion actions">
+          <button className="brand" type="button" onClick={() => openView("actions")}>
             <img src="/icon-192.png" alt="" />
             <span><strong>APC Calm Companion</strong><small>One clear next step</small></span>
+            <span className="sr-only">Open Actions</span>
           </button>
           <nav className="app-nav" aria-label="Main navigation">
             <button type="button" aria-current={activeView === "actions" ? "page" : undefined} onClick={() => openView("actions")}>Actions</button>
@@ -433,10 +434,11 @@ export default function App() {
               <h1 id="choose-title" ref={!activeGuide ? actionsHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
               <p>Choose the closest match. You do not need to work out the cause first.</p>
             </div>
-            <button className="profile-shortcut" type="button" onClick={openProfile} aria-label={`Open profile settings. Currently supporting ${profileLabel}`}>
+            <button className="profile-shortcut" type="button" onClick={openProfile}>
               <span className="profile-avatar" aria-hidden="true">{profileName ? profileInitials(profileName) : "＋"}</span>
               <span><small>Supporting</small><strong>{profileLabel}</strong></span>
               <span className="profile-edit">Edit</span>
+              <span className="sr-only">Open profile settings</span>
             </button>
           </div>
           {!activeGuide ? (
