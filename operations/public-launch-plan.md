@@ -2,11 +2,15 @@
 
 Status date: 3 September 2026
 
-Interface candidate: `c7526ea`
+Interface candidate: `605af9d`
 
-Owner beta-export candidate: `ada4bfb`, pending GitHub publication
+Owner beta-export candidate: `605af9d`, published to GitHub
 
 Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.dev/`
+
+Exact verified deployment: `https://cd5e5666.apc-calm-companion.pages.dev/`
+
+Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.
 
 Public launch means a limited organic release of the free web app. Paid printable sales and broad promotion remain separate decisions.
 
@@ -18,12 +22,16 @@ Public launch means a limited organic release of the free web app. Paid printabl
 - [x] Run the Excel export query against the actual D1 migration schema.
 - [x] Complete a production D1 read without exposing feedback publicly.
 - [x] Verify 390 by 844 layout, fixed bottom navigation, install-guide dialog, focus return, two-letter initials, and absence of browser errors.
-- [x] Pass a Lighthouse audit with 100 accessibility, 100 best practices, and 94 performance on the exact deployment.
+- [x] Pass a Lighthouse audit with 100 accessibility, 100 best practices, and 95 performance on the exact deployment.
 - [x] Verify logical keyboard order, the skip link, and visible-text inclusion in accessible button names.
 - [x] Verify an activated service worker, complete runtime cache, offline HTTP 200 reopening, offline Tools navigation, and no horizontal overflow at 390 by 844 while an uncached external page fails.
 - [x] Verify the deployed reduced-motion media path uses near-zero transitions and animations, one animation iteration, and automatic scrolling.
 - [x] Verify the deployed one-minute timer advances by the elapsed deadline after a 3.2-second browser background interval, then pauses and resets correctly.
 - [x] Correct the Tools-menu overflow found at 320 pixels with 200-percent text and verify Actions, Tools, and More reflow without page overflow or clipped text.
+- [x] Verify the final deployed build at 320 and 390 pixels with 200-percent text, including both visual installation dialogs.
+- [x] Pass a 12-check black-box audit of all action routes, all five tools, two-letter initials, feedback draft persistence, install-dialog focus return, and browser Back with no page or console error.
+- [x] Submit one non-personal response through the visible Feedback journey, confirm HTTP 201 and one matching private preview-D1 row, then remove only that synthetic row and confirm zero matches remain.
+- [x] Confirm the feedback endpoint rejects GET, foreign origins, wrong content types, missing security tokens, and the immutable deployment hostname.
 - [x] Create and verify separate private production and controlled-beta feedback exports.
 - [x] Add a private beta record with P1 to P5 feedback-reference matching and formula-driven pass criteria.
 
@@ -38,8 +46,8 @@ Record device, browser, result, defect, and retest status without collecting chi
 - [ ] Background and return while the timer is running.
 - [ ] VoiceOver route, dialog, tool, and feedback-success checks.
 - [ ] TalkBack route, dialog, tool, and feedback-success checks.
-- [ ] Desktop keyboard-only flow and visible-focus check.
-- [ ] Reduced-motion check.
+- [x] Desktop keyboard-only flow and visible-focus check.
+- [ ] Reduced motion on at least one physical device.
 
 Any safety, privacy, blocking accessibility, installation, offline, or data-loss defect returns the candidate to revision.
 

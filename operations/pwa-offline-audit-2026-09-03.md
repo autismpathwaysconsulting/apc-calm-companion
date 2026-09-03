@@ -2,9 +2,9 @@
 
 Audit date: 3 September 2026
 
-Candidate: `c7526ea`
+Candidate: `605af9d`
 
-Exact Cloudflare deployment: `https://969671c2.apc-calm-companion.pages.dev/`
+Exact Cloudflare deployment: `https://cd5e5666.apc-calm-companion.pages.dev/`
 
 Browser: Microsoft Edge 152 in a clean automated context at 390 by 844.
 
