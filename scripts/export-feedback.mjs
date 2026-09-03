@@ -2,11 +2,18 @@ import { execFileSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractFeedbackRows, feedbackCsv, FEEDBACK_EXPORT_QUERY } from "./feedback-export-utils.mjs";
+import { extractFeedbackRows, feedbackCsv, feedbackExportTarget, FEEDBACK_EXPORT_QUERY } from "./feedback-export-utils.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const appDirectory = resolve(scriptDirectory, "..");
 const outputDirectory = resolve(appDirectory, "..", "Feedback_Exports");
+let target;
+try {
+  target = feedbackExportTarget(process.argv.slice(2));
+} catch (error) {
+  console.error(error.message);
+  process.exit(2);
+}
 let raw;
 try {
   raw = execFileSync("npx", [
@@ -14,14 +21,14 @@ try {
     "wrangler@4.128.0",
     "d1",
     "execute",
-    "apc-calm-feedback-production",
+    target.database,
     "--remote",
     "--command",
     FEEDBACK_EXPORT_QUERY,
     "--json",
   ], { cwd: appDirectory, encoding: "utf8", maxBuffer: 10 * 1024 * 1024 });
 } catch {
-  console.error("Could not read the production feedback database. Sign in to Cloudflare, confirm you are using the APC account, and try again.");
+  console.error(`Could not read the ${target.label} feedback database. Sign in to Cloudflare, confirm you are using the APC account, and try again.`);
   process.exit(1);
 }
 
@@ -35,7 +42,7 @@ try {
 
 const now = new Date();
 const timestamp = now.toISOString().replace(/[:.]/g, "-");
-const outputPath = resolve(outputDirectory, `APC_Calm_Companion_Feedback_${timestamp}.csv`);
+const outputPath = resolve(outputDirectory, `${target.filenamePrefix}_${timestamp}.csv`);
 await mkdir(outputDirectory, { recursive: true });
 await writeFile(outputPath, feedbackCsv(rows), { encoding: "utf8", mode: 0o600 });
 

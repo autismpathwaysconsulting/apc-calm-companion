@@ -4,6 +4,26 @@ export const FEEDBACK_EXPORT_QUERY = `SELECT id AS reference, helpfulness, categ
   FROM feedback
   ORDER BY datetime(created_at) DESC`;
 
+const EXPORT_TARGETS = {
+  production: {
+    database: "apc-calm-feedback-production",
+    filenamePrefix: "APC_Calm_Companion_Feedback",
+    label: "production",
+  },
+  preview: {
+    database: "apc-calm-feedback-preview",
+    filenamePrefix: "APC_Calm_Companion_Beta_Feedback",
+    label: "controlled-beta preview",
+  },
+};
+
+export function feedbackExportTarget(args = []) {
+  if (!Array.isArray(args)) throw new Error("Export arguments must be an array.");
+  if (args.length === 0) return EXPORT_TARGETS.production;
+  if (args.length === 1 && args[0] === "--preview") return EXPORT_TARGETS.preview;
+  throw new Error("Use no option for production or --preview for the controlled beta database.");
+}
+
 function excelSafe(value) {
   const text = value == null ? "" : String(value);
   return FORMULA_PREFIX.test(text) ? `'${text}` : text;

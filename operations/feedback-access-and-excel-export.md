@@ -31,3 +31,9 @@ ORDER BY datetime(created_at) DESC;
 ```
 
 The website must not expose a public feedback-download page. Owner access stays behind the Cloudflare account login.
+
+## Controlled-beta feedback
+
+The branch preview stores feedback in the separate `apc-calm-feedback-preview` database. During the five-parent beta, double-click `Export Calm Companion Beta Feedback.command` in the release folder. It creates a timestamped `APC_Calm_Companion_Beta_Feedback_*.csv` file in `Feedback_Exports`.
+
+Match each P1 to P5 submission reference to exactly one preview-database row. Do not copy optional comment text into the test record. Record only the reference and whether exactly one matching row exists.

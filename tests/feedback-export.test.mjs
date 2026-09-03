@@ -2,7 +2,21 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { extractFeedbackRows, feedbackCsv, FEEDBACK_EXPORT_QUERY } from "../scripts/feedback-export-utils.mjs";
+import { extractFeedbackRows, feedbackCsv, feedbackExportTarget, FEEDBACK_EXPORT_QUERY } from "../scripts/feedback-export-utils.mjs";
+
+test("feedback export selects production by default and preview only when requested", () => {
+  assert.deepEqual(feedbackExportTarget([]), {
+    database: "apc-calm-feedback-production",
+    filenamePrefix: "APC_Calm_Companion_Feedback",
+    label: "production",
+  });
+  assert.deepEqual(feedbackExportTarget(["--preview"]), {
+    database: "apc-calm-feedback-preview",
+    filenamePrefix: "APC_Calm_Companion_Beta_Feedback",
+    label: "controlled-beta preview",
+  });
+  assert.throws(() => feedbackExportTarget(["--production"]), /Use no option for production/);
+});
 
 test("feedback export extracts D1 rows and creates an Excel-readable table", () => {
   const rows = extractFeedbackRows([{ results: [{ reference: "APC-123", helpfulness: "yes", category: "wording", comment: "Clear, thank you", app_version: "1.0.0-beta.1", created_at: "2026-09-03T05:00:00.000Z", review_status: "new" }] }]);

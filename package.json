@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs",
     "feedback:export": "node scripts/export-feedback.mjs",
+    "feedback:export:preview": "node scripts/export-feedback.mjs --preview",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:build": "node scripts/verify-build.mjs",
     "check": "npm run lint && npm run test && npm run build && npm run verify:release && npm run verify:build"
