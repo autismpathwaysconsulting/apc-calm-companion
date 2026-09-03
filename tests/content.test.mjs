@@ -202,18 +202,22 @@ test("mobile timing and safe-area behavior are explicit", async () => {
   assert.ok(css.includes("100dvh"));
 });
 
-test("mobile Home Screen instructions are visible without an app-store download", async () => {
+test("mobile Home Screen instructions open as an accessible visual guide", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   for (const phrase of [
     "Add Calm Companion to your phone Home Screen",
     "No App Store or Google Play download is needed.",
-    "Open Calm Companion in Safari.",
+    "Open visual instructions",
+    "Visual phone guide",
+    "Open Calm Companion in Safari",
     "Add to Home Screen",
     "Open as Web App",
-    "Open Calm Companion in Chrome.",
+    "Open Calm Companion in Chrome",
     "Add to home screen or Install app",
   ]) assert.ok(source.includes(phrase), `missing install guidance: ${phrase}`);
-  assert.equal(source.includes("showInstallSteps"), false, "phone instructions must not be hidden behind a disclosure state");
+  assert.ok(source.includes("showModal()"));
+  assert.ok(source.includes("aria-labelledby=\"visual-install-title\""));
+  assert.ok(source.includes("onClose={() => installDialogTriggerRef.current?.focus()}"));
 });
 
 test("action and tool details use progressive disclosure", async () => {

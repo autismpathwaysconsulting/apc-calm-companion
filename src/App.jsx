@@ -28,6 +28,29 @@ const moreSections = [
   { id: "install", label: "Install" },
 ];
 
+const installGuides = {
+  apple: {
+    label: "iPhone or iPad",
+    browser: "Safari",
+    steps: [
+      { cue: "Safari", symbol: "Aa", title: "Open Calm Companion in Safari", detail: "Keep this page open while you add it." },
+      { cue: "Share", symbol: "↥", title: "Tap Share", detail: "If Share is not visible, tap More first, then Share." },
+      { cue: "Add to Home Screen", symbol: "+", title: "Choose Add to Home Screen", detail: "Scroll down the Share menu if you do not see it straight away." },
+      { cue: "Open as Web App · Add", symbol: "✓", title: "Confirm the web app", detail: "Turn on Open as Web App if it appears, then tap Add." },
+    ],
+  },
+  android: {
+    label: "Android",
+    browser: "Chrome",
+    steps: [
+      { cue: "Chrome", symbol: "◎", title: "Open Calm Companion in Chrome", detail: "Keep this page open while you add it." },
+      { cue: "Browser menu", symbol: "⋮", title: "Tap the three-dot menu", detail: "It is usually beside the address bar." },
+      { cue: "Add to home screen", symbol: "+", title: "Choose the Home Screen option", detail: "It may be labelled Add to home screen or Install app." },
+      { cue: "Install", symbol: "✓", title: "Confirm installation", detail: "Tap Install to place Calm Companion on your Home Screen." },
+    ],
+  },
+};
+
 function GuideIcon({ name }) {
   if (name === "words") {
     return (
@@ -71,6 +94,10 @@ function isRunningInstalled() {
   return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
+function defaultInstallPlatform() {
+  return /Android/i.test(window.navigator.userAgent) ? "android" : "apple";
+}
+
 export default function App() {
   const [activeView, setActiveView] = useState("actions");
   const [activeGuide, setActiveGuide] = useState(null);
@@ -87,6 +114,7 @@ export default function App() {
   const [voiceOn, setVoiceOn] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(isRunningInstalled);
+  const [installPlatform, setInstallPlatform] = useState(defaultInstallPlatform);
   const [today, setToday] = useState(() => new Date());
   const [profileName, setProfileName] = useState(loadProfileName);
   const [profileDraft, setProfileDraft] = useState(profileName);
@@ -99,6 +127,9 @@ export default function App() {
   const privacyHeadingRef = useRef(null);
   const evidenceHeadingRef = useRef(null);
   const installHeadingRef = useRef(null);
+  const installDialogRef = useRef(null);
+  const installDialogHeadingRef = useRef(null);
+  const installDialogTriggerRef = useRef(null);
   const profileHeadingRef = useRef(null);
   const shouldMoveFocusRef = useRef(false);
   const shouldFocusToolRef = useRef(false);
@@ -302,6 +333,16 @@ export default function App() {
     setInstallPrompt(null);
   }
 
+  function openVisualInstallGuide(event) {
+    installDialogTriggerRef.current = event.currentTarget;
+    installDialogRef.current?.showModal();
+    window.requestAnimationFrame(() => installDialogHeadingRef.current?.focus());
+  }
+
+  function closeVisualInstallGuide() {
+    installDialogRef.current?.close();
+  }
+
   const timerProgress = Math.max(0, Math.min(100, (remaining / (minutes * 60)) * 100));
   const todayLabel = formatToday(today);
   const profileLabel = profileName || "My child";
@@ -370,7 +411,7 @@ export default function App() {
                     <h2 id="home-install-title">Add Calm Companion to your phone Home Screen</h2>
                     <p>Open it like an app when you need it. No App Store or Google Play download is needed.</p>
                   </div>
-                  <button className="button secondary" type="button" onClick={() => openMoreSection("install", true)}>See phone instructions</button>
+                  <button className="button secondary" type="button" onClick={openVisualInstallGuide}>Open visual instructions</button>
                 </aside>
               )}
             </>
@@ -616,27 +657,8 @@ export default function App() {
                 {isInstalled
                   ? <p className="installed-state" role="status">Installed on this device</p>
                   : installPrompt && <button className="button primary" type="button" onClick={installApp}>Add to Home Screen now</button>}
-                <div className="install-steps">
-                  <section aria-labelledby="install-apple-title">
-                    <h4 id="install-apple-title">iPhone or iPad</h4>
-                    <ol>
-                      <li>Open Calm Companion in Safari.</li>
-                      <li>Tap Share. In some Safari layouts, tap More first, then Share.</li>
-                      <li>Scroll down and tap Add to Home Screen.</li>
-                      <li>Turn on Open as Web App if it appears, then tap Add.</li>
-                    </ol>
-                  </section>
-                  <section aria-labelledby="install-android-title">
-                    <h4 id="install-android-title">Android</h4>
-                    <ol>
-                      <li>Open Calm Companion in Chrome.</li>
-                      <li>Tap the three-dot menu beside the address bar.</li>
-                      <li>Tap Add to home screen or Install app.</li>
-                      <li>Tap Install to confirm.</li>
-                    </ol>
-                  </section>
-                  <p className="install-offline-note">After the app has loaded online once, its main tools may be reopened on this device without internet.</p>
-                </div>
+                <button className="button secondary" type="button" onClick={openVisualInstallGuide}>Open visual instructions</button>
+                <p className="install-offline-note">After the app has loaded online once, its main tools may be reopened on this device without internet.</p>
               </article>
               <article className="more-card support-card">
                 <div><h3>Need personalised support?</h3><p>If the same difficulties keep happening, general tips may not be enough. APC can look with you at routines, communication, surroundings and support needs. The app itself is not an assessment.</p></div>
@@ -646,6 +668,61 @@ export default function App() {
           </section>
         </div>
       </main>
+
+      <dialog
+        ref={installDialogRef}
+        className="install-dialog"
+        aria-labelledby="visual-install-title"
+        onClose={() => installDialogTriggerRef.current?.focus()}
+      >
+        <div className="install-dialog-shell">
+          <div className="install-dialog-heading">
+            <div>
+              <p className="section-label">Visual phone guide</p>
+              <h2 id="visual-install-title" ref={installDialogHeadingRef} tabIndex="-1">Add Calm Companion to your Home Screen</h2>
+              <p>Choose your phone, then follow the four pictures in order.</p>
+            </div>
+            <button className="dialog-close" type="button" onClick={closeVisualInstallGuide} aria-label="Close visual instructions">×</button>
+          </div>
+
+          <div className="platform-switch" aria-label="Choose phone type">
+            {Object.entries(installGuides).map(([id, guide]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={installPlatform === id}
+                onClick={() => setInstallPlatform(id)}
+              >
+                {guide.label}
+              </button>
+            ))}
+          </div>
+
+          <section className="visual-install-guide" aria-labelledby="selected-platform-title">
+            <div className="visual-guide-intro">
+              <span aria-hidden="true">{installPlatform === "apple" ? "◉" : "◎"}</span>
+              <div><h3 id="selected-platform-title">{installGuides[installPlatform].label}</h3><p>Use {installGuides[installPlatform].browser} for these steps.</p></div>
+            </div>
+            <ol className="visual-step-list">
+              {installGuides[installPlatform].steps.map((step, index) => (
+                <li key={step.title}>
+                  <div className="step-number" aria-hidden="true">{index + 1}</div>
+                  <div className="step-visual" aria-hidden="true">
+                    <span className="step-symbol">{step.symbol}</span>
+                    <span className="step-cue">{step.cue}</span>
+                  </div>
+                  <div className="step-copy"><h4>{step.title}</h4><p>{step.detail}</p></div>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <div className="install-dialog-footer">
+            <p>Menu names may look slightly different after a phone update.</p>
+            <button className="button primary" type="button" onClick={closeVisualInstallGuide}>Done</button>
+          </div>
+        </div>
+      </dialog>
 
       <footer className="site-footer">
         <div className="page-width footer-grid">
