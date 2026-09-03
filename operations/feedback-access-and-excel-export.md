@@ -11,7 +11,7 @@ The release folder also contains `Feedback Access - START HERE.txt` for a short 
 3. The export opens the `Feedback_Exports` folder when it finishes.
 4. Open the newest `APC_Calm_Companion_Feedback_*.csv` file in Microsoft Excel.
 
-The export is timestamped and does not overwrite an earlier file. It includes the reference, usefulness answer, improvement category, optional comment, app version, submission date, review state, and review date. CSV is used because Excel opens it directly and Cloudflare can export it without placing spreadsheet credentials in the public app.
+The export is timestamped and does not overwrite an earlier file. It includes the reference, usefulness answer, improvement category, optional comment, app version, submission date, and review status. CSV is used because Excel opens it directly and Cloudflare can export it without placing spreadsheet credentials in the public app.
 
 Treat exports as restricted files. Optional comments may contain private information even though the form asks users not to include it. Delete old exports when they are no longer needed and continue the 90-day comment review described in `feedback-retention.md`.
 
@@ -24,8 +24,8 @@ If Cloudflare changes the direct link, open the APC account in the dashboard, th
 To review the newest submissions with selected fields, open Query in Studio and run:
 
 ```sql
-SELECT reference, helpfulness, category, comment, app_version,
-       created_at, review_state, reviewed_at
+SELECT id AS reference, helpfulness, category, comment, app_version,
+       created_at, review_status
 FROM feedback
 ORDER BY datetime(created_at) DESC;
 ```

@@ -2,15 +2,11 @@ import { execFileSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractFeedbackRows, feedbackCsv } from "./feedback-export-utils.mjs";
+import { extractFeedbackRows, feedbackCsv, FEEDBACK_EXPORT_QUERY } from "./feedback-export-utils.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const appDirectory = resolve(scriptDirectory, "..");
 const outputDirectory = resolve(appDirectory, "..", "Feedback_Exports");
-const query = `SELECT reference, helpfulness, category, comment, app_version, created_at, review_state, reviewed_at
-  FROM feedback
-  ORDER BY datetime(created_at) DESC`;
-
 let raw;
 try {
   raw = execFileSync("npx", [
@@ -21,7 +17,7 @@ try {
     "apc-calm-feedback-production",
     "--remote",
     "--command",
-    query,
+    FEEDBACK_EXPORT_QUERY,
     "--json",
   ], { cwd: appDirectory, encoding: "utf8", maxBuffer: 10 * 1024 * 1024 });
 } catch {

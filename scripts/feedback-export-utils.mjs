@@ -1,5 +1,9 @@
 const FORMULA_PREFIX = /^[\t\r ]*[=+\-@]/;
 
+export const FEEDBACK_EXPORT_QUERY = `SELECT id AS reference, helpfulness, category, comment, app_version, created_at, review_status
+  FROM feedback
+  ORDER BY datetime(created_at) DESC`;
+
 function excelSafe(value) {
   const text = value == null ? "" : String(value);
   return FORMULA_PREFIX.test(text) ? `'${text}` : text;
@@ -24,8 +28,7 @@ export function feedbackCsv(rows) {
     ["Optional comment", "comment"],
     ["App version", "app_version"],
     ["Submitted at", "created_at"],
-    ["Review state", "review_state"],
-    ["Reviewed at", "reviewed_at"],
+    ["Review status", "review_status"],
   ];
   const lines = [columns.map(([heading]) => csvCell(heading)).join(",")];
   for (const row of rows) lines.push(columns.map(([, key]) => csvCell(row[key])).join(","));
