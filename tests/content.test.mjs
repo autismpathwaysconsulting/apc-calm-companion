@@ -280,6 +280,10 @@ test("feedback is voluntary, bounded and separated from urgent support", async (
     'maxLength="300"',
   ]) assert.ok(`${appSource}\n${feedbackSource}`.includes(phrase), `missing feedback safeguard: ${phrase}`);
   assert.equal(feedbackSource.includes("email"), true, "the no-email disclosure must remain visible");
+  assert.ok(appSource.includes('!(activeView === "about" && activeMoreSection === "feedback")'));
+  assert.ok(appSource.includes('className="feedback-entry"'));
+  assert.ok(appSource.includes('<button className="button secondary" type="button" onClick={openFeedback}>Send feedback</button>'));
+  assert.equal(appSource.includes('<div className="footer-links"><button'), false, "feedback must not wrap out of alignment in the footer link row");
 });
 
 test("feedback exposes secure loading, accessible errors and a removal reference", async () => {

@@ -61,6 +61,8 @@ Before enabling production submissions:
 5. Follow `operations/feedback-retention.md` every month and retain the audit evidence.
 6. Test export, reference-based deletion and restricted reviewer access through the authenticated Cloudflare D1 dashboard.
 
+For routine owner review, double-click `../Export Calm Companion Feedback.command`. It creates a timestamped Excel-readable CSV in `../Feedback_Exports` without exposing a download route in the public app. See `operations/feedback-access-and-excel-export.md`.
+
 Controlled-beta operations:
 
 - `GATES.md` records the release decision gates.

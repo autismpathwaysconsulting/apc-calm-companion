@@ -718,6 +718,14 @@ export default function App() {
             </div>
           </section>
         </div>
+
+        {!(activeView === "about" && activeMoreSection === "feedback") && (
+          <aside className="feedback-entry" aria-label="Feedback">
+            <div className="page-width feedback-entry-inner">
+              <button className="button secondary" type="button" onClick={openFeedback}>Send feedback</button>
+            </div>
+          </aside>
+        )}
       </main>
 
       <dialog
@@ -769,7 +777,7 @@ export default function App() {
       <footer className="site-footer">
         <div className="page-width footer-grid">
           <div><strong>APC Calm Companion</strong><p>General educational parent support from Autism Pathways Consulting.</p></div>
-          <div className="footer-links"><button type="button" onClick={openFeedback}>Send feedback</button><a href={APC_URL}>APC website</a><a href={PRIVACY_URL}>Privacy</a><a href={TERMS_URL}>Terms</a><a href={BEFRIENDERS_URL} target="_blank" rel="noreferrer">Befrienders KL</a></div>
+          <div className="footer-links"><a href={APC_URL}>APC website</a><a href={PRIVACY_URL}>Privacy</a><a href={TERMS_URL}>Terms</a><a href={BEFRIENDERS_URL} target="_blank" rel="noreferrer">Befrienders KL</a></div>
           <p className="footer-boundary">Not therapy, diagnosis, assessment, medical advice or emergency support. No outcome is guaranteed.</p>
         </div>
       </footer>
