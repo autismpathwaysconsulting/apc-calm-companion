@@ -20,6 +20,7 @@ Public launch means a limited organic release of the free web app. Paid printabl
 - [x] Verify logical keyboard order, the skip link, and visible-text inclusion in accessible button names.
 - [x] Verify an activated service worker, complete runtime cache, offline HTTP 200 reopening, offline Tools navigation, and no horizontal overflow at 390 by 844 while an uncached external page fails.
 - [x] Verify the deployed reduced-motion media path uses near-zero transitions and animations, one animation iteration, and automatic scrolling.
+- [x] Verify the deployed one-minute timer advances by the elapsed deadline after a 3.2-second browser background interval, then pauses and resets correctly.
 
 ## Phase 2: physical device and accessibility gate
 
