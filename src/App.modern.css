@@ -148,9 +148,9 @@ h1, h2, h3, h4, .brand strong { font-family: "Outfit", "Work Sans", sans-serif; 
 .tool-menu { width: min(900px,100%); display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 13px; }
 .tool-menu button { min-height: 118px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: center; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); padding: 18px; color: var(--ink); cursor: pointer; text-align: left; transition: border-color .18s ease, transform .18s ease; }
 .tool-menu button:hover { border-color: var(--primary); transform: translateY(-1px); }
-.tool-menu button > span:nth-child(2) { display: grid; gap: 6px; }
-.tool-menu strong { font-size: 1.08rem; }
-.tool-menu small { color: var(--muted); font-size: .92rem; line-height: 1.48; }
+.tool-menu button > span:nth-child(2) { min-width: 0; display: grid; gap: 6px; }
+.tool-menu strong { overflow-wrap: anywhere; font-size: 1.08rem; }
+.tool-menu small { overflow-wrap: anywhere; color: var(--muted); font-size: .92rem; line-height: 1.48; }
 .tool-marker { min-width: 54px; min-height: 48px; display: grid; place-items: center; border-radius: 13px; background: var(--primary-tint); color: var(--primary-hover); font-size: .8rem; font-weight: 700; }
 .tool-panel { min-height: 440px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); padding: clamp(20px,4vw,36px); box-shadow: 0 10px 32px rgba(15,118,110,.08); outline: none; }
 .tool-panel:focus-visible { box-shadow: 0 0 0 4px rgba(138,62,24,.24), 0 10px 32px rgba(15,118,110,.08); }
@@ -392,6 +392,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .feedback-entry .button { width: 100%; }
   .more-card .button, .feedback-form > .button { width: 100%; }
   .footer-links { justify-content: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .tool-menu button { grid-template-columns: minmax(0,1fr) auto; gap: 12px; padding: 12px; }
+  .tool-menu button > span:nth-child(2) { grid-column: 1 / -1; grid-row: 1; }
+  .tool-menu strong { font-size: 1rem; }
+  .tool-marker { grid-column: 1; grid-row: 2; justify-self: start; }
+  .tool-arrow { grid-column: 2; grid-row: 2; align-self: center; }
 }
 
 @supports (height: 100dvh) {

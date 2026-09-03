@@ -14,7 +14,7 @@ Public launch means a limited organic release of the free web app. Paid printabl
 
 - [x] Publish the reviewed branch to GitHub.
 - [x] Complete Cloudflare branch deployment.
-- [x] Pass lint, 55 automated tests, production build, release verification, and offline-cache verification.
+- [x] Pass lint, 56 automated tests, production build, release verification, and offline-cache verification.
 - [x] Run the Excel export query against the actual D1 migration schema.
 - [x] Complete a production D1 read without exposing feedback publicly.
 - [x] Verify 390 by 844 layout, fixed bottom navigation, install-guide dialog, focus return, two-letter initials, and absence of browser errors.
@@ -23,6 +23,7 @@ Public launch means a limited organic release of the free web app. Paid printabl
 - [x] Verify an activated service worker, complete runtime cache, offline HTTP 200 reopening, offline Tools navigation, and no horizontal overflow at 390 by 844 while an uncached external page fails.
 - [x] Verify the deployed reduced-motion media path uses near-zero transitions and animations, one animation iteration, and automatic scrolling.
 - [x] Verify the deployed one-minute timer advances by the elapsed deadline after a 3.2-second browser background interval, then pauses and resets correctly.
+- [x] Correct the Tools-menu overflow found at 320 pixels with 200-percent text and verify Actions, Tools, and More reflow without page overflow or clipped text.
 - [x] Create and verify separate private production and controlled-beta feedback exports.
 - [x] Add a private beta record with P1 to P5 feedback-reference matching and formula-driven pass criteria.
 

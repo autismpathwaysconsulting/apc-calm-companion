@@ -233,6 +233,15 @@ test("mobile timing and safe-area behavior are explicit", async () => {
   assert.ok(css.includes("backdrop-filter: none"), "mobile header must not trap fixed bottom navigation");
 });
 
+test("visual tool labels can reflow without forcing horizontal page scrolling", async () => {
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+  assert.match(css, /\.tool-menu button > span:nth-child\(2\)\s*\{[^}]*min-width:\s*0/i);
+  assert.match(css, /\.tool-menu strong\s*\{[^}]*overflow-wrap:\s*anywhere/i);
+  assert.match(css, /\.tool-menu small\s*\{[^}]*overflow-wrap:\s*anywhere/i);
+  assert.ok(css.includes("@media (max-width: 480px)"));
+  assert.ok(css.includes(".tool-menu button > span:nth-child(2) { grid-column: 1 / -1; grid-row: 1; }"));
+});
+
 test("mobile Home Screen instructions open as an accessible visual guide", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   for (const phrase of [

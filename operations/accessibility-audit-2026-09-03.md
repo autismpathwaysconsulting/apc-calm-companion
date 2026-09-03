@@ -20,6 +20,7 @@ Scope: automated browser audit, accessibility-tree inspection, and desktop keybo
 | Skip link | Pass | Activating Skip to main content places focus on `main#main-content` |
 | Accessible button names | Pass after correction | The APC brand and profile buttons preserve their visible labels in the accessible name |
 | Reduced-motion media path | Pass in browser emulation | The deployed candidate matches `prefers-reduced-motion: reduce`, reduces transitions and animations to 0.01 milliseconds, limits animations to one iteration, and uses automatic scrolling |
+| Enlarged-text reflow | Pass after local correction | At 320 pixels with 200-percent text, Actions, Tools, and More have no page-level horizontal overflow or clipped text. The More section selector remains an intentional internal horizontal scroll region |
 
 ## Corrected issue
 
@@ -34,6 +35,16 @@ Severity before correction: Major. A speech-input user might say the visible lab
 Remediation: Removed the overriding `aria-label` values and added visually hidden action text inside each button. This keeps the visible words in the computed accessible name while still explaining the action.
 
 Verification: Deployment `969671c2` exposes “APC Calm Companion One clear next step Open Actions” and “Supporting My child Edit Open profile settings”. Lighthouse no longer reports `label-content-name-mismatch`.
+
+Description: The word “Communication” and its summary forced the Tools page wider than the viewport at 320 pixels with 200-percent text.
+
+WCAG criteria: 1.4.4 Resize Text and 1.4.10 Reflow.
+
+Severity before correction: Major. A user relying on enlarged text could encounter horizontal page scrolling and lose the relationship between the tool label and its control.
+
+Remediation: Allowed the tool-label grid item to shrink and long labels and summaries to wrap when necessary.
+
+Verification: A headless Edge 152 check of Actions, Tools, and More at 320 by 800 pixels with a 200-percent root text size reports a 320-pixel document width and no clipped text on the corrected local build. Physical increased-text checks remain required.
 
 ## Remaining human verification
 
