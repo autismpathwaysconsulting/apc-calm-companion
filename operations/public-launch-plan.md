@@ -39,6 +39,8 @@ Public launch means a limited organic release of the free web app. Paid printabl
 
 Record device, browser, result, defect, and retest status without collecting child information.
 
+Follow `physical-device-accessibility-runbook.md` and record D01 to D14 in the launch workbook.
+
 - [ ] iPhone Safari at default and increased text size.
 - [ ] Android Chrome at default and increased text size.
 - [ ] Add to Home Screen on both platforms.
