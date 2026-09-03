@@ -3,7 +3,7 @@ import "./App.modern.css";
 import FeedbackForm from "./FeedbackForm.jsx";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "./content.js";
 import { appHash, parseAppHash } from "./navigation.js";
-import { formatToday, loadProfileName, saveProfileName } from "./profile.js";
+import { formatToday, loadProfileName, profileInitials, saveProfileName } from "./profile.js";
 
 const APC_URL = "https://autismpathwaysconsulting.com/";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
@@ -434,7 +434,7 @@ export default function App() {
               <p>Choose the closest match. You do not need to work out the cause first.</p>
             </div>
             <button className="profile-shortcut" type="button" onClick={openProfile} aria-label={`Open profile settings. Currently supporting ${profileLabel}`}>
-              <span className="profile-avatar" aria-hidden="true">{profileName ? profileName.charAt(0).toUpperCase() : "＋"}</span>
+              <span className="profile-avatar" aria-hidden="true">{profileName ? profileInitials(profileName) : "＋"}</span>
               <span><small>Supporting</small><strong>{profileLabel}</strong></span>
               <span className="profile-edit">Edit</span>
             </button>

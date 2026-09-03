@@ -7,6 +7,14 @@ export function normaliseProfileName(value) {
     .slice(0, 24);
 }
 
+export function profileInitials(value) {
+  const words = normaliseProfileName(value).split(" ").filter(Boolean);
+  if (!words.length) return "";
+  const first = Array.from(words[0])[0] || "";
+  const last = words.length > 1 ? Array.from(words.at(-1))[0] || "" : "";
+  return `${first}${last}`.toLocaleUpperCase("en-MY");
+}
+
 export function formatToday(date = new Date(), locale = "en-MY") {
   const validDate = date instanceof Date && Number.isFinite(date.getTime()) ? date : new Date();
   return new Intl.DateTimeFormat(locale, {

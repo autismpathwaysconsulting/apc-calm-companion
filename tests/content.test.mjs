@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "../src/content.js";
 import { turnstileSizeForWidth } from "../src/feedback-utils.js";
 import { appHash, parseAppHash } from "../src/navigation.js";
-import { formatToday, loadProfileName, normaliseProfileName, PROFILE_STORAGE_KEY, saveProfileName } from "../src/profile.js";
+import { formatToday, loadProfileName, normaliseProfileName, profileInitials, PROFILE_STORAGE_KEY, saveProfileName } from "../src/profile.js";
 
 test("the parent guide contains four routes and one separate parent pause", () => {
   assert.equal(guideOptions.length, 4);
@@ -96,6 +96,13 @@ test("the optional profile stores only a short display name on the device", () =
   assert.equal(loadProfileName(storage), "Aina");
   assert.equal(saveProfileName("", storage), "");
   assert.equal(values.has(PROFILE_STORAGE_KEY), false);
+});
+
+test("the profile badge uses first and last initials", () => {
+  assert.equal(profileInitials("Jin Heng"), "JH");
+  assert.equal(profileInitials("Jin Wei Heng"), "JH");
+  assert.equal(profileInitials("Aina"), "A");
+  assert.equal(profileInitials(""), "");
 });
 
 test("today uses the device date without storing a selected date", () => {
