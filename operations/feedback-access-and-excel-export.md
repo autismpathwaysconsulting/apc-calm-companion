@@ -4,6 +4,8 @@ Calm Companion feedback is stored in the private Cloudflare D1 database named `a
 
 ## Easiest review method
 
+The release folder also contains `Feedback Access - START HERE.txt` for a short saveable copy of these instructions and `Open Cloudflare Feedback Database.webloc` for direct dashboard access.
+
 1. Double-click `Export Calm Companion Feedback.command` in the `APC_Calm_Companion_Release` folder.
 2. If Cloudflare asks you to sign in, use the APC Cloudflare account and approve the official Wrangler connection.
 3. The export opens the `Feedback_Exports` folder when it finishes.
