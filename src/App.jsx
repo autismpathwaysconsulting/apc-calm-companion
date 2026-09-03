@@ -86,7 +86,6 @@ export default function App() {
   const [selectedPhrase, setSelectedPhrase] = useState("Choose a communication option");
   const [voiceOn, setVoiceOn] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [showInstallSteps, setShowInstallSteps] = useState(false);
   const [isInstalled, setIsInstalled] = useState(isRunningInstalled);
   const [today, setToday] = useState(() => new Date());
   const [profileName, setProfileName] = useState(loadProfileName);
@@ -295,7 +294,7 @@ export default function App() {
 
   async function installApp() {
     if (!installPrompt) {
-      setShowInstallSteps(true);
+      openMoreSection("install", true);
       return;
     }
     installPrompt.prompt();
@@ -364,6 +363,16 @@ export default function App() {
                 <span><strong>{parentPause.prompt}</strong><small>{parentPause.short}</small></span>
                 <span aria-hidden="true">→</span>
               </button>
+              {!isInstalled && (
+                <aside className="home-install-callout" aria-labelledby="home-install-title">
+                  <div>
+                    <p className="section-label">Keep it close</p>
+                    <h2 id="home-install-title">Add Calm Companion to your phone Home Screen</h2>
+                    <p>Open it like an app when you need it. No App Store or Google Play download is needed.</p>
+                  </div>
+                  <button className="button secondary" type="button" onClick={() => openMoreSection("install", true)}>See phone instructions</button>
+                </aside>
+              )}
             </>
           ) : (
             <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
@@ -603,13 +612,31 @@ export default function App() {
             </div>
             <div className="more-install-grid">
               <article className="more-card install-card">
-                <div><h3>Install on this device</h3><p>No account is needed, and anything you type into the tools is not saved. Once the app has loaded online, its main tools can be reopened on this device without internet.</p></div>
+                <div><h3>Add to your Home Screen</h3><p>Calm Companion currently works as a web app. You do not need to download it from the App Store or Google Play. No account is needed, and anything you type into the tools is not saved.</p></div>
                 {isInstalled
                   ? <p className="installed-state" role="status">Installed on this device</p>
-                  : <button className="button primary" type="button" onClick={installApp}>Install or show instructions</button>}
-                {showInstallSteps && (
-                  <div className="install-steps" role="status"><p><strong>iPhone or iPad:</strong> open in Safari, tap Share, then Add to Home Screen.</p><p><strong>Android or desktop:</strong> open the browser menu and choose Install app or Add to Home screen.</p></div>
-                )}
+                  : installPrompt && <button className="button primary" type="button" onClick={installApp}>Add to Home Screen now</button>}
+                <div className="install-steps">
+                  <section aria-labelledby="install-apple-title">
+                    <h4 id="install-apple-title">iPhone or iPad</h4>
+                    <ol>
+                      <li>Open Calm Companion in Safari.</li>
+                      <li>Tap Share. In some Safari layouts, tap More first, then Share.</li>
+                      <li>Scroll down and tap Add to Home Screen.</li>
+                      <li>Turn on Open as Web App if it appears, then tap Add.</li>
+                    </ol>
+                  </section>
+                  <section aria-labelledby="install-android-title">
+                    <h4 id="install-android-title">Android</h4>
+                    <ol>
+                      <li>Open Calm Companion in Chrome.</li>
+                      <li>Tap the three-dot menu beside the address bar.</li>
+                      <li>Tap Add to home screen or Install app.</li>
+                      <li>Tap Install to confirm.</li>
+                    </ol>
+                  </section>
+                  <p className="install-offline-note">After the app has loaded online once, its main tools may be reopened on this device without internet.</p>
+                </div>
               </article>
               <article className="more-card support-card">
                 <div><h3>Need personalised support?</h3><p>If the same difficulties keep happening, general tips may not be enough. APC can look with you at routines, communication, surroundings and support needs. The app itself is not an assessment.</p></div>
