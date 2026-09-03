@@ -4,7 +4,7 @@ Calm Companion feedback is stored in the private Cloudflare D1 database named `a
 
 ## Easiest review method
 
-The release folder also contains `Feedback Access - START HERE.txt` for a short saveable copy of these instructions and `Open Cloudflare Feedback Database.webloc` for direct dashboard access.
+The release folder also contains `Feedback Access - START HERE.txt` for a short saveable copy of these instructions and `Open Cloudflare Feedback Database.webloc` for direct access to the production database in Cloudflare Studio.
 
 1. Double-click `Export Calm Companion Feedback.command` in the `APC_Calm_Companion_Release` folder.
 2. If Cloudflare asks you to sign in, use the APC Cloudflare account and approve the official Wrangler connection.
@@ -17,7 +17,11 @@ Treat exports as restricted files. Optional comments may contain private informa
 
 ## Check directly in Cloudflare
 
-In the Cloudflare dashboard, open the APC account, then Storage and databases, D1 SQL Database, and `apc-calm-feedback-production`. In its console, run:
+Double-click `Open Cloudflare Feedback Database.webloc`, sign in with the APC Cloudflare account, and click `feedback` in the left column. This opens the production database directly in Cloudflare Studio.
+
+If Cloudflare changes the direct link, open the APC account in the dashboard, then Storage & databases, D1 SQLite Database, and `apc-calm-feedback-production`. Click Explore Data.
+
+To review the newest submissions with selected fields, open Query in Studio and run:
 
 ```sql
 SELECT reference, helpfulness, category, comment, app_version,
