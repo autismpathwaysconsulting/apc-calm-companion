@@ -207,14 +207,30 @@ test("mobile Home Screen instructions open as an accessible visual guide", async
   for (const phrase of [
     "Add Calm Companion to your phone Home Screen",
     "No App Store or Google Play download is needed.",
-    "Open visual instructions",
-    "Visual phone guide",
-    "Open Calm Companion in Safari",
+    "See pictures",
     "Add to Home Screen",
-    "Open as Web App",
-    "Open Calm Companion in Chrome",
-    "Add to home screen or Install app",
+    "install-safari.png",
+    "install-chrome.png",
+    "install-apple-share.png",
+    "install-apple-home.png",
+    "install-android-menu.svg",
+    "install-android-home.svg",
+    "icon-192.png",
   ]) assert.ok(source.includes(phrase), `missing install guidance: ${phrase}`);
+  for (const removedPhrase of ["Keep this page open while you add it.", "Menu names may look slightly different after a phone update."]) {
+    assert.equal(source.includes(removedPhrase), false, `visual guide should not include extra copy: ${removedPhrase}`);
+  }
+  for (const asset of [
+    "install-safari.png",
+    "install-chrome.png",
+    "install-apple-share.png",
+    "install-apple-home.png",
+    "install-android-menu.svg",
+    "install-android-home.svg",
+  ]) {
+    const contents = await readFile(new URL(`../public/${asset}`, import.meta.url));
+    assert.ok(contents.length > 100, `missing visual asset: ${asset}`);
+  }
   assert.ok(source.includes("showModal()"));
   assert.ok(source.includes("aria-labelledby=\"visual-install-title\""));
   assert.ok(source.includes("onClose={() => installDialogTriggerRef.current?.focus()}"));
