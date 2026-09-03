@@ -2,7 +2,7 @@
 
 Status date: 3 September 2026
 
-Release candidate: `27401f9`
+Release candidate: `c7526ea`
 
 Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.dev/`
 
@@ -12,10 +12,12 @@ Public launch means a limited organic release of the free web app. Paid printabl
 
 - [x] Publish the reviewed branch to GitHub.
 - [x] Complete Cloudflare branch deployment.
-- [x] Pass lint, 53 automated tests, production build, release verification, and offline-cache verification.
+- [x] Pass lint, 54 automated tests, production build, release verification, and offline-cache verification.
 - [x] Run the Excel export query against the actual D1 migration schema.
 - [x] Complete a production D1 read without exposing feedback publicly.
 - [x] Verify 390 by 844 layout, fixed bottom navigation, install-guide dialog, focus return, two-letter initials, and absence of browser errors.
+- [x] Pass a Lighthouse audit with 100 accessibility, 100 best practices, and 94 performance on the exact deployment.
+- [x] Verify logical keyboard order, the skip link, and visible-text inclusion in accessible button names.
 
 ## Phase 2: physical device and accessibility gate
 
