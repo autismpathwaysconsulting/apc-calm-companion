@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "../src/content.js";
 import { turnstileSizeForWidth } from "../src/feedback-utils.js";
+import { appHash, parseAppHash } from "../src/navigation.js";
 import { formatToday, loadProfileName, normaliseProfileName, PROFILE_STORAGE_KEY, saveProfileName } from "../src/profile.js";
 
 test("the parent guide contains four routes and one separate parent pause", () => {
@@ -120,8 +121,10 @@ test("the skip link target is focusable and action descriptions meet text contra
 
   assert.ok(source.includes('<main id="main-content" tabIndex="-1">'));
 
-  const foreground = css.match(/\.guide-choice small\s*\{[^}]*color:\s*(#[0-9a-f]{6})/i)?.[1];
-  const background = css.match(/--surface:\s*(#[0-9a-f]{6})/i)?.[1];
+  const tokens = Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/gi)].map((match) => [match[1], match[2]]));
+  assert.ok(css.match(/\.guide-choice small\s*\{[^}]*color:\s*var\(--muted\)/i), "guide description must use the muted text token");
+  const foreground = tokens.muted;
+  const background = tokens.surface;
   assert.ok(foreground && background, "guide colours could not be read");
 
   function luminance(hex) {
@@ -136,7 +139,6 @@ test("the skip link target is focusable and action descriptions meet text contra
   const ratio = (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
   assert.ok(ratio >= 4.5, `action description contrast on ${background} is ${ratio.toFixed(2)}:1`);
 
-  const tokens = Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/gi)].map((match) => [match[1], match[2]]));
   for (const [foregroundName, backgroundName] of [
     ["primary", "surface"],
     ["primary-hover", "primary-tint"],
@@ -150,13 +152,26 @@ test("the skip link target is focusable and action descriptions meet text contra
   }
 });
 
-test("the app defaults to a focused three-view navigation model", async () => {
+test("the app uses a focused three-view navigation model with restorable URLs", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  assert.ok(source.includes('useState("actions")'));
-  assert.ok(source.includes('const [activeGuide, setActiveGuide] = useState(null)'));
-  assert.ok(source.includes('const [activeTool, setActiveTool] = useState(null)'));
+  assert.ok(source.includes("parseAppHash(window.location.hash)"));
+  assert.ok(source.includes("window.history.pushState"));
+  assert.ok(source.includes('window.addEventListener("popstate", restoreRoute)'));
   for (const label of ["Actions", "Tools", "More"]) assert.ok(source.includes(label));
   assert.equal(source.includes('className="hero page-width"'), false);
+});
+
+test("navigation hashes are bounded, canonical and directly restorable", () => {
+  assert.deepEqual(parseAppHash(""), { view: "actions", guideId: "", toolId: "", moreSection: "safety" });
+  assert.deepEqual(parseAppHash("#actions/next-step"), { view: "actions", guideId: "next-step", toolId: "", moreSection: "safety" });
+  assert.deepEqual(parseAppHash("#tools/timer"), { view: "tools", guideId: "", toolId: "timer", moreSection: "safety" });
+  assert.deepEqual(parseAppHash("#more/install"), { view: "about", guideId: "", toolId: "", moreSection: "install" });
+  assert.deepEqual(parseAppHash("#tools/not-a-tool"), { view: "tools", guideId: "", toolId: "", moreSection: "safety" });
+  assert.deepEqual(parseAppHash("#unknown"), { view: "actions", guideId: "", toolId: "", moreSection: "safety" });
+  assert.equal(appHash({ view: "actions", guideId: "respond" }), "#actions/respond");
+  assert.equal(appHash({ view: "tools", toolId: "communication" }), "#tools/communication");
+  assert.equal(appHash({ view: "about", moreSection: "evidence" }), "#more/evidence");
+  assert.equal(appHash({ view: "about", moreSection: "invalid" }), "#more/safety");
 });
 
 test("the app exposes five bounded tools including observation support", async () => {
@@ -173,7 +188,7 @@ test("More shows one section at a time without discarding a feedback draft", asy
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
-  assert.ok(appSource.includes('const [activeMoreSection, setActiveMoreSection] = useState("safety")'));
+  assert.ok(appSource.includes("useState(initialRoute.moreSection)"));
   for (const section of ["profile", "safety", "feedback", "privacy", "evidence", "install"]) {
     assert.ok(appSource.includes(`id: "${section}"`), `missing More section: ${section}`);
   }
@@ -200,6 +215,7 @@ test("mobile timing and safe-area behavior are explicit", async () => {
   assert.ok(html.includes("viewport-fit=cover"));
   assert.ok(css.includes("env(safe-area-inset-bottom)"));
   assert.ok(css.includes("100dvh"));
+  assert.ok(css.includes("backdrop-filter: none"), "mobile header must not trap fixed bottom navigation");
 });
 
 test("mobile Home Screen instructions open as an accessible visual guide", async () => {
@@ -269,8 +285,44 @@ test("feedback exposes secure loading, accessible errors and a removal reference
     "REQUEST_TIMEOUT_MS",
     'setSecurityState("expired")',
     "Submission reference",
+    "Copy reference",
+    "navigator.clipboard?.writeText",
     "Comments older than 90 days are removed during APC’s monthly review",
     "Cloudflare Turnstile processes technical security data",
     "Secure feedback submission is not available in this preview",
   ]) assert.ok(source.includes(marker), `missing feedback readiness marker: ${marker}`);
+});
+
+test("interactive examples start empty and explain themselves with placeholders", async () => {
+  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  for (const state of ["firstStep", "thenStep", "choiceA", "choiceB"]) {
+    assert.ok(source.includes(`const [${state}, set${state[0].toUpperCase()}${state.slice(1)}] = useState(\"\")`));
+  }
+  for (const placeholder of ["For example, shoes on", "For example, go to the car", "For example, blue shirt", "For example, green shirt"]) {
+    assert.ok(source.includes(`placeholder=\"${placeholder}\"`), `missing placeholder: ${placeholder}`);
+  }
+});
+
+test("the interface includes APC brand tokens, self-hosted fonts and accessible semantic colours", async () => {
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const manifest = await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8");
+  for (const token of ["--brand-teal: #2dd4bf", "--brand-coral: #e8997a", "--brand-sage: #6b9e7a", "--brand-cream: #fff9f1"]) {
+    assert.ok(css.includes(token), `missing APC token: ${token}`);
+  }
+  assert.ok(css.includes('font-family: "Outfit"'));
+  assert.ok(css.includes('font-family: "Work Sans"'));
+  assert.ok(css.includes('url("/fonts/outfit-latin.woff2")'));
+  assert.ok(css.includes('url("/fonts/work-sans-latin.woff2")'));
+  assert.ok(html.includes('<meta name="theme-color" content="#0F766E"'));
+  assert.ok(manifest.includes('"background_color": "#FFF9F1"'));
+  assert.ok(manifest.includes('"theme_color": "#0F766E"'));
+});
+
+test("repeated evidence links have unique accessible names and More cues horizontal overflow", async () => {
+  const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+  assert.ok(appSource.includes('aria-label={`Read the evidence brief: ${item.title}`}'));
+  assert.ok(appSource.includes('selectedButton?.scrollIntoView({ block: "nearest", inline: "center" })'));
+  assert.ok(css.includes("mask-image: linear-gradient"));
 });

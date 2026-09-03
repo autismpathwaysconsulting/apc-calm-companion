@@ -26,6 +26,7 @@ export default function FeedbackForm({ headingRef, hidden = false }) {
   const [feedback, setFeedback] = useState(emptyFeedback);
   const [status, setStatus] = useState({ state: "idle", message: "", field: "" });
   const [reference, setReference] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
   const [shouldLoadSecurity, setShouldLoadSecurity] = useState(false);
   const [securityAttempt, setSecurityAttempt] = useState(0);
   const [securityState, setSecurityState] = useState(TURNSTILE_SITE_KEY ? "loading" : "unavailable");
@@ -130,10 +131,21 @@ export default function FeedbackForm({ headingRef, hidden = false }) {
   function resetFeedback() {
     setFeedback(emptyFeedback);
     setReference("");
+    setCopyStatus("");
     setStatus({ state: "idle", message: "", field: "" });
     setTurnstileToken("");
     setSecurityState(TURNSTILE_SITE_KEY ? "loading" : "unavailable");
     setSecurityAttempt((attempt) => attempt + 1);
+  }
+
+  async function copyReference() {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(reference);
+      setCopyStatus("Copied.");
+    } catch {
+      setCopyStatus("Select and copy the reference.");
+    }
   }
 
   async function submitFeedback(event) {
@@ -215,7 +227,12 @@ export default function FeedbackForm({ headingRef, hidden = false }) {
           <div className="feedback-confirmation" role="status">
             <strong>Thank you. APC received your feedback.</strong>
             <p>No name or email was requested.</p>
-            <p className="feedback-reference"><span>Submission reference</span><code>{reference}</code></p>
+            <div className="feedback-reference">
+              <span>Submission reference</span>
+              <code>{reference}</code>
+              <button className="button secondary" type="button" onClick={copyReference}>Copy reference</button>
+            </div>
+            <p className="copy-status" role="status" aria-live="polite">{copyStatus}</p>
             <p>Keep this reference if you may ask APC to remove your optional comment.</p>
             <button className="button secondary" type="button" onClick={resetFeedback}>Send another response</button>
           </div>

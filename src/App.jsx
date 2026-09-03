@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.modern.css";
-import APC_LOGO from "./assets/apc-logo.png";
 import FeedbackForm from "./FeedbackForm.jsx";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "./content.js";
+import { appHash, parseAppHash } from "./navigation.js";
 import { formatToday, loadProfileName, saveProfileName } from "./profile.js";
 
 const APC_URL = "https://autismpathwaysconsulting.com/";
@@ -27,6 +27,8 @@ const moreSections = [
   { id: "evidence", label: "Evidence" },
   { id: "install", label: "Install" },
 ];
+
+const allGuides = [...guideOptions, parentPause];
 
 const installGuides = {
   apple: {
@@ -99,14 +101,15 @@ function defaultInstallPlatform() {
 }
 
 export default function App() {
-  const [activeView, setActiveView] = useState("actions");
-  const [activeGuide, setActiveGuide] = useState(null);
-  const [activeTool, setActiveTool] = useState(null);
-  const [activeMoreSection, setActiveMoreSection] = useState("safety");
-  const [firstStep, setFirstStep] = useState("Shoes on");
-  const [thenStep, setThenStep] = useState("Go to the car");
-  const [choiceA, setChoiceA] = useState("Blue shirt");
-  const [choiceB, setChoiceB] = useState("Green shirt");
+  const [initialRoute] = useState(() => parseAppHash(window.location.hash));
+  const [activeView, setActiveView] = useState(initialRoute.view);
+  const [activeGuide, setActiveGuide] = useState(() => allGuides.find((guide) => guide.id === initialRoute.guideId) || null);
+  const [activeTool, setActiveTool] = useState(initialRoute.toolId || null);
+  const [activeMoreSection, setActiveMoreSection] = useState(initialRoute.moreSection);
+  const [firstStep, setFirstStep] = useState("");
+  const [thenStep, setThenStep] = useState("");
+  const [choiceA, setChoiceA] = useState("");
+  const [choiceB, setChoiceB] = useState("");
   const [minutes, setMinutes] = useState(5);
   const [remaining, setRemaining] = useState(300);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -119,7 +122,9 @@ export default function App() {
   const [profileName, setProfileName] = useState(loadProfileName);
   const [profileDraft, setProfileDraft] = useState(profileName);
   const [profileStatus, setProfileStatus] = useState("");
-  const viewHeadingRef = useRef(null);
+  const actionsHeadingRef = useRef(null);
+  const toolsHeadingRef = useRef(null);
+  const moreHeadingRef = useRef(null);
   const guidePanelRef = useRef(null);
   const toolPanelRef = useRef(null);
   const safetyHeadingRef = useRef(null);
@@ -131,6 +136,7 @@ export default function App() {
   const installDialogHeadingRef = useRef(null);
   const installDialogTriggerRef = useRef(null);
   const profileHeadingRef = useRef(null);
+  const moreNavRef = useRef(null);
   const shouldMoveFocusRef = useRef(false);
   const shouldFocusToolRef = useRef(false);
   const shouldFocusMoreSectionRef = useRef(null);
@@ -141,6 +147,30 @@ export default function App() {
     const clockId = window.setInterval(() => setToday(new Date()), 60_000);
     return () => window.clearInterval(clockId);
   }, []);
+
+  useEffect(() => {
+    const canonicalHash = appHash(initialRoute);
+    if (window.location.hash !== canonicalHash) window.history.replaceState(null, "", canonicalHash);
+
+    function restoreRoute() {
+      const route = parseAppHash(window.location.hash);
+      setActiveView(route.view);
+      setActiveGuide(allGuides.find((guide) => guide.id === route.guideId) || null);
+      setActiveTool(route.toolId || null);
+      setActiveMoreSection(route.moreSection);
+      if (route.view === "tools" && route.toolId) shouldFocusToolRef.current = true;
+      else if (route.view === "about") shouldFocusMoreSectionRef.current = route.moreSection;
+      else shouldMoveFocusRef.current = true;
+      window.scrollTo({ top: 0 });
+    }
+
+    window.addEventListener("popstate", restoreRoute);
+    window.addEventListener("hashchange", restoreRoute);
+    return () => {
+      window.removeEventListener("popstate", restoreRoute);
+      window.removeEventListener("hashchange", restoreRoute);
+    };
+  }, [initialRoute]);
 
   useEffect(() => {
     if (!timerRunning) return undefined;
@@ -190,7 +220,9 @@ export default function App() {
     if (!shouldMoveFocusRef.current) return;
     shouldMoveFocusRef.current = false;
     if (activeView === "actions" && activeGuide) guidePanelRef.current?.focus();
-    else viewHeadingRef.current?.focus();
+    else if (activeView === "actions") actionsHeadingRef.current?.focus();
+    else if (activeView === "tools") toolsHeadingRef.current?.focus();
+    else moreHeadingRef.current?.focus();
   }, [activeGuide, activeTool, activeView]);
 
   useEffect(() => {
@@ -214,9 +246,22 @@ export default function App() {
     focusHeading(headingBySection[requestedSection]);
   }, [activeMoreSection, activeView]);
 
+  useEffect(() => {
+    if (activeView !== "about") return;
+    const selectedButton = moreNavRef.current?.querySelector('[aria-current="page"]');
+    selectedButton?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [activeMoreSection, activeView]);
+
+  function pushRoute(route) {
+    const nextHash = appHash(route);
+    if (window.location.hash !== nextHash) window.history.pushState(null, "", nextHash);
+  }
+
   function chooseGuide(guide) {
     shouldMoveFocusRef.current = true;
     setActiveGuide(guide);
+    setActiveView("actions");
+    pushRoute({ view: "actions", guideId: guide.id });
   }
 
   function openView(view) {
@@ -224,6 +269,7 @@ export default function App() {
     setActiveView(view);
     if (view === "actions") setActiveGuide(null);
     if (view === "tools") setActiveTool(null);
+    pushRoute({ view, moreSection: activeMoreSection });
     window.scrollTo({ top: 0 });
   }
 
@@ -243,6 +289,7 @@ export default function App() {
     if (moveFocus) shouldFocusMoreSectionRef.current = section;
     setActiveMoreSection(section);
     setActiveView("about");
+    pushRoute({ view: "about", moreSection: section });
     if (!moveFocus) window.scrollTo({ top: 0 });
   }
 
@@ -250,17 +297,20 @@ export default function App() {
     shouldFocusToolRef.current = true;
     setActiveTool(tool);
     setActiveView("tools");
+    pushRoute({ view: "tools", toolId: tool });
     window.scrollTo({ top: 0 });
   }
 
   function openTool(tool) {
     shouldFocusToolRef.current = true;
     setActiveTool(tool);
+    pushRoute({ view: "tools", toolId: tool });
   }
 
   function returnToTools() {
     shouldMoveFocusRef.current = true;
     setActiveTool(null);
+    pushRoute({ view: "tools" });
   }
 
   function openFeedback() {
@@ -364,7 +414,7 @@ export default function App() {
       <header className="site-header">
         <div className="page-width header-inner">
           <button className="brand" type="button" onClick={() => openView("actions")} aria-label="Open Calm Companion actions">
-            <img src={APC_LOGO} alt="" />
+            <img src="/icon-192.png" alt="" />
             <span><strong>APC Calm Companion</strong><small>One clear next step</small></span>
           </button>
           <nav className="app-nav" aria-label="Main navigation">
@@ -380,7 +430,7 @@ export default function App() {
           <div className="action-heading-row">
             <div className="section-heading">
               <p className="today-label"><span>Today</span>{todayLabel}</p>
-              <h1 id="choose-title" ref={!activeGuide ? viewHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
+              <h1 id="choose-title" ref={!activeGuide ? actionsHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
               <p>Choose the closest match. You do not need to work out the cause first.</p>
             </div>
             <button className="profile-shortcut" type="button" onClick={openProfile} aria-label={`Open profile settings. Currently supporting ${profileLabel}`}>
@@ -417,7 +467,7 @@ export default function App() {
             </>
           ) : (
             <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
-              <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); }}>← All actions</button>
+              <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); pushRoute({ view: "actions" }); }}>← All actions</button>
               <p className="guide-kicker">One option to try</p>
               <h2 id="guide-panel-title">{activeGuide.title}</h2>
               <div className="now-box"><span>Try this now</span><strong>{activeGuide.now}</strong></div>
@@ -443,7 +493,7 @@ export default function App() {
         {activeView === "tools" && <section id="tools" className="section tools-section view-section" aria-labelledby="tools-title">
           <div className="page-width">
             <div className="section-heading">
-              <h1 id="tools-title" ref={viewHeadingRef} tabIndex="-1">Choose a visual tool</h1>
+              <h1 id="tools-title" ref={toolsHeadingRef} tabIndex="-1">Choose a visual tool</h1>
               <p>These tools support understanding and communication. They do not require a child to respond in a particular way.</p>
             </div>
             {!activeTool ? (
@@ -463,8 +513,8 @@ export default function App() {
                 <div id="first-then-panel" className="tool-content">
                   <div className="tool-intro"><h2>First, then</h2><p>Use two short, concrete steps. “Then” should be accurate and realistically available.</p></div>
                   <div className="field-grid">
-                    <label>First<input value={firstStep} maxLength="40" onChange={(event) => setFirstStep(event.target.value)} /></label>
-                    <label>Then<input value={thenStep} maxLength="40" onChange={(event) => setThenStep(event.target.value)} /></label>
+                    <label>First<input value={firstStep} maxLength="40" placeholder="For example, shoes on" onChange={(event) => setFirstStep(event.target.value)} /></label>
+                    <label>Then<input value={thenStep} maxLength="40" placeholder="For example, go to the car" onChange={(event) => setThenStep(event.target.value)} /></label>
                   </div>
                   <div className="visual-board two-part" aria-label={`First ${firstStep || "blank"}, then ${thenStep || "blank"}`}>
                     <div><span>First</span><strong>{firstStep || "Add one step"}</strong></div>
@@ -477,8 +527,8 @@ export default function App() {
                 <div id="choices-panel" className="tool-content">
                   <div className="tool-intro"><h2>Two manageable choices</h2><p>Offer only options that are genuinely available. A point, reach, look, gesture or spoken response can all communicate a choice.</p></div>
                   <div className="field-grid">
-                    <label>Choice one<input value={choiceA} maxLength="40" onChange={(event) => setChoiceA(event.target.value)} /></label>
-                    <label>Choice two<input value={choiceB} maxLength="40" onChange={(event) => setChoiceB(event.target.value)} /></label>
+                    <label>Choice one<input value={choiceA} maxLength="40" placeholder="For example, blue shirt" onChange={(event) => setChoiceA(event.target.value)} /></label>
+                    <label>Choice two<input value={choiceB} maxLength="40" placeholder="For example, green shirt" onChange={(event) => setChoiceB(event.target.value)} /></label>
                   </div>
                   <div className="visual-board two-part choices" aria-label={`Choice one ${choiceA || "blank"}, choice two ${choiceB || "blank"}`}>
                     <div><span>Choice 1</span><strong>{choiceA || "Add a choice"}</strong></div>
@@ -564,14 +614,15 @@ export default function App() {
           <section id="about" className="more-header" aria-labelledby="about-title">
             <div className="page-width">
               <div className="section-heading more-heading">
-                <h1 id="about-title" ref={viewHeadingRef} tabIndex="-1">More</h1>
+                <h1 id="about-title" ref={moreHeadingRef} tabIndex="-1">More</h1>
                 <p>Safety, feedback and app information.</p>
               </div>
-              <nav className="more-section-nav" aria-label="More sections">
+              <nav ref={moreNavRef} className="more-section-nav" aria-label="More sections">
                 {moreSections.map((section) => (
                   <button
                     key={section.id}
                     type="button"
+                    data-more-section={section.id}
                     aria-current={activeMoreSection === section.id ? "page" : undefined}
                     onClick={() => openMoreSection(section.id, true)}
                   >
@@ -641,7 +692,7 @@ export default function App() {
             </div>
             <div className="evidence-grid">
               {evidenceNotes.map((item) => (
-                <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer">Read the evidence brief</a></article>
+                <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer" aria-label={`Read the evidence brief: ${item.title}`}>Read the evidence brief</a></article>
               ))}
             </div>
           </section>
