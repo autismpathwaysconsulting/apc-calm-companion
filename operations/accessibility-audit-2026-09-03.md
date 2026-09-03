@@ -19,6 +19,7 @@ Scope: automated browser audit, accessibility-tree inspection, and desktop keybo
 | Keyboard order | Pass | Skip link, emergency call, safety information, brand action, main navigation, profile, and action choices receive focus in logical order |
 | Skip link | Pass | Activating Skip to main content places focus on `main#main-content` |
 | Accessible button names | Pass after correction | The APC brand and profile buttons preserve their visible labels in the accessible name |
+| Reduced-motion media path | Pass in browser emulation | The deployed candidate matches `prefers-reduced-motion: reduce`, reduces transitions and animations to 0.01 milliseconds, limits animations to one iteration, and uses automatic scrolling |
 
 ## Corrected issue
 

@@ -19,6 +19,7 @@ Public launch means a limited organic release of the free web app. Paid printabl
 - [x] Pass a Lighthouse audit with 100 accessibility, 100 best practices, and 94 performance on the exact deployment.
 - [x] Verify logical keyboard order, the skip link, and visible-text inclusion in accessible button names.
 - [x] Verify an activated service worker, complete runtime cache, offline HTTP 200 reopening, offline Tools navigation, and no horizontal overflow at 390 by 844 while an uncached external page fails.
+- [x] Verify the deployed reduced-motion media path uses near-zero transitions and animations, one animation iteration, and automatic scrolling.
 
 ## Phase 2: physical device and accessibility gate
 
