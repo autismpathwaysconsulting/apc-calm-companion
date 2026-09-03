@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const dist = new URL("../dist/", import.meta.url);
 
@@ -15,7 +16,7 @@ async function listFiles(directory) {
   return files;
 }
 
-const distPath = dist.pathname;
+const distPath = fileURLToPath(dist);
 const allFiles = await listFiles(distPath);
 const cacheableFiles = allFiles
   .filter((path) => !path.endsWith("/sw.js") && !path.endsWith("/_headers"))

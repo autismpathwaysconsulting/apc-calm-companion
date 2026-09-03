@@ -7,8 +7,9 @@ APC Calm Companion is a parent-facing web app for ordinary, non-emergency moment
 - General educational support only
 - Not therapy, diagnosis, assessment, medical advice or emergency support
 - No claim that an action will calm every child
-- No account, advertising tracker or child profile
-- No persistence of child names, notes, routines or behaviour information
+- No account, advertising tracker or clinical or behavioural profile
+- One optional name or nickname, limited to 24 characters, may be saved only in that browser so the prompt can be personalised. It can be removed at any time and is never included with feedback
+- No persistence of diagnoses, dates of birth, photos, school details, notes, histories, routines or behaviour records
 - Optional feedback sends only a usefulness answer, an optional improvement category and an optional comment; the server adds the app version and submission date
 - Feedback never includes tool entries or the action selected by the parent
 - The form does not request personal or child information, but optional free text may contain information entered accidentally
@@ -35,6 +36,8 @@ The static host must honour `public/_headers`. Test the generated `dist` folder 
 ## Feedback service
 
 The parent feedback form posts only to the same-origin `/api/feedback` Pages Function. The Function validates a strict data allow-list, always requires Turnstile and inserts through a prepared D1 statement. Feedback is not emailed or published; an authorised APC reviewer reads it in Cloudflare D1. The form does not request names, email addresses or child information. The database does not include fields for IP addresses, user agents, cookies, device identifiers, selected actions or tool contents. Restricted reviewers must still treat optional comments as potentially containing personal information entered accidentally.
+
+The optional nickname is separate from feedback. It stays in browser `localStorage`, is not sent to APC and is excluded from the feedback request. On a shared device, anyone using the same browser may see it until it is removed, so parents should leave it blank or remove it after use when that matters for privacy. The app remains fully usable without a nickname.
 
 Required production configuration:
 

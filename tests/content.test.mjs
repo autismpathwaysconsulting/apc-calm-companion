@@ -159,6 +159,15 @@ test("the app defaults to a focused three-view navigation model", async () => {
   assert.equal(source.includes('className="hero page-width"'), false);
 });
 
+test("the app exposes five bounded tools including observation support", async () => {
+  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  for (const tool of ["first-then", "choices", "timer", "communication", "observation"]) {
+    assert.ok(source.includes(`id: "${tool}"`), `missing tool: ${tool}`);
+  }
+  assert.ok(source.includes("Notice only what you can see, hear or verify."));
+  assert.ok(source.includes("not assessment or proof of a cause"));
+});
+
 test("More shows one section at a time without discarding a feedback draft", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");

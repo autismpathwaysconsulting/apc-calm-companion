@@ -16,6 +16,7 @@ const toolOptions = [
   { id: "choices", label: "Two choices", summary: "Show two options that are both available.", marker: "A / B" },
   { id: "timer", label: "Timer", summary: "Make the remaining time visible.", marker: "5:00" },
   { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech.", marker: "Yes / No" },
+  { id: "observation", label: "Quick check", summary: "Notice one observable factor before changing one thing.", marker: "Look" },
 ];
 
 const moreSections = [
@@ -469,6 +470,38 @@ export default function App() {
                     ))}
                   </div>
                   <p className="medical-note">Pain, illness, breathing difficulty, injury or a sudden concerning change may need medical assessment. Do not use the board to delay urgent care.</p>
+                </div>
+              )}
+
+              {activeTool === "observation" && (
+                <div id="observation-panel" className="tool-content">
+                  <div className="tool-intro">
+                    <h2>Quick observation check</h2>
+                    <p>Notice only what you can see, hear or verify. This check cannot identify why something is happening.</p>
+                  </div>
+                  <div className="observation-grid" aria-label="Observable factors to check">
+                    <article>
+                      <span>1</span>
+                      <h3>Safety and health</h3>
+                      <p>Check for immediate danger, breathing difficulty, injury, pain, illness or a sudden concerning change. Stop using the app and seek appropriate help when needed.</p>
+                    </article>
+                    <article>
+                      <span>2</span>
+                      <h3>Communication access</h3>
+                      <p>Is the person’s usual device, picture, object, sign, gesture or other response method available?</p>
+                    </article>
+                    <article>
+                      <span>3</span>
+                      <h3>Surroundings</h3>
+                      <p>Notice what is observable about noise, light, crowding, temperature, clothing and available space.</p>
+                    </article>
+                    <article>
+                      <span>4</span>
+                      <h3>Task and timing</h3>
+                      <p>Is one next step visible? Could the task be made shorter, clearer or easier to begin?</p>
+                    </article>
+                  </div>
+                  <p className="observation-note">Change one reasonable factor, then notice what becomes easier, stays difficult or changes. This is observation, not assessment or proof of a cause.</p>
                 </div>
               )}
 

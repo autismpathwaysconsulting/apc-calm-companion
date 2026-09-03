@@ -64,6 +64,7 @@ export const guideOptions = [
     ],
     say: "Let’s make one part easier.",
     notice: "What became easier, stayed difficult or changed after one adjustment?",
+    tools: ["observation"],
   },
 ];
 

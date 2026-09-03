@@ -164,6 +164,12 @@ textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
 .communication-grid button > span { min-width: 34px; min-height: 34px; display: inline-grid; place-items: center; border-radius: 10px; background: var(--primary-tint); color: var(--primary-hover); font-weight: 700; }
 .communication-grid small { color: var(--muted); line-height: 1.3; }
 .medical-note { margin: 0; border-left: 4px solid var(--danger-text); border-radius: 0 12px 12px 0; background: var(--danger-surface); padding: 14px 16px; color: #73241e; line-height: 1.58; }
+.observation-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.observation-grid article { position: relative; border: 1px solid var(--border); border-radius: 16px; background: #fafbfe; padding: 20px 20px 20px 62px; }
+.observation-grid article > span { position: absolute; top: 18px; left: 18px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: var(--primary-tint); color: var(--primary-hover); font-weight: 700; }
+.observation-grid h3 { margin: 0; font-size: 1.08rem; }
+.observation-grid p { margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.observation-note { margin: 0; border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0; background: var(--primary-tint); padding: 14px 16px; color: #344476; line-height: 1.58; }
 
 .about-view { min-height: calc(100vh - 116px); }
 .about-view[hidden] { display: none !important; }
@@ -299,7 +305,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .focused-guide, .tool-panel, .feedback-form { padding: 18px; }
   .tool-menu { grid-template-columns: 1fr; gap: 10px; }
   .tool-menu button { min-height: 100px; padding: 15px; }
-  .field-grid, .two-part { grid-template-columns: 1fr; }
+  .field-grid, .two-part, .observation-grid { grid-template-columns: 1fr; }
   .two-part > div { min-height: 150px; }
   .split-heading { flex-direction: column; }
   .communication-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
