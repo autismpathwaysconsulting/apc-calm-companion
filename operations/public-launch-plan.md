@@ -1,14 +1,14 @@
 # Calm Companion public launch plan
 
-Status date: 3 September 2026
+Status date: 6 September 2026
 
-Interface candidate: `605af9d`
+Interface candidate: `35770a5`
 
-Owner beta-export candidate: `605af9d`, published to GitHub
+Owner beta-export candidate: `35770a5`, published to GitHub
 
 Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.dev/`
 
-Exact verified deployment: `https://cd5e5666.apc-calm-companion.pages.dev/`
+Exact verified deployment: `https://efacfe31.apc-calm-companion.pages.dev/`
 
 Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.  
 For live execution, also use `operations/launch-operator-checklist-2026-09-06.md`.
