@@ -2,31 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Outfit";
-  src: url("/fonts/outfit-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500 800;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Work Sans";
-  src: url("/fonts/work-sans-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-}
-
 :root {
-  --apc-cream: #fff9f1;
-  --apc-ink: #173936;
-  --apc-action: #1f6f66;
-  --apc-teal: #2dd4bf;
-  --apc-coral: #e8997a;
-  --apc-sage: #6b9e7a;
-  --apc-border: #d6e2dc;
-  --apc-muted: #475569;
+  --apc-color-teal-500: #2dd4bf;
+  --apc-color-teal-700: #0f766e;
+  --apc-color-coral-500: #e8997a;
+  --apc-color-sage-500: #6b9e7a;
+  --apc-color-cream-50: #fff9f1;
+  --apc-color-ink-900: #073734;
+  --apc-color-slate-600: #475569;
+  --apc-color-border: #d6e2dc;
+  --apc-color-surface: #ffffff;
+
+  --apc-cream: var(--apc-color-cream-50);
+  --apc-ink: var(--apc-color-ink-900);
+  --apc-action: var(--apc-color-teal-700);
+  --apc-teal: var(--apc-color-teal-500);
+  --apc-coral: var(--apc-color-coral-500);
+  --apc-sage: var(--apc-color-sage-500);
+  --apc-border: var(--apc-color-border);
+  --apc-muted: var(--apc-color-slate-600);
+
+  --apc-font-display: "DM Serif Display", Georgia, serif;
+  --apc-font-body: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --apc-space-1: 0.25rem;
+  --apc-space-2: 0.5rem;
+  --apc-space-3: 0.75rem;
+  --apc-space-4: 1rem;
+  --apc-space-5: 1.25rem;
+  --apc-space-6: 1.5rem;
+  --apc-radius-control: 1rem;
+  --apc-radius-card: 1.5rem;
+  --apc-radius-pill: 999px;
+  --apc-shadow-card: 0 12px 32px rgba(7, 55, 52, 0.08);
+  --apc-shadow-raised: 0 16px 40px rgba(7, 55, 52, 0.18);
+  --apc-duration-fast: 160ms;
+  --apc-duration-base: 200ms;
+  --apc-duration-slow: 220ms;
+  --apc-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 [hidden] {
@@ -42,14 +54,14 @@ body {
   min-width: 320px;
   background: var(--apc-cream);
   color: var(--apc-ink);
-  font-family: "Work Sans", system-ui, sans-serif;
+  font-family: var(--apc-font-body);
 }
 
 .apc-app {
   background:
     radial-gradient(circle at 8% 2%, rgba(45, 212, 191, 0.13), transparent 28rem),
     radial-gradient(circle at 96% 34%, rgba(232, 153, 122, 0.11), transparent 25rem),
-    linear-gradient(180deg, #fff9f1 0%, #f7f3eb 48%, #f1f7f3 100%);
+    linear-gradient(180deg, var(--apc-cream) 0%, #f7f3eb 48%, #f1f7f3 100%);
 }
 
 .apc-app-shell {
@@ -59,7 +71,7 @@ body {
 .apc-section-stop {
   position: relative;
   scroll-margin-block: 14px 110px;
-  animation: apc-soft-arrival 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: apc-soft-arrival var(--apc-duration-slow) var(--apc-ease-standard) both;
 }
 
 .apc-home-grid {
@@ -72,7 +84,8 @@ body {
 #install-guide > section {
   overflow: hidden;
   border-color: rgba(45, 212, 191, 0.34);
-  box-shadow: 0 14px 38px rgba(23, 57, 54, 0.075);
+  border-radius: var(--apc-radius-card);
+  box-shadow: var(--apc-shadow-card);
 }
 
 .apc-hero-card::before {
@@ -83,6 +96,99 @@ body {
   content: "";
 }
 
+.apc-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: 0 0 auto;
+}
+
+.apc-hero-inner {
+  position: relative;
+  isolation: isolate;
+}
+
+.apc-hero-content,
+.apc-hero-utility,
+.apc-home-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.apc-path-motif {
+  position: absolute;
+  top: -2.5rem;
+  right: -3.5rem;
+  z-index: -1;
+  width: min(58%, 27rem);
+  color: var(--apc-teal);
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+.apc-path-motif path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.apc-path-motif path:nth-child(2) {
+  color: var(--apc-sage);
+  stroke-width: 9;
+}
+
+.apc-path-motif path:nth-child(3) {
+  color: var(--apc-coral);
+  stroke-width: 7;
+}
+
+.apc-path-motif circle {
+  fill: var(--apc-coral);
+  stroke: white;
+  stroke-width: 4;
+}
+
+.apc-hero-utility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--apc-space-3);
+}
+
+.apc-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border-radius: var(--apc-radius-pill);
+  background: rgba(45, 212, 191, 0.12);
+  padding: 0.35rem 0.75rem;
+  color: var(--apc-action);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.apc-help-link,
+.apc-header-utility {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--apc-space-2);
+  border: 1px solid var(--apc-border);
+  border-radius: var(--apc-radius-pill);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 0.75rem;
+  color: var(--apc-action);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.apc-help-link:hover,
+.apc-header-utility:hover {
+  border-color: var(--apc-action);
+  background: white;
+}
+
 .apc-home-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -91,7 +197,7 @@ body {
 
 .apc-home-actions > button {
   min-width: 0;
-  border-radius: 1.1rem;
+  border-radius: var(--apc-radius-control);
   padding-inline: 0.75rem;
   line-height: 1.2;
 }
@@ -99,6 +205,23 @@ body {
 .apc-home-primary,
 .apc-home-feedback {
   grid-column: 1 / -1;
+}
+
+.apc-home-actions > button:nth-child(4) {
+  grid-column: 1 / -1;
+}
+
+.apc-button {
+  border-radius: var(--apc-radius-control) !important;
+}
+
+.apc-tool-tab {
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--apc-space-2);
+  border-radius: var(--apc-radius-control);
 }
 
 .apc-date-control {
@@ -114,7 +237,7 @@ body {
   gap: 0.65rem;
   overflow: hidden;
   border: 1px solid #d6dde8;
-  border-radius: 1rem;
+  border-radius: var(--apc-radius-control);
   background: #f4f4f5;
   padding: 0.75rem 1rem;
   color: #0f172a;
@@ -157,12 +280,15 @@ body {
 
 .apc-nav-item,
 .apc-floating-feedback,
-.apc-home-actions > button {
+.apc-home-actions > button,
+.apc-help-link,
+.apc-header-utility,
+.apc-tool-tab {
   transition:
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease;
+    transform var(--apc-duration-base) var(--apc-ease-standard),
+    border-color var(--apc-duration-fast) ease,
+    background-color var(--apc-duration-fast) ease,
+    box-shadow var(--apc-duration-base) ease;
 }
 
 @keyframes apc-soft-arrival {
@@ -190,12 +316,18 @@ body {
 
   .apc-home-primary,
   .apc-home-feedback {
+    grid-column: 1 / -1;
+  }
+
+  .apc-home-actions > button:nth-child(4) {
     grid-column: auto;
   }
 }
 
 h1, h2, h3, h4 {
-  font-family: "Outfit", "Work Sans", system-ui, sans-serif;
+  font-family: var(--apc-font-display);
+  font-weight: 400 !important;
+  letter-spacing: -0.025em;
 }
 
 button, input, textarea, select {
@@ -283,7 +415,12 @@ summary:focus-visible {
   padding: 10px 17px;
   color: #0f766e;
   font-weight: 700;
-  box-shadow: 0 12px 30px rgba(23, 57, 54, 0.2);
+  box-shadow: var(--apc-shadow-raised);
+}
+
+.apc-floating-feedback .apc-icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .apc-view-header {
@@ -292,10 +429,10 @@ summary:focus-visible {
   gap: 12px;
   margin-bottom: 20px;
   border: 1px solid var(--apc-border);
-  border-radius: 24px;
+  border-radius: var(--apc-radius-card);
   background: rgba(255, 255, 255, 0.96);
   padding: 12px 16px;
-  box-shadow: 0 8px 24px rgba(23, 57, 54, 0.08);
+  box-shadow: var(--apc-shadow-card);
 }
 
 .apc-view-header img {
@@ -362,8 +499,8 @@ summary:focus-visible {
 }
 
 .apc-nav-icon {
-  font-size: 1.28rem;
-  line-height: 1;
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .apc-nav-item[aria-current="page"] {
@@ -385,6 +522,8 @@ summary:focus-visible {
 }
 
 .apc-first-visit-dialog {
+  position: relative;
+  isolation: isolate;
   width: min(100%, 620px);
   max-width: calc(100vw - 32px);
   box-sizing: border-box;
@@ -396,6 +535,19 @@ summary:focus-visible {
   color: var(--apc-ink);
   text-align: center;
   box-shadow: 0 30px 80px rgba(8, 35, 32, 0.34);
+}
+
+.apc-first-visit-dialog > :not(.apc-path-motif) {
+  position: relative;
+  z-index: 1;
+}
+
+.apc-first-visit-dialog .apc-path-motif {
+  top: -1.5rem;
+  right: -2rem;
+  z-index: 0;
+  width: 72%;
+  opacity: 0.12;
 }
 
 .apc-first-visit-brand {
@@ -442,9 +594,10 @@ summary:focus-visible {
   box-shadow: 0 8px 20px rgba(23, 57, 54, 0.08);
 }
 
-.apc-first-choice span {
-  font-size: 2.4rem;
-  line-height: 1;
+.apc-first-choice .apc-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  color: var(--apc-action);
 }
 
 .apc-first-choice strong {

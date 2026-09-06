@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import APC_LOGO from "./assets/apc-logo.png";
+import ApcIcon from "./ApcIcon.jsx";
 import FeedbackForm from "./FeedbackForm.jsx";
 
 
@@ -15,7 +16,7 @@ function Card({ children, className = "", ...props }) {
 
 function Button({ children, onClick, variant = "solid", className = "", type = "button", disabled = false, ref, ...props }) {
   const base =
-    "inline-flex min-h-12 items-center justify-center rounded-3xl px-5 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]";
+    "apc-button inline-flex min-h-12 items-center justify-center rounded-3xl px-5 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]";
   const style =
     variant === "urgent"
       ? "bg-[#A84730] text-white shadow-lg shadow-orange-100 hover:bg-[#873622]"
@@ -32,11 +33,22 @@ function Button({ children, onClick, variant = "solid", className = "", type = "
   );
 }
 
-function IconBadge({ label, className = "" }) {
+function IconBadge({ label, icon, className = "" }) {
   return (
     <span aria-hidden="true" className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-xl ${className}`}>
-      {label}
+      {icon ? <ApcIcon name={icon} className="h-6 w-6" /> : label}
     </span>
+  );
+}
+
+function PathMotif({ className = "" }) {
+  return (
+    <svg className={`apc-path-motif ${className}`} viewBox="0 0 420 280" aria-hidden="true">
+      <path d="M24 224C72 112 147 64 256 80c54 8 91-15 136-58" />
+      <path d="M44 258c56-86 132-122 222-100 57 14 94-4 128-36" />
+      <path d="M12 178C76 54 190 18 310 49" />
+      <circle cx="310" cy="49" r="12" />
+    </svg>
   );
 }
 
@@ -299,6 +311,7 @@ function viewFromHash(hash) {
     "#communication": "communication",
     "#quick-tools": "tools",
     "#parent-support": "tools",
+    "#help": "help",
     "#feedback": "feedback",
   };
   return routes[hash] || "home";
@@ -563,7 +576,7 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
     }
 
     setShowInstallHelp(true);
-    window.setTimeout(() => goToSection("install-guide"), 80);
+    openView("help", "install-guide");
   }
 function enableDeviceSaving() {
   try {
@@ -596,6 +609,7 @@ function resetSavedData() {
       routine: "#independence",
       communication: "#communication",
       tools: "#quick-tools",
+      help: "#help",
     };
     setActiveView(view);
     setFeedbackOpen(false);
@@ -637,12 +651,6 @@ function resetSavedData() {
   function selectTemplate(templateName) {
     setSelectedTemplate(templateName);
     setSchedule(cloneRoutine(routineTemplates[templateName]));
-  }
-
-  function openBedtimeRoutine() {
-    selectTemplate("Bedtime");
-    setRoutineEditMode(false);
-    openView("routine");
   }
 
   function toggleTask(id) {
@@ -813,7 +821,7 @@ function resetSavedData() {
     const nextView = previousViewRef.current || "home";
     setFeedbackOpen(false);
     setActiveView(nextView);
-    const hashes = { calm: "#calm-reset", routine: "#independence", communication: "#communication", tools: "#quick-tools" };
+    const hashes = { calm: "#calm-reset", routine: "#independence", communication: "#communication", tools: "#quick-tools", help: "#help" };
     window.history.replaceState(null, "", `${window.location.pathname}${hashes[nextView] || ""}`);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: "auto" }), 80);
   }
@@ -860,25 +868,25 @@ function resetSavedData() {
         <a href="#calm-reset" onClick={(event) => { event.preventDefault(); openView("calm"); }} className="apc-skip-link">Skip to Calm Reset</a>
         <p className="sr-only" role="status" aria-live="polite">{appNotice}</p>
         {activeView !== "home" && activeView !== "feedback" && (
-          <header className="apc-view-header">
+          <header className="apc-view-header apc-section-stop">
             <img src={APC_LOGO} alt="" />
-            <div>
+            <div className="min-w-0 flex-1">
               <p>APC Calm Companion</p>
-              <h1>{activeView === "calm" ? "Calm Reset" : activeView === "routine" ? "Visual Routine" : activeView === "communication" ? "Communication" : "Tools"}</h1>
+              <h1>{activeView === "calm" ? "Calm Reset" : activeView === "routine" ? "Visual Routine" : activeView === "communication" ? "Communication" : activeView === "help" ? "Help & app info" : "Tools"}</h1>
             </div>
+            {activeView !== "help" && <button type="button" className="apc-header-utility" onClick={() => openView("help")}><ApcIcon name="help" /> <span>Help</span></button>}
           </header>
         )}
         <header hidden={activeView !== "home"} className="apc-home-grid mb-8 grid gap-4 lg:grid-cols-[1.45fr_0.95fr]">
           <Card className="apc-section-stop apc-hero-card border border-teal-100">
             <div className="apc-hero-inner p-6 md:p-8">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-medium text-teal-700">
-                <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#FFF9F1] ring-1 ring-teal-100">
-                  <img src={APC_LOGO} alt="" className="h-full w-full object-contain" />
-                </span>
-                Autism Pathways Consulting
+              <PathMotif />
+              <div className="apc-hero-utility mb-4">
+                <span className="apc-kicker">Practical parent support</span>
+                <button type="button" onClick={() => openView("help")} className="apc-help-link"><ApcIcon name="help" /> Help & install</button>
               </div>
 
-              <div className="grid gap-5 text-center md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-7 md:text-left">
+              <div className="apc-hero-content grid gap-5 text-center md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-7 md:text-left">
                 <div className="apc-hero-logo mx-auto flex h-24 w-32 items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#FFF9F1] px-3 shadow-lg ring-4 ring-white md:mx-0">
                   <img
                     src={APC_LOGO}
@@ -898,12 +906,11 @@ function resetSavedData() {
               </div>
 
               <div className="apc-home-actions mt-6">
-                <Button onClick={() => openView("calm")} className="apc-home-primary h-14 w-full text-base">🧘 Calm Reset</Button>
-                <Button variant="outline" onClick={() => openView("tools")} className="h-14 w-full text-base">🧰 Tools</Button>
-                <Button variant="outline" onClick={() => openView("communication")} className="h-14 w-full text-base">💬 Communication</Button>
-                <Button variant="outline" onClick={openBedtimeRoutine} className="h-14 w-full text-base">🌙 Bedtime routine</Button>
-                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">📲 Install</Button>
-                <Button variant="feedback" onClick={openFeedback} className="apc-home-feedback h-14 w-full text-base">♡ Give feedback</Button>
+                <Button onClick={() => openView("calm")} className="apc-home-primary h-14 w-full gap-2 text-base"><ApcIcon name="calm" /> Calm Reset</Button>
+                <Button variant="outline" onClick={() => openView("routine")} className="h-14 w-full gap-2 text-base"><ApcIcon name="routine" /> Routine</Button>
+                <Button variant="outline" onClick={() => openView("communication")} className="h-14 w-full gap-2 text-base"><ApcIcon name="communication" /> Communication</Button>
+                <Button variant="outline" onClick={() => openView("tools")} className="h-14 w-full gap-2 text-base"><ApcIcon name="tools" /> Tools</Button>
+                <Button variant="feedback" onClick={openFeedback} className="apc-home-feedback h-14 w-full gap-2 text-base"><ApcIcon name="feedback" /> Give feedback</Button>
               </div>
             </div>
           </Card>
@@ -924,7 +931,7 @@ function resetSavedData() {
               <label htmlFor="selected-date" className="sr-only">Choose the date</label>
               <div className="apc-date-control mt-4">
                 <span className="apc-date-control-value" aria-hidden="true">{dateButtonLabel}</span>
-                <span className="apc-date-control-icon" aria-hidden="true">📅</span>
+                <ApcIcon name="date" className="apc-date-control-icon" />
                 <input id="selected-date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-date-native" />
               </div>
               <div className="apc-privacy-card mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
@@ -945,7 +952,7 @@ function resetSavedData() {
 
         
 
-        {activeView === "home" && !onboardingComplete && (
+        {activeView === "help" && !onboardingComplete && (
           <section className="apc-section-stop apc-home-panel mb-6 rounded-[2rem] border border-teal-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div>
@@ -980,7 +987,7 @@ function resetSavedData() {
           <section className="apc-section-stop mb-6 rounded-[2rem] border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-6 shadow-lg">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-bold text-rose-600">🚨 Focus Mode Active</div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-bold text-rose-600"><ApcIcon name="alert" className="h-5 w-5" /> Focus Mode Active</div>
                 <h2 className="mt-3 text-3xl font-bold text-slate-900">Things are escalating</h2>
                 <p className="mt-2 max-w-2xl text-lg leading-7 text-slate-700">Lower demands. Use fewer words. Focus on safety first. You do not need to solve everything immediately.</p>
               </div>
@@ -988,9 +995,9 @@ function resetSavedData() {
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🧘</div><h3 className="mt-3 text-lg font-bold">Say less</h3><p className="mt-2 text-sm leading-6 text-slate-600">Short phrases are easier to process during distress.</p></div>
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">🎧</div><h3 className="mt-3 text-lg font-bold">Reduce sensory input</h3><p className="mt-2 text-sm leading-6 text-slate-600">Lower noise, lights, crowding, and pressure.</p></div>
-              <div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-4xl">💜</div><h3 className="mt-3 text-lg font-bold">Connection first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Regulation before reasoning.</p></div>
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="calm" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Say less</h3><p className="mt-2 text-sm leading-6 text-slate-600">Short phrases are easier to process during distress.</p></div>
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="sensory" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Reduce sensory input</h3><p className="mt-2 text-sm leading-6 text-slate-600">Lower noise, lights, crowding, and pressure.</p></div>
+              <div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="feedback" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Connection first</h3><p className="mt-2 text-sm leading-6 text-slate-600">Regulation before reasoning.</p></div>
             </div>
           </section>
         )}
@@ -1002,7 +1009,7 @@ function resetSavedData() {
               <h2 className="text-2xl font-bold md:text-3xl">What should I do right now?</h2>
               <p className="mt-3 text-base leading-7 text-slate-600">Choose the closest situation. I’ll give you what to say, what to avoid, what to do, and which tool to open.</p>
 
-              <Button variant="urgent" className="mt-5 min-h-16 w-full text-base" onClick={() => setFocusMode(true)}>🛟 Things are escalating</Button>
+              <Button variant="urgent" className="mt-5 min-h-16 w-full gap-2 text-base" onClick={() => setFocusMode(true)}><ApcIcon name="alert" /> Things are escalating</Button>
 
               <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-1">
                 {Object.entries(calmResets).map(([key, item]) => (
@@ -1022,7 +1029,7 @@ function resetSavedData() {
                   <p className="mt-2 leading-7 text-slate-600">{reset.message}</p>
 
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                    {reset.actions.map((action) => <div key={action} className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold shadow-sm">✅ {action}</div>)}
+                    {reset.actions.map((action) => <div key={action} className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold shadow-sm"><ApcIcon name="check" className="h-5 w-5 text-teal-700" /> {action}</div>)}
                   </div>
 
                   <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -1095,7 +1102,7 @@ function resetSavedData() {
           <Card hidden={activeView !== "routine"} className="border border-teal-100 lg:col-span-3">
             <div className="p-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-3"><IconBadge label="👆" /><div><p className="text-sm font-medium text-slate-500">Child independence mode</p><h2 className="text-2xl font-bold">Show the routine, then let your child tap</h2></div></div>
+                <div className="flex items-center gap-3"><IconBadge icon="routine" /><div><p className="text-sm font-medium text-slate-500">Child independence mode</p><h2 className="text-2xl font-bold">Show the routine, then let your child tap</h2></div></div>
                 <div className="grid grid-cols-2 gap-2">
                   <Button variant={routineEditMode ? "outline" : "solid"} aria-pressed={!routineEditMode} onClick={() => setRoutineEditMode(false)}>▶ Use routine</Button>
                   <Button variant={routineEditMode ? "solid" : "outline"} aria-pressed={routineEditMode} onClick={() => setRoutineEditMode(true)}>✏️ Edit routine</Button>
@@ -1164,8 +1171,8 @@ function resetSavedData() {
 
           <Card id="communication" hidden={activeView !== "communication"} className="scroll-mt-6 border border-slate-100 lg:col-span-3">
             <div className="p-6">
-              <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
-              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed" role="status" aria-live="polite">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" aria-pressed={voiceEnabled} onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
+              <div className="mb-5 flex items-center gap-3"><IconBadge icon="communication" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
+              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed" role="status" aria-live="polite">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" aria-pressed={voiceEnabled} onClick={() => setVoiceEnabled((value) => !value)}><ApcIcon name="volume" /> Voice {voiceEnabled ? "ON" : "OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {essentialCommunicationCards.map((card) => (
                   <button key={card.title} type="button" onClick={() => speakCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
@@ -1222,7 +1229,7 @@ function resetSavedData() {
         <section id="quick-tools" hidden={activeView !== "tools"} className="apc-section-stop mb-8 scroll-mt-6 rounded-[2rem] bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">⚡ Everyday support tools</div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700"><ApcIcon name="tools" className="h-5 w-5" /> Everyday support tools</div>
               <h2 className="mt-3 text-2xl font-bold">Choose one tool to show your child</h2>
               <p className="mt-2 max-w-2xl leading-7 text-slate-600">To avoid overwhelming your child, only one tool opens at a time. Use the tabs, then show that one screen to your child.</p>
             </div>
@@ -1231,19 +1238,19 @@ function resetSavedData() {
 
           <div className="mb-5 grid gap-2 sm:grid-cols-4">
             {[
-              ["firstThen", "1️⃣ First / Then"],
-              ["timer", "⏱️ Timer"],
-              ["calm", "🌬️ Calm Down"],
-              ["reward", "⭐ Reward"],
-            ].map(([toolType, label]) => (
+              ["firstThen", "sequence", "First / Then"],
+              ["timer", "timer", "Timer"],
+              ["calm", "calm", "Calm Down"],
+              ["reward", "reward", "Reward"],
+            ].map(([toolType, icon, label]) => (
               <button
                 key={toolType}
                 type="button"
                 onClick={() => setActiveQuickTool(toolType)}
                 aria-pressed={activeQuickTool === toolType}
-                className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${activeQuickTool === toolType ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-[#F0F7F3]"}`}
+                className={`apc-tool-tab rounded-2xl px-4 py-3 text-sm font-bold transition ${activeQuickTool === toolType ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-[#F0F7F3]"}`}
               >
-                {label}
+                <ApcIcon name={icon} /> {label}
               </button>
             ))}
           </div>
@@ -1409,7 +1416,7 @@ function resetSavedData() {
         <section id="parent-support" hidden={activeView !== "tools" || !parentInstructionsOpen} className="apc-section-stop mb-8 grid gap-6 lg:grid-cols-3">
           <Card className="border border-slate-100 lg:col-span-2">
             <div className="p-6">
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><IconBadge label="🧰" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div><Button variant="outline" onClick={toggleParentInstructions}>Close guidance</Button></div>
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><IconBadge icon="tools" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div><Button variant="outline" onClick={toggleParentInstructions}>Close guidance</Button></div>
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
                 <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" aria-pressed={activeTool.title === tool.title} onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
                 <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
@@ -1424,18 +1431,21 @@ function resetSavedData() {
 
         
 
-        <div id="install-guide" hidden={activeView !== "home"} className="apc-section-stop scroll-mt-8">
+        <div id="install-guide" hidden={activeView !== "help"} className="apc-section-stop scroll-mt-8">
         <Card className="border border-teal-100 bg-[#F0FDFA]">
           <div className="p-6">
             <div className="flex items-start gap-3">
-              <IconBadge label="📲" />
+              <IconBadge icon="install" />
               <div>
                 <p className="text-sm font-medium text-slate-500">Install APC Calm Companion</p>
                 <h2 className="text-2xl font-bold">Add this tool to your Home Screen</h2>
               </div>
             </div>
 
-            <Button variant="outline" className="mt-5 w-full" aria-expanded={showInstallHelp} aria-controls="visual-install-steps" onClick={() => setShowInstallHelp((value) => !value)}>{showInstallHelp ? "Hide visual instructions" : "Show visual instructions"}</Button>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Button onClick={installApp} className="w-full gap-2"><ApcIcon name="install" /> Install app</Button>
+              <Button variant="outline" className="w-full" aria-expanded={showInstallHelp} aria-controls="visual-install-steps" onClick={() => setShowInstallHelp((value) => !value)}>{showInstallHelp ? "Hide visual instructions" : "Show visual instructions"}</Button>
+            </div>
 
             {showInstallHelp && (
               <div id="visual-install-steps" className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1465,9 +1475,9 @@ function resetSavedData() {
 
         {feedbackOpen && <FeedbackForm headingRef={feedbackHeadingRef} onClose={closeFeedback} hidden={false} />}
 
-        <Card hidden={activeView !== "home"} className="apc-section-stop border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
+        <Card hidden={activeView !== "help"} className="apc-section-stop border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge icon="feedback" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="brain" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="family" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="spark" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
-        <section hidden={activeView !== "home"} className="apc-section-stop mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
+        <section hidden={activeView !== "help"} className="apc-section-stop mt-8 rounded-[2rem] border border-teal-100 bg-[#173936] p-6 text-white shadow-xl">
           <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-white/70">Seeing the same pattern repeat?</p>
@@ -1486,7 +1496,7 @@ function resetSavedData() {
           </div>
         </section>
 
-        <footer hidden={activeView !== "home"} className="apc-section-stop mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 text-center text-sm leading-6 text-slate-600 shadow-sm">
+        <footer hidden={activeView !== "help"} className="apc-section-stop mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 text-center text-sm leading-6 text-slate-600 shadow-sm">
           <p className="font-bold text-slate-900">© Autism Pathways Consulting</p>
           <p className="mt-2">APC Calm Companion provides educational parent support tools only. It does not replace therapy, diagnosis, medical advice, or crisis support.</p>
           <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
@@ -1494,11 +1504,11 @@ function resetSavedData() {
         {!firstVisitOpen && (
           <nav className="apc-nav-dock" aria-label="Main app sections">
             {[
-              ["home", "⌂", "Home"],
-              ["calm", "🧘", "Calm"],
-              ["routine", "☑", "Routine"],
-              ["communication", "💬", "Communicate"],
-              ["tools", "🧰", "Tools"],
+              ["home", "home", "Home"],
+              ["calm", "calm", "Calm"],
+              ["routine", "routine", "Routine"],
+              ["communication", "communication", "Communicate"],
+              ["tools", "tools", "Tools"],
             ].map(([view, icon, label]) => (
               <button
                 key={view}
@@ -1507,18 +1517,19 @@ function resetSavedData() {
                 aria-current={activeView === view ? "page" : undefined}
                 onClick={() => openView(view)}
               >
-                <span className="apc-nav-icon" aria-hidden="true">{icon}</span>
+                <ApcIcon name={icon} className="apc-nav-icon" />
                 <span>{label}</span>
               </button>
             ))}
           </nav>
         )}
-        {!feedbackOpen && !firstVisitOpen && activeView !== "home" && <button type="button" onClick={openFeedback} className="apc-floating-feedback" aria-label="Open feedback page">♡ <span>Feedback</span></button>}
+        {!feedbackOpen && !firstVisitOpen && activeView !== "home" && <button type="button" onClick={openFeedback} className="apc-floating-feedback" aria-label="Open feedback page"><ApcIcon name="feedback" /> <span>Feedback</span></button>}
       </div>
 
       {firstVisitOpen && createPortal(
         <div className="apc-first-visit-backdrop">
           <section ref={firstVisitDialogRef} role="dialog" aria-modal="true" aria-labelledby="first-visit-title" onKeyDown={trapFirstVisitFocus} className="apc-first-visit-dialog">
+            <PathMotif />
             <div className="apc-first-visit-brand">
               <img src={APC_LOGO} alt="" />
               <span>APC Calm Companion</span>
@@ -1526,19 +1537,19 @@ function resetSavedData() {
             <h1 id="first-visit-title">What do you need right now?</h1>
             <div className="apc-first-visit-grid">
               <button ref={firstVisitCloseRef} type="button" className="apc-first-choice apc-first-choice-calm" onClick={() => chooseFirstDestination("calm")}>
-                <span aria-hidden="true">🧘</span>
+                <ApcIcon name="calm" />
                 <strong>Calm Reset</strong>
               </button>
               <button type="button" className="apc-first-choice" onClick={() => chooseFirstDestination("routine")}>
-                <span aria-hidden="true">☑️</span>
+                <ApcIcon name="routine" />
                 <strong>Routine</strong>
               </button>
               <button type="button" className="apc-first-choice" onClick={() => chooseFirstDestination("communication")}>
-                <span aria-hidden="true">💬</span>
+                <ApcIcon name="communication" />
                 <strong>Communication</strong>
               </button>
               <button type="button" className="apc-first-choice" onClick={() => chooseFirstDestination("tools")}>
-                <span aria-hidden="true">🧰</span>
+                <ApcIcon name="tools" />
                 <strong>Tools</strong>
               </button>
             </div>

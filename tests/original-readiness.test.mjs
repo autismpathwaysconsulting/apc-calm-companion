@@ -39,7 +39,7 @@ test("audience-test routine separates child use from parent editing", () => {
   assert.ok(appSource.includes("✏️ Edit routine"));
   assert.ok(appSource.includes("routineEditMode && <button"));
   assert.ok(appSource.includes("Routine changes are not saved."));
-  assert.ok(appSource.includes('selectTemplate("Bedtime")'));
+  assert.ok(appSource.includes('Bedtime: ['));
   assert.equal(appSource.includes("bedtimeMode"), false);
 });
 
@@ -109,13 +109,36 @@ test("motion reduction and offline caching are explicit", () => {
 });
 
 test("mobile home uses compact section stops and a visible feedback action", () => {
-  assert.ok(appSource.includes('className="apc-home-feedback h-14 w-full text-base"'));
-  assert.ok(appSource.includes("♡ Give feedback"));
+  assert.ok(appSource.includes('className="apc-home-feedback h-14 w-full gap-2 text-base"'));
+  assert.ok(appSource.includes('<ApcIcon name="feedback" /> Give feedback'));
   assert.ok(appSource.includes("apc-section-stop"));
   assert.ok(appSource.includes('activeView !== "home"'));
   assert.ok(styles.includes("scroll-snap-type: y proximity"));
   assert.ok(styles.includes("scroll-snap-stop: always"));
   assert.ok(styles.includes(".apc-home-actions"));
+});
+
+test("brand refinement uses the shared typography, tokens, and APC icon system", async () => {
+  const mainSource = await readFile(new URL("../src/main.jsx", import.meta.url), "utf8");
+  const iconSource = await readFile(new URL("../src/ApcIcon.jsx", import.meta.url), "utf8");
+  assert.ok(mainSource.includes("@fontsource/dm-sans"));
+  assert.ok(mainSource.includes("@fontsource/dm-serif-display"));
+  assert.ok(styles.includes('--apc-font-display: "DM Serif Display"'));
+  assert.ok(styles.includes("--apc-radius-card: 1.5rem"));
+  assert.ok(styles.includes("--apc-duration-base: 200ms"));
+  for (const icon of ["home", "calm", "routine", "communication", "tools", "feedback", "install", "help"]) {
+    assert.ok(iconSource.includes(`${icon}:`), `missing APC icon: ${icon}`);
+  }
+});
+
+test("home prioritises four tools and moves secondary content to Help", () => {
+  for (const destination of ["calm", "routine", "communication", "tools"]) {
+    assert.ok(appSource.includes(`openView("${destination}")`), `missing primary destination: ${destination}`);
+  }
+  assert.ok(appSource.includes('"#help": "help"'));
+  assert.ok(appSource.includes('hidden={activeView !== "help"}'));
+  assert.ok(appSource.includes("Help & install"));
+  assert.equal(appSource.includes("openBedtimeRoutine"), false);
 });
 
 test("date picker is clipped inside a bounded visual control", () => {
