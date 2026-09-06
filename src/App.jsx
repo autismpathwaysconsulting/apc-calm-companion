@@ -326,7 +326,8 @@ const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationBoardOpen, setCommunicationBoardOpen] = useState(false);
 const [xp, setXp] = useState(savedAppData?.xp || 120);
   const [focusMode, setFocusMode] = useState(false);
-  const [bedtimeMode, setBedtimeMode] = useState(false);
+  const [routineEditMode, setRoutineEditMode] = useState(false);
+  const [parentInstructionsOpen, setParentInstructionsOpen] = useState(false);
 const [onboardingComplete, setOnboardingComplete] = useState(savedAppData?.onboardingComplete || false);
 const [childName, setChildName] = useState(savedAppData?.childName || "");
 const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge || "Aggression / hitting");  const [voiceEnabled, setVoiceEnabled] = useState(true);
@@ -405,6 +406,11 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
 
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -630,6 +636,12 @@ function resetSavedData() {
     setSchedule(cloneRoutine(routineTemplates[templateName]));
   }
 
+  function openBedtimeRoutine() {
+    selectTemplate("Bedtime");
+    setRoutineEditMode(false);
+    openView("routine");
+  }
+
   function toggleTask(id) {
     setSchedule((items) => items.map((item) => (item.id === id ? { ...item, done: !item.done } : item)));
     setXp((value) => value + 5);
@@ -750,6 +762,13 @@ function resetSavedData() {
     }, 80);
   }
 
+  function toggleParentInstructions() {
+    const nextOpen = !parentInstructionsOpen;
+    setParentInstructionsOpen(nextOpen);
+    if (nextOpen) window.setTimeout(() => goToSection("parent-support"), 80);
+    else window.setTimeout(() => goToSection("quick-tools"), 80);
+  }
+
   function openQuickTool(toolType) {
     setActiveQuickTool(toolType);
     setActiveView("tools");
@@ -833,7 +852,7 @@ function resetSavedData() {
   }
 
   return (
-    <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-[#F7F3EB]"}`}>
+    <main className="min-h-screen bg-[#F7F3EB] text-slate-900 transition-all duration-300">
       <div id="app-content" inert={communicationBoardOpen || firstVisitOpen ? true : undefined} aria-hidden={communicationBoardOpen || firstVisitOpen ? "true" : undefined} className="mx-auto w-full max-w-[430px] px-4 pb-32 pt-6 md:max-w-7xl md:px-8 md:pb-32 md:pt-10">
         <a href="#calm-reset" onClick={(event) => { event.preventDefault(); openView("calm"); }} className="apc-skip-link">Skip to Calm Reset</a>
         <p className="sr-only" role="status" aria-live="polite">{appNotice}</p>
@@ -879,7 +898,7 @@ function resetSavedData() {
                 <Button onClick={() => openView("calm")} className="h-14 w-full text-base">🧘 Calm Reset</Button>
                 <Button variant="outline" onClick={() => openView("tools")} className="h-14 w-full text-base">🧰 Tools</Button>
                 <Button variant="outline" onClick={() => openView("communication")} className="h-14 w-full text-base">💬 Communication</Button>
-                <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
+                <Button variant="outline" onClick={openBedtimeRoutine} className="h-14 w-full text-base">🌙 Bedtime routine</Button>
                 <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install</Button>
               </div>
             </div>
@@ -1069,11 +1088,24 @@ function resetSavedData() {
             <div className="p-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3"><IconBadge label="👆" /><div><p className="text-sm font-medium text-slate-500">Child independence mode</p><h2 className="text-2xl font-bold">Show the routine, then let your child tap</h2></div></div>
-                <label htmlFor="routine-template" className="sr-only">Choose a routine</label>
-                <select id="routine-template" value={selectedTemplate} onChange={(event) => selectTemplate(event.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500">
-                  {Object.keys(routineTemplates).map((name) => <option key={name} value={name}>{name}</option>)}
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant={routineEditMode ? "outline" : "solid"} aria-pressed={!routineEditMode} onClick={() => setRoutineEditMode(false)}>▶ Use routine</Button>
+                  <Button variant={routineEditMode ? "solid" : "outline"} aria-pressed={routineEditMode} onClick={() => setRoutineEditMode(true)}>✏️ Edit routine</Button>
+                </div>
               </div>
+
+              {!storageEnabled && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-950">
+                  <span>Routine changes are not saved.</span>
+                  <button type="button" onClick={enableDeviceSaving} className="min-h-11 rounded-xl px-3 font-bold underline">Save on this device</button>
+                </div>
+              )}
+
+              {routineEditMode && <>
+              <label htmlFor="routine-template" className="sr-only">Choose a routine</label>
+              <select id="routine-template" value={selectedTemplate} onChange={(event) => selectTemplate(event.target.value)} className="mb-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500">
+                {Object.keys(routineTemplates).map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
 
               <div className="grid gap-3 md:grid-cols-3">
                 {[['parent-guided','1. Parent shows phone'],['child-taps','2. Child taps step'],['fade-prompt','3. Fade prompts']].map(([key,label]) => (
@@ -1085,23 +1117,25 @@ function resetSavedData() {
                 {childMode === "child-taps" && "After the step is completed, invite your child to tap the card. This gives a clear finish point."}
                 {childMode === "fade-prompt" && "Once your child understands the routine, stand nearby and wait. Let the visual do more work."}
               </div>
+              </>}
 
               <div className="mt-5 grid gap-3">
                 {schedule.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
                     <button type="button" aria-label={`${item.done ? "Mark incomplete" : "Mark complete"}: ${item.title}`} aria-pressed={item.done} onClick={() => toggleTask(item.id)} className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-3xl shadow-sm transition-all ${item.done ? "bg-teal-100" : "bg-slate-100 hover:bg-[#F0F7F3]"}`}>{item.done ? "✅" : item.icon}</button>
                     <button type="button" aria-pressed={item.done} onClick={() => toggleTask(item.id)} className={`min-h-12 flex-1 text-left text-xl font-bold ${item.done ? "text-slate-500 line-through" : "text-slate-800"}`}>{item.title}</button>
-                    <button type="button" aria-label={`Remove ${item.title}`} onClick={() => removeTask(item.id)} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-600 hover:bg-slate-100 hover:text-slate-800">🗑️</button>
+                    {routineEditMode && <button type="button" aria-label={`Remove ${item.title}`} onClick={() => removeTask(item.id)} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-600 hover:bg-slate-100 hover:text-slate-800">🗑️</button>}
                   </div>
                 ))}
               </div>
-              {lastRemovedTask && (
+              {routineEditMode && lastRemovedTask && (
                 <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-950" role="status">
                   <span>{lastRemovedTask.item.title} removed.</span>
                   <button type="button" onClick={undoRemoveTask} className="min-h-12 rounded-xl px-3 font-bold underline">Undo</button>
                 </div>
               )}
 
+              {routineEditMode && <>
               <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 md:grid-cols-[1fr_190px]">
                   <label htmlFor="new-routine-step" className="sr-only">Add one routine step</label>
@@ -1116,6 +1150,7 @@ function resetSavedData() {
                 <Button onClick={addTask}>Add step + visual</Button>
               </div>
               <p className="mt-2 text-xs font-semibold text-slate-500">You can choose the visual icon yourself. This prevents repeated visuals, such as school bag and going to school looking the same.</p>
+              </>}
             </div>
           </Card>
 
@@ -1183,7 +1218,7 @@ function resetSavedData() {
               <h2 className="mt-3 text-2xl font-bold">Choose one tool to show your child</h2>
               <p className="mt-2 max-w-2xl leading-7 text-slate-600">To avoid overwhelming your child, only one tool opens at a time. Use the tabs, then show that one screen to your child.</p>
             </div>
-            <Button variant="outline" onClick={() => goToSection("parent-support")}>Parent instructions</Button>
+            <Button variant="outline" aria-expanded={parentInstructionsOpen} aria-controls="parent-support" onClick={toggleParentInstructions}>{parentInstructionsOpen ? "Hide guidance" : "Guidance & notes"}</Button>
           </div>
 
           <div className="mb-5 grid gap-2 sm:grid-cols-4">
@@ -1363,10 +1398,10 @@ function resetSavedData() {
           </div>
         </section>
 
-        <section id="parent-support" hidden={activeView !== "tools"} className="mb-8 grid gap-6 lg:grid-cols-3">
+        <section id="parent-support" hidden={activeView !== "tools" || !parentInstructionsOpen} className="mb-8 grid gap-6 lg:grid-cols-3">
           <Card className="border border-slate-100 lg:col-span-2">
             <div className="p-6">
-              <div className="mb-5 flex items-center gap-3"><IconBadge label="🧰" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div>
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><IconBadge label="🧰" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div><Button variant="outline" onClick={toggleParentInstructions}>Close guidance</Button></div>
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
                 <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" aria-pressed={activeTool.title === tool.title} onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
                 <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
@@ -1484,7 +1519,7 @@ function resetSavedData() {
             <div className="apc-first-visit-grid">
               <button ref={firstVisitCloseRef} type="button" className="apc-first-choice apc-first-choice-calm" onClick={() => chooseFirstDestination("calm")}>
                 <span aria-hidden="true">🧘</span>
-                <strong>Calm help</strong>
+                <strong>Calm Reset</strong>
               </button>
               <button type="button" className="apc-first-choice" onClick={() => chooseFirstDestination("routine")}>
                 <span aria-hidden="true">☑️</span>
@@ -1496,7 +1531,7 @@ function resetSavedData() {
               </button>
               <button type="button" className="apc-first-choice" onClick={() => chooseFirstDestination("tools")}>
                 <span aria-hidden="true">🧰</span>
-                <strong>More tools</strong>
+                <strong>Tools</strong>
               </button>
             </div>
             <button type="button" className="apc-first-visit-skip" onClick={dismissFirstVisit}>Go to home</button>

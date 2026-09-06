@@ -27,11 +27,26 @@ test("primary tools use persistent view navigation instead of one long page", ()
 test("first visit presents visual choices and Calm Reset escalation access", () => {
   assert.ok(appSource.includes("apc-calm-companion-onboarding-seen"));
   assert.ok(appSource.includes('id="first-visit-title"'));
-  for (const label of ["Calm help", "Routine", "Communication", "More tools", "Things are escalating"]) {
+  for (const label of ["Calm Reset", "Routine", "Communication", "Tools", "Things are escalating"]) {
     assert.ok(appSource.includes(label), `missing first-use choice: ${label}`);
   }
   assert.ok(styles.includes(".apc-first-visit-grid"));
   assert.ok(styles.includes(".apc-nav-item[aria-current=\"page\"]"));
+});
+
+test("audience-test routine separates child use from parent editing", () => {
+  assert.ok(appSource.includes("▶ Use routine"));
+  assert.ok(appSource.includes("✏️ Edit routine"));
+  assert.ok(appSource.includes("routineEditMode && <button"));
+  assert.ok(appSource.includes("Routine changes are not saved."));
+  assert.ok(appSource.includes('selectTemplate("Bedtime")'));
+  assert.equal(appSource.includes("bedtimeMode"), false);
+});
+
+test("optional tool guidance stays collapsed until requested", () => {
+  assert.ok(appSource.includes("Guidance & notes"));
+  assert.ok(appSource.includes('hidden={activeView !== "tools" || !parentInstructionsOpen}'));
+  assert.ok(appSource.includes('aria-controls="parent-support"'));
 });
 
 test("device persistence requires explicit consent", () => {
