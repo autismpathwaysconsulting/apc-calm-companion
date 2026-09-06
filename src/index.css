@@ -29,6 +29,10 @@
   --apc-muted: #475569;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -118,7 +122,7 @@ summary:focus-visible {
 .apc-floating-feedback {
   position: fixed;
   right: max(14px, env(safe-area-inset-right));
-  bottom: max(14px, env(safe-area-inset-bottom));
+  bottom: max(96px, calc(84px + env(safe-area-inset-bottom)));
   z-index: 40;
   min-height: 50px;
   display: inline-flex;
@@ -131,6 +135,187 @@ summary:focus-visible {
   color: #0f766e;
   font-weight: 700;
   box-shadow: 0 12px 30px rgba(23, 57, 54, 0.2);
+}
+
+.apc-view-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  border: 1px solid var(--apc-border);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 12px 16px;
+  box-shadow: 0 8px 24px rgba(23, 57, 54, 0.08);
+}
+
+.apc-view-header img {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--apc-cream);
+  object-fit: contain;
+  padding: 4px;
+}
+
+.apc-view-header p,
+.apc-view-header h1 {
+  margin: 0;
+}
+
+.apc-view-header p {
+  color: var(--apc-action);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.apc-view-header h1 {
+  color: var(--apc-ink);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  line-height: 1.1;
+}
+
+.apc-nav-dock {
+  position: fixed;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 35;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(calc(100% - 24px), 720px);
+  transform: translateX(-50%);
+  overflow: hidden;
+  border: 1px solid #b8ccc3;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.97);
+  padding: 6px;
+  box-shadow: 0 16px 40px rgba(23, 57, 54, 0.24);
+  backdrop-filter: blur(16px);
+}
+
+.apc-nav-item {
+  position: relative;
+  min-width: 0;
+  min-height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  padding: 6px 2px;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.apc-nav-icon {
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.apc-nav-item[aria-current="page"] {
+  background: #0f766e;
+  color: white;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+}
+
+.apc-first-visit-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgba(23, 57, 54, 0.74);
+  padding: 16px;
+  backdrop-filter: blur(8px);
+}
+
+.apc-first-visit-dialog {
+  width: min(100%, 620px);
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid #b8ccc3;
+  border-radius: 32px;
+  background: var(--apc-cream);
+  padding: clamp(20px, 5vw, 36px);
+  color: var(--apc-ink);
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(8, 35, 32, 0.34);
+}
+
+.apc-first-visit-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--apc-action);
+  font-weight: 700;
+}
+
+.apc-first-visit-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: white;
+  object-fit: contain;
+}
+
+.apc-first-visit-dialog h1 {
+  margin: 16px 0 20px;
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  line-height: 1.08;
+}
+
+.apc-first-visit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apc-first-choice {
+  min-width: 0;
+  min-height: 122px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--apc-border);
+  border-radius: 26px;
+  background: white;
+  padding: 14px 8px;
+  color: var(--apc-ink);
+  box-shadow: 0 8px 20px rgba(23, 57, 54, 0.08);
+}
+
+.apc-first-choice span {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.apc-first-choice strong {
+  font-size: 1rem;
+}
+
+.apc-first-choice-calm {
+  border: 2px solid #0f766e;
+  background: #e5f7f3;
+}
+
+.apc-first-visit-skip {
+  min-height: 48px;
+  margin-top: 14px;
+  border: 0;
+  background: transparent;
+  padding: 8px 16px;
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .feedback-section {

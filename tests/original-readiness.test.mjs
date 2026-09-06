@@ -8,9 +8,30 @@ const styles = await readFile(new URL("../src/index.css", import.meta.url), "utf
 const buildScript = await readFile(new URL("../scripts/generate-sw.mjs", import.meta.url), "utf8");
 
 test("approved visual interface retains its primary tools", () => {
-  for (const label of ["Get calm support", "What should I do right now?", "Quick communication board", "First / Then Board", "Visual Timer"]) {
+  for (const label of ["Calm Reset", "What should I do right now?", "Quick communication board", "First / Then Board", "Visual Timer"]) {
     assert.ok(appSource.includes(label), `missing original interface element: ${label}`);
   }
+});
+
+test("primary tools use persistent view navigation instead of one long page", () => {
+  for (const view of ["home", "calm", "routine", "communication", "tools"]) {
+    assert.ok(appSource.includes(`[\"${view}\"`), `missing dock destination: ${view}`);
+  }
+  assert.ok(appSource.includes('className="apc-nav-dock"'));
+  assert.ok(appSource.includes('aria-current={activeView === view ? "page" : undefined}'));
+  assert.ok(appSource.includes('hidden={activeView !== "calm"}'));
+  assert.ok(appSource.includes('hidden={activeView !== "tools"}'));
+  assert.ok(styles.includes("[hidden]"));
+});
+
+test("first visit presents visual choices and Calm Reset escalation access", () => {
+  assert.ok(appSource.includes("apc-calm-companion-onboarding-seen"));
+  assert.ok(appSource.includes('id="first-visit-title"'));
+  for (const label of ["Calm help", "Routine", "Communication", "More tools", "Things are escalating"]) {
+    assert.ok(appSource.includes(label), `missing first-use choice: ${label}`);
+  }
+  assert.ok(styles.includes(".apc-first-visit-grid"));
+  assert.ok(styles.includes(".apc-nav-item[aria-current=\"page\"]"));
 });
 
 test("device persistence requires explicit consent", () => {
