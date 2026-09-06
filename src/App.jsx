@@ -12,11 +12,11 @@ const EMERGENCY_URL = "https://www.malaysia.gov.my/en/categories/safety-and-comm
 const BEFRIENDERS_URL = "https://befrienders.org.my/contact-us/";
 
 const toolOptions = [
-  { id: "first-then", label: "First, then", summary: "Show one step and what genuinely follows.", marker: "1 → 2" },
-  { id: "choices", label: "Two choices", summary: "Show two options that are both available.", marker: "A / B" },
-  { id: "timer", label: "Timer", summary: "Make the remaining time visible.", marker: "5:00" },
-  { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech.", marker: "Yes / No" },
-  { id: "observation", label: "Quick check", summary: "Notice one observable factor before changing one thing.", marker: "Look" },
+  { id: "first-then", label: "First, then", summary: "Show one step and what genuinely follows." },
+  { id: "choices", label: "Two choices", summary: "Show two options that are both available." },
+  { id: "timer", label: "Timer", summary: "Make the remaining time visible." },
+  { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech." },
+  { id: "observation", label: "Quick check", summary: "Notice one observable factor before changing one thing." },
 ];
 
 const moreSections = [
@@ -54,6 +54,14 @@ const installGuides = {
 };
 
 function GuideIcon({ name }) {
+  if (name === "pause") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.5 8.5v7m5-7v7" />
+      </svg>
+    );
+  }
   if (name === "words") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -83,6 +91,33 @@ function GuideIcon({ name }) {
       <circle cx="12" cy="12" r="2" />
     </svg>
   );
+}
+
+function ToolIcon({ name }) {
+  if (name === "first-then") {
+    return <svg viewBox="0 0 96 72" aria-hidden="true"><rect x="7" y="12" width="31" height="48" rx="10" /><rect x="58" y="12" width="31" height="48" rx="10" /><path d="M42 36h12m-5-6 6 6-6 6" /><path d="M18 28h10M18 36h10M69 32h10M69 40h10" /></svg>;
+  }
+  if (name === "choices") {
+    return <svg viewBox="0 0 96 72" aria-hidden="true"><rect x="8" y="12" width="34" height="48" rx="12" /><rect x="54" y="12" width="34" height="48" rx="12" /><circle cx="25" cy="31" r="7" /><path d="m21 31 3 3 6-7M65 31h12M65 40h8" /></svg>;
+  }
+  if (name === "timer") {
+    return <svg viewBox="0 0 96 72" aria-hidden="true"><circle cx="48" cy="38" r="25" /><path d="M40 7h16M48 13v5M48 38V24M48 38l11 7" /><path d="M27 16 20 23M69 16l7 7" /></svg>;
+  }
+  if (name === "communication") {
+    return <svg viewBox="0 0 96 72" aria-hidden="true"><path d="M10 14h47v35H29L15 60V49h-5z" /><path d="M46 26h40v29H72l-10 8v-8H46z" /><path d="M22 28h23M22 36h16M58 38h16M58 46h11" /></svg>;
+  }
+  return <svg viewBox="0 0 96 72" aria-hidden="true"><circle cx="40" cy="32" r="21" /><path d="m55 47 20 17M29 32s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" /><circle cx="40" cy="32" r="3" /><path d="M71 14v17M63 22h17" /></svg>;
+}
+
+function NavIcon({ name }) {
+  if (name === "actions") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17l9-10" /><circle cx="12" cy="12" r="9" /></svg>;
+  if (name === "tools") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 15 8M14 5l2-2 5 5-2 2M5 14l5 5M7 12l5 5" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>;
+}
+
+function MoreIcon({ name }) {
+  const icons = { profile: "☺", safety: "＋", feedback: "♡", privacy: "○", evidence: "✓", install: "↓" };
+  return <span aria-hidden="true">{icons[name]}</span>;
 }
 
 function focusHeading(headingRef) {
@@ -419,9 +454,9 @@ export default function App() {
             <span className="sr-only">Open Actions</span>
           </button>
           <nav className="app-nav" aria-label="Main navigation">
-            <button type="button" aria-current={activeView === "actions" ? "page" : undefined} onClick={() => openView("actions")}>Actions</button>
-            <button type="button" aria-current={activeView === "tools" ? "page" : undefined} onClick={() => openView("tools")}>Tools</button>
-            <button type="button" aria-current={activeView === "about" ? "page" : undefined} onClick={() => openView("about")}>More</button>
+            <button type="button" aria-current={activeView === "actions" ? "page" : undefined} onClick={() => openView("actions")}><NavIcon name="actions" /><span>Actions</span></button>
+            <button type="button" aria-current={activeView === "tools" ? "page" : undefined} onClick={() => openView("tools")}><NavIcon name="tools" /><span>Tools</span></button>
+            <button type="button" aria-current={activeView === "about" ? "page" : undefined} onClick={() => openView("about")}><NavIcon name="more" /><span>More</span></button>
           </nav>
         </div>
       </header>
@@ -432,7 +467,6 @@ export default function App() {
             <div className="section-heading">
               <p className="today-label"><span>Today</span>{todayLabel}</p>
               <h1 id="choose-title" ref={!activeGuide ? actionsHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
-              <p>Choose the closest match. You do not need to work out the cause first.</p>
             </div>
             <button className="profile-shortcut" type="button" onClick={openProfile}>
               <span className="profile-avatar" aria-hidden="true">{profileName ? profileInitials(profileName) : "＋"}</span>
@@ -447,21 +481,22 @@ export default function App() {
                 {guideOptions.map((guide) => (
                   <button type="button" key={guide.id} className="guide-choice" onClick={() => chooseGuide(guide)}>
                     <span className="guide-icon-wrap"><GuideIcon name={guide.icon} /></span>
-                    <span><strong>{guide.prompt}</strong><small>{guide.short}</small></span>
-                    <span className="guide-arrow" aria-hidden="true">→</span>
+                    <strong>{guide.label}</strong>
+                    <span className="sr-only">{guide.prompt}. {guide.short}</span>
                   </button>
                 ))}
               </div>
               <button type="button" className="parent-pause" onClick={() => chooseGuide(parentPause)}>
-                <span><strong>{parentPause.prompt}</strong><small>{parentPause.short}</small></span>
-                <span aria-hidden="true">→</span>
+                <span className="pause-visual" aria-hidden="true"><span></span></span>
+                <strong>{parentPause.label}</strong>
+                <span className="sr-only">{parentPause.prompt}. {parentPause.short}</span>
               </button>
               {!isInstalled && (
                 <aside className="home-install-callout" aria-labelledby="home-install-title">
+                  <span className="install-visual" aria-hidden="true">＋</span>
                   <div>
-                    <p className="section-label">Keep it close</p>
-                    <h2 id="home-install-title">Add Calm Companion to your phone Home Screen</h2>
-                    <p>Open it like an app when you need it. No App Store or Google Play download is needed.</p>
+                    <h2 id="home-install-title">Add to Home Screen</h2>
+                    <p className="sr-only">Add Calm Companion to your phone Home Screen. Open it like an app when you need it. No App Store or Google Play download is needed.</p>
                   </div>
                   <button className="button secondary" type="button" onClick={openVisualInstallGuide}>See pictures</button>
                 </aside>
@@ -470,8 +505,10 @@ export default function App() {
           ) : (
             <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
               <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); pushRoute({ view: "actions" }); }}>← All actions</button>
-              <p className="guide-kicker">One option to try</p>
-              <h2 id="guide-panel-title">{activeGuide.title}</h2>
+              <div className="guide-title-row">
+                <span className="guide-icon-wrap detail-icon"><GuideIcon name={activeGuide.icon} /></span>
+                <div><p className="guide-kicker">One option to try</p><h2 id="guide-panel-title">{activeGuide.title}</h2></div>
+              </div>
               <div className="now-box"><span>Try this now</span><strong>{activeGuide.now}</strong></div>
               <div className="say-box"><span>You could say</span><strong>“{activeGuide.say}”</strong></div>
               {activeGuide.tools?.length > 0 && (
@@ -495,16 +532,15 @@ export default function App() {
         {activeView === "tools" && <section id="tools" className="section tools-section view-section" aria-labelledby="tools-title">
           <div className="page-width">
             <div className="section-heading">
-              <h1 id="tools-title" ref={toolsHeadingRef} tabIndex="-1">Choose a visual tool</h1>
-              <p>These tools support understanding and communication. They do not require a child to respond in a particular way.</p>
+              <h1 id="tools-title" ref={toolsHeadingRef} tabIndex="-1">Choose a tool</h1>
             </div>
             {!activeTool ? (
               <div className="tool-menu" aria-label="Visual tool choices">
                 {toolOptions.map((tool) => (
                   <button type="button" key={tool.id} onClick={() => openTool(tool.id)}>
-                    <span className="tool-marker" aria-hidden="true">{tool.marker}</span>
-                    <span><strong>{tool.label}</strong><small>{tool.summary}</small></span>
-                    <span className="tool-arrow" aria-hidden="true">→</span>
+                    <span className="tool-marker"><ToolIcon name={tool.id} /></span>
+                    <strong>{tool.label}</strong>
+                    <span className="sr-only">{tool.summary}</span>
                   </button>
                 ))}
               </div>
@@ -628,7 +664,8 @@ export default function App() {
                     aria-current={activeMoreSection === section.id ? "page" : undefined}
                     onClick={() => openMoreSection(section.id, true)}
                   >
-                    {section.label}
+                    <MoreIcon name={section.id} />
+                    <span>{section.label}</span>
                   </button>
                 ))}
               </nav>

@@ -70,6 +70,7 @@ export const guideOptions = [
 
 export const parentPause = {
   id: "parent-pause",
+  icon: "pause",
   prompt: "I need to pause",
   label: "Pause before solving",
   short: "Use this when you are speaking faster, adding words or struggling to choose.",

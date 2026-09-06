@@ -286,6 +286,20 @@ test("action and tool details use progressive disclosure", async () => {
   assert.equal(source.includes("function ToolButton"), false);
 });
 
+test("the opening views stay visual-first and button-led", async () => {
+  const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
+
+  assert.ok(source.includes("function ToolIcon"));
+  assert.ok(source.includes("function NavIcon"));
+  assert.ok(source.includes("<strong>{guide.label}</strong>"));
+  assert.ok(source.includes('<span className="sr-only">{guide.prompt}. {guide.short}</span>'));
+  assert.equal(source.includes("<small>{guide.short}</small>"), false);
+  assert.match(css, /\.guide-choice\s*\{[^}]*min-height:\s*210px/i);
+  assert.ok(css.includes(".guide-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }"));
+  assert.ok(css.includes(".tool-menu { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }"));
+});
+
 test("feedback is voluntary, bounded and separated from urgent support", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
