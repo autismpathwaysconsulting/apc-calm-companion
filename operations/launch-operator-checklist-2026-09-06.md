@@ -35,7 +35,7 @@ Use one iPhone session and one Android session only.
 
 ## 2) Phase 3 five-parent controlled beta
 
-Follow `operations/parent-beta-facilitator-script.md` and `operations/beta-test-plan.md`.
+Recruit with `operations/parent-beta-invitation.md`, then follow `operations/parent-beta-facilitator-script.md` and `operations/beta-test-plan.md`.
 
 1. Assign P1 to P5 and collect a reference from each one short session.
 2. Export preview CSV before P1:

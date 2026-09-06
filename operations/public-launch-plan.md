@@ -58,6 +58,7 @@ Any safety, privacy, blocking accessibility, installation, offline, or data-loss
 
 ## Phase 3: five-parent controlled beta
 
+- [ ] Recruit privately with `operations/parent-beta-invitation.md`; do not post the preview link publicly.
 - [ ] Recruit five voluntary adult parents or caregivers.
 - [ ] Use participant codes P1 to P5 only.
 - [ ] Run every task in `beta-test-plan.md` without teaching the interface first.
