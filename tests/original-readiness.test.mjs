@@ -117,3 +117,14 @@ test("mobile home uses compact section stops and a visible feedback action", () 
   assert.ok(styles.includes("scroll-snap-stop: always"));
   assert.ok(styles.includes(".apc-home-actions"));
 });
+
+test("date picker is clipped inside a bounded visual control", () => {
+  assert.ok(appSource.includes('className="apc-date-control mt-4"'));
+  assert.ok(appSource.includes('className="apc-date-native"'));
+  assert.ok(styles.includes(".apc-date-control"));
+  assert.ok(styles.includes("overflow: hidden"));
+  assert.ok(styles.includes(".apc-date-native"));
+  assert.ok(styles.includes("position: absolute"));
+  assert.ok(styles.includes("max-width: 100%"));
+  assert.ok(styles.includes("min-width: 0"));
+});

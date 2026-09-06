@@ -398,6 +398,7 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   const dateObj = new Date(`${selectedDate}T00:00:00`);
   const todayLabel = dateObj.toLocaleDateString("en-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const shortDate = dateObj.toLocaleDateString("en-MY", { day: "numeric", month: "short" });
+  const dateButtonLabel = dateObj.toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" });
 
   useEffect(() => {
     function handleHashChange() {
@@ -921,7 +922,11 @@ function resetSavedData() {
               </div>
 
               <label htmlFor="selected-date" className="sr-only">Choose the date</label>
-              <input id="selected-date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-ios-date-compact mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
+              <div className="apc-date-control mt-4">
+                <span className="apc-date-control-value" aria-hidden="true">{dateButtonLabel}</span>
+                <span className="apc-date-control-icon" aria-hidden="true">📅</span>
+                <input id="selected-date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-date-native" />
+              </div>
               <div className="apc-privacy-card mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
   <p className="font-bold">{storageEnabled ? "Saved on this device" : "Private by default"}</p>
   <p>{storageEnabled ? "Your optional name, routines, notes, rewards, and timer settings stay in this browser. Nothing is sent to APC." : "No family details or tool activity are saved unless you choose device saving."}</p>
