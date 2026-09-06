@@ -16,6 +16,16 @@ Do not use the immutable deployment URL for feedback. The feedback endpoint is i
 4. Record `Pass`, `Fail`, or `Not run` for the matching D01 to D14 row. Add the shortest reproducible observation. Use `Retest required` after any failure.
 5. Stop promotion for any missing control, trapped focus, unreadable content, incorrect timer, failed offline reopen, privacy failure, or unsafe interpretation.
 
+## Consolidated execution
+
+Keep D01 to D14 as separate evidence rows, but complete them in two coordinated phone sessions:
+
+1. Run D01 to D06 and D14 in one iPhone session. Change settings as directed between checks and record each result separately.
+2. Run D07 to D12 in one Android session. Change settings as directed between checks and record each result separately.
+3. Keep D13 as the existing desktop result unless the app code, focus behaviour or navigation changes.
+
+A provisional result supports workflow continuity only. It is not a pass and does not permit production promotion.
+
 ## iPhone Safari, D01 to D06
 
 ### Default text, D01

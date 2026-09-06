@@ -35,5 +35,8 @@ Ask the participant to submit one short app-focused response without personal in
 2. Open the newest `APC_Calm_Companion_Beta_Feedback_*.csv` file.
 3. Match every recorded reference to exactly one preview-database row.
 4. Record Yes or No in Exactly one database row.
-5. Do not copy optional comments into the launch-testing workbook.
-6. Review the formula-driven decision on Launch Summary.
+5. Run the beta matcher from app:
+   `npm run beta:verify <before-csv> <after-csv> <P1-ref> <P2-ref> <P3-ref> <P4-ref> <P5-ref>`
+6. Record Yes or No in Exactly one database row.
+7. Do not copy optional comments into the launch-testing workbook.
+8. Review the formula-driven decision on Launch Summary.

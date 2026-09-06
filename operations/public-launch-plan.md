@@ -41,6 +41,8 @@ Record device, browser, result, defect, and retest status without collecting chi
 
 Follow `physical-device-accessibility-runbook.md` and record D01 to D14 in the launch workbook.
 
+Keep all fourteen evidence rows, but execute them as one consolidated iPhone session and one consolidated Android session. A provisional row does not count as a pass.
+
 - [ ] iPhone Safari at default and increased text size.
 - [ ] Android Chrome at default and increased text size.
 - [ ] Add to Home Screen on both platforms.
@@ -65,6 +67,8 @@ Any safety, privacy, blocking accessibility, installation, offline, or data-loss
 
 The beta evaluates usability and safety. It is not evidence that the app calms children or improves clinical outcomes.
 
+Use the launch workbook as the operational source of truth. Export the preview database once immediately before P1 and once after P5. Perform additional exports only after a failed or uncertain submission.
+
 ## Phase 4: production promotion
 
 Complete only after Phases 2 and 3 pass.
@@ -73,8 +77,12 @@ Complete only after Phases 2 and 3 pass.
 - [ ] Confirm Cloudflare reports a successful production deployment from that commit.
 - [ ] Check the custom domain on desktop, iPhone, and Android.
 - [ ] Confirm security headers, privacy and terms links, PWA assets, offline reopening, and `/api/feedback` fail-closed behaviour.
-- [ ] Confirm the production database receives only the intended beta submissions.
+- [ ] Confirm the production database receives only the controlled post-promotion validation submission. P1 to P5 remain in the preview database.
 - [ ] Update `GATES.md` and the release report with exact evidence.
+
+Run the automated release suite once immediately before promotion. Repeat earlier Lighthouse, black-box, reflow, offline-emulation or accessibility audits only if app code, dependencies, build settings or Cloudflare configuration changed after the verified candidate.
+
+The P1 to P5 rows remain in the preview database and must not be migrated into production. After promotion, use one controlled non-personal production submission to confirm the production reference and D1 row, then remove its optional test comment according to the established procedure.
 
 ## Phase 5: limited organic public release
 

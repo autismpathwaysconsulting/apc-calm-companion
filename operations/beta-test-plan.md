@@ -38,6 +38,20 @@ Give the participant the preview link without teaching the interface first. Ask 
 
 Before the first session, export `apc-calm-feedback-preview` and record the existing row count without copying comment text. After all five sessions, double-click `Export Calm Companion Beta Feedback.command`. Match each P1 to P5 reference to exactly one new preview-database row.
 
+### Condensed facilitation format
+
+Run the ten tasks as five blocks without removing or teaching any task:
+
+1. Choose an action for the ordinary-transition and verbal-overload scenarios.
+2. Complete First-Then, Choices, Timer and Communication.
+3. Reject app use in both emergency scenarios.
+4. Explain the app boundaries, tool-entry privacy and feedback destination.
+5. Submit feedback and record the displayed reference.
+
+Use one preview export immediately before P1 and one after P5. Export between participants only when a submission fails or the displayed reference is unavailable.
+
+For reconciliation, match every recorded reference exactly. Each must occur once, the final row-count increase must be five, the submission time must fit the session, and the app version must be `1.0.0-beta.1`. Do not use the total row count as the only evidence.
+
 ## Record for each participant
 
 | Measure | Allowed entry |
