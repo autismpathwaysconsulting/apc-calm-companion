@@ -2,13 +2,13 @@
 
 Status date: 6 September 2026
 
-Interface candidate: `35770a5`
+Interface candidate: `697e794`
 
-Owner beta-export candidate: `35770a5`, published to GitHub
+Owner beta-export candidate: `697e794`, published to GitHub
 
 Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.dev/`
 
-Exact verified deployment: `https://efacfe31.apc-calm-companion.pages.dev/`
+Exact verified deployment: `https://846f1a7a.apc-calm-companion.pages.dev/`
 
 Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.  
 For live execution, also use `operations/launch-operator-checklist-2026-09-06.md`.

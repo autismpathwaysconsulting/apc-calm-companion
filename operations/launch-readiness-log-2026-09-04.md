@@ -4,8 +4,8 @@
 
 Approved workflow exception: physical-device gates may remain provisional while the controlled beta is organised because no test devices are available in this environment. This exception does not satisfy Phase 2 and does not authorise production promotion.
 
-- Deployment candidate: `605af9d` family, currently deployed via `codex/commercial-redesign` branch and exposed at `https://3566b9f7.apc-calm-companion.pages.dev/`.
-- Updated candidate and deployment evidence (6 September 2026): latest reviewed commit is `35770a5` on `codex/commercial-redesign`, and the latest branch deployment is `https://efacfe31.apc-calm-companion.pages.dev/` (source `35770a5`).
+- Deployment candidate: `697e794` reviewed candidate family, currently deployed via `codex/commercial-redesign` branch and exposed at `https://846f1a7a.apc-calm-companion.pages.dev/`.
+- Updated candidate and deployment evidence (6 September 2026): latest reviewed commit is `697e794` on `codex/commercial-redesign`, and the latest branch deployment is `https://846f1a7a.apc-calm-companion.pages.dev/` (source `697e794`).
 - `export-feedback` and `export-preview-feedback` now run successfully from this environment with live Cloudflare auth.
 - Automated verification status: **pass**
   - `npm run check`: 56 tests passed, lint/build/release/build-verification passed.
