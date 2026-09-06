@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import APC_LOGO from "./assets/apc-logo.png";
+import FeedbackForm from "./FeedbackForm.jsx";
 
 
-const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
-const APC_WEBSITE_URL = "https://autismpathwaysconsulting.com";
 
 
 
@@ -13,16 +13,16 @@ function Card({ children, className = "" }) {
   return <section className={`rounded-3xl bg-white shadow-sm ${className}`}>{children}</section>;
 }
 
-function Button({ children, onClick, variant = "solid", className = "", type = "button", disabled = false }) {
+function Button({ children, onClick, variant = "solid", className = "", type = "button", disabled = false, ref, ...props }) {
   const base =
-    "inline-flex items-center justify-center rounded-3xl px-5 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]";
+    "inline-flex min-h-12 items-center justify-center rounded-3xl px-5 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]";
   const style =
     variant === "outline"
       ? "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
       : "bg-gradient-to-r from-teal-700 to-teal-700 text-white shadow-lg shadow-teal-100 hover:shadow-xl hover:shadow-teal-100";
 
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${style} ${className}`}>
+    <button ref={ref} type={type} onClick={onClick} disabled={disabled} className={`${base} ${style} ${className}`} {...props}>
       {children}
     </button>
   );
@@ -276,24 +276,14 @@ function createQuickNote(note) {
   return { id: `note-${Date.now()}-${Math.random().toString(16).slice(2)}`, before: String(note.before || "").trim(), during: String(note.during || "").trim(), helped: String(note.helped || "").trim(), date: new Date().toLocaleDateString() };
 }
 
-const selfTests = [
-  { name: "Progress is 0 when schedule is empty", passed: calculateProgress([]) === 0 },
-  { name: "Progress calculates completed routine steps", passed: calculateProgress([{ done: true }, { done: false }, { done: true }, { done: false }]) === 50 },
-  { name: "Blank routine step is rejected", passed: createScheduleItem("   ") === null },
-  { name: "Created routine item is incomplete by default", passed: createScheduleItem("Pack lunch")?.done === false },
-  { name: "Added toilet step gets toilet icon", passed: createScheduleItem("go toilet")?.icon === "🚽" },
-  { name: "AAC board has at least 12 communication buttons", passed: supportCards.length >= 12 },
-  { name: "Evidence items include references and links", passed: evidenceHighlights.every((item) => Boolean(item.reference && item.link)) },
-  { name: "Parent tools include usable tool types", passed: parentTools.every((tool) => Boolean(tool.toolType)) },
-];
-
 function getSavedAppData() {
   if (typeof window === "undefined") return null;
 
   try {
+    if (window.localStorage.getItem("apc-calm-companion-storage-consent") !== "yes") return null;
     const saved = window.localStorage.getItem("apc-calm-companion-data");
     return saved ? JSON.parse(saved) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -316,23 +306,33 @@ const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5
   const [timerRemaining, setTimerRemaining] = useState(() => (savedAppData?.timerMinutes || 5) * 60);
   const [timerRunning, setTimerRunning] = useState(false);
   const [selectedTaskIcon, setSelectedTaskIcon] = useState("✅");
-  const [childPhotoLabel, setChildPhotoLabel] = useState("No photo added yet");
 const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
   const [researchOpen, setResearchOpen] = useState(false);
   const [communicationBoardOpen, setCommunicationBoardOpen] = useState(false);
-const [xp, setXp] = useState(savedAppData?.xp || 120);  const [streak, setStreak] = useState(savedAppData?.streak || 3);
+const [xp, setXp] = useState(savedAppData?.xp || 120);
   const [focusMode, setFocusMode] = useState(false);
   const [bedtimeMode, setBedtimeMode] = useState(false);
-const [favouriteTools, setFavouriteTools] = useState(savedAppData?.favouriteTools || ["Calm Down Toolkit"]);
 const [onboardingComplete, setOnboardingComplete] = useState(savedAppData?.onboardingComplete || false);
-const [childName, setChildName] = useState(savedAppData?.childName || "My Child");  
+const [childName, setChildName] = useState(savedAppData?.childName || "");
 const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge || "Aggression / hitting");  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [activeQuickTool, setActiveQuickTool] = useState("timer");
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState("ready");
   const [breathingCount, setBreathingCount] = useState(4);
   const [timerVisualMode, setTimerVisualMode] = useState("circle");
+  const [storageEnabled, setStorageEnabled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("apc-calm-companion-storage-consent") === "yes";
+  });
+  const [appNotice, setAppNotice] = useState("");
+  const [lastRemovedTask, setLastRemovedTask] = useState(null);
+  const [timerStatus, setTimerStatus] = useState("");
+  const [feedbackOpen, setFeedbackOpen] = useState(() => typeof window !== "undefined" && window.location.hash === "#feedback");
+  const feedbackHeadingRef = useRef(null);
+  const communicationDialogRef = useRef(null);
+  const communicationCloseRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   const visualChoices = [
     ["✅", "General"],
@@ -361,19 +361,17 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   ];
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("Saved on this device");
 
   const reset = calmResets[activeReset];
   const completedCount = useMemo(() => countCompleted(schedule), [schedule]);
   const progress = useMemo(() => calculateProgress(schedule), [schedule]);
   const canSaveNote = hasAnyNoteText(note);
-  const passedTestCount = selfTests.filter((test) => test.passed).length;
   const dateObj = new Date(`${selectedDate}T00:00:00`);
   const todayLabel = dateObj.toLocaleDateString("en-MY", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const shortDate = dateObj.toLocaleDateString("en-MY", { day: "numeric", month: "short" });
-  const level = Math.max(1, Math.floor(xp / 100) + 1);
-  const levelProgress = xp % 100;
   useEffect(() => {
+  if (!storageEnabled) return;
+
   const appState = {
     childName,
     schedule,
@@ -383,20 +381,19 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
     timerPurpose,
     timerMinutes,
     xp,
-    streak,
     selectedDate,
     mainChallenge,
     onboardingComplete,
-    favouriteTools,
+  storageEnabled: true,
   };
 
   try {
     window.localStorage.setItem("apc-calm-companion-data", JSON.stringify(appState));
-    setSaveMessage("Saved on this device");
-  } catch (error) {
-    setSaveMessage("Saving unavailable in this browser");
+  } catch {
+    // The app remains usable for the current session when browser storage is unavailable.
   }
 }, [
+  storageEnabled,
   childName,
   schedule,
   stars,
@@ -405,12 +402,28 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   timerPurpose,
   timerMinutes,
   xp,
-  streak,
   selectedDate,
   mainChallenge,
   onboardingComplete,
-  favouriteTools,
 ]);
+
+  useEffect(() => {
+    if (!communicationBoardOpen) return undefined;
+
+    previousFocusRef.current = document.activeElement;
+    communicationCloseRef.current?.focus();
+
+    function handleEscape(event) {
+      if (event.key !== "Escape") return;
+      setCommunicationBoardOpen(false);
+    }
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      previousFocusRef.current?.focus?.();
+    };
+  }, [communicationBoardOpen]);
 
   useEffect(() => {
     function handleBeforeInstallPrompt(event) {
@@ -426,16 +439,10 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   }, []);
 
   useEffect(() => {
-    if (!breathingActive) {
-      setBreathingPhase("ready");
-      setBreathingCount(4);
-      return;
-    }
+    if (!breathingActive) return undefined;
 
     let phase = "inhale";
     let count = 4;
-    setBreathingPhase(phase);
-    setBreathingCount(count);
 
     const interval = window.setInterval(() => {
       count -= 1;
@@ -467,6 +474,7 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
       setTimerRemaining((seconds) => {
         if (seconds <= 1) {
           setTimerRunning(false);
+          setTimerStatus("Timer finished.");
           return 0;
         }
         return seconds - 1;
@@ -484,19 +492,31 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
       return;
     }
 
-    setShowInstallHelp((value) => !value);
+    setShowInstallHelp(true);
+    window.setTimeout(() => goToSection("install-guide"), 80);
   }
+function enableDeviceSaving() {
+  try {
+    window.localStorage.setItem("apc-calm-companion-storage-consent", "yes");
+    setStorageEnabled(true);
+    setAppNotice("Device saving is on. Nothing is sent to APC.");
+  } catch {
+    setAppNotice("Saving is unavailable in this browser. You can still use the app for this session.");
+  }
+}
 function resetSavedData() {
-  const confirmReset = window.confirm("Reset saved APC Calm Companion data on this device?");
+  const confirmReset = window.confirm("Remove saved APC Calm Companion data from this device?");
   if (!confirmReset) return;
 
   window.localStorage.removeItem("apc-calm-companion-data");
+  window.localStorage.removeItem("apc-calm-companion-storage-consent");
   window.location.reload();
 }
   function goToSection(id) {
     const element = document.getElementById(id);
     if (!element) return;
-    element.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    element.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   }
 
   function chooseScenario(key) {
@@ -526,7 +546,24 @@ function resetSavedData() {
   }
 
   function removeTask(id) {
-    setSchedule((items) => items.filter((item) => item.id !== id));
+    setSchedule((items) => {
+      const index = items.findIndex((item) => item.id === id);
+      if (index < 0) return items;
+      setLastRemovedTask({ item: items[index], index });
+      setAppNotice(`${items[index].title} removed. You can undo this.`);
+      return items.filter((item) => item.id !== id);
+    });
+  }
+
+  function undoRemoveTask() {
+    if (!lastRemovedTask) return;
+    setSchedule((items) => {
+      const restored = [...items];
+      restored.splice(Math.min(lastRemovedTask.index, restored.length), 0, lastRemovedTask.item);
+      return restored;
+    });
+    setAppNotice(`${lastRemovedTask.item.title} restored.`);
+    setLastRemovedTask(null);
   }
 
   function saveReward() {
@@ -540,17 +577,20 @@ function resetSavedData() {
       ...items,
     ]);
     setXp((value) => value + 10);
+    setAppNotice("Reward saved.");
   }
 
   function resetTimer() {
     setTimerRunning(false);
     setTimerRemaining(timerMinutes * 60);
+    setTimerStatus("Timer reset.");
   }
 
   function updateTimerMinutes(value) {
     setTimerMinutes(value);
     setTimerRemaining(value * 60);
     setTimerRunning(false);
+    setTimerStatus(`Timer set for ${value} minute${value === 1 ? "" : "s"}.`);
   }
 
   function saveNote() {
@@ -559,9 +599,10 @@ function resetSavedData() {
     setSavedNotes((items) => [nextNote, ...items]);
     setNote({ before: "", during: "", helped: "" });
     setXp((value) => value + 10);
+    setAppNotice("Pattern note saved on this device for this session.");
   }
 
-  function useCommunicationCard(card) {
+  function speakCommunicationCard(card) {
     const phrase = card.speak || card.words || card.title || "I need help.";
 
     setCommunicationPhrase(phrase);
@@ -587,14 +628,18 @@ function resetSavedData() {
     }
   }
 
-
-  function toggleFavourite(toolTitle) {
-    setFavouriteTools((current) =>
-      current.includes(toolTitle)
-        ? current.filter((item) => item !== toolTitle)
-        : [...current, toolTitle]
-    );
+  function toggleBreathingGuide() {
+    if (breathingActive) {
+      setBreathingActive(false);
+      setBreathingPhase("ready");
+      setBreathingCount(4);
+      return;
+    }
+    setBreathingPhase("inhale");
+    setBreathingCount(4);
+    setBreathingActive(true);
   }
+
 
   function openParentTool(tool) {
     setActiveTool(tool);
@@ -611,63 +656,60 @@ function resetSavedData() {
     }, 80);
   }
 
-  function sendSummaryToCJ() {
-    const completedSteps = schedule
-      .filter((item) => item.done)
-      .map((item) => item.title);
+  function savePreferences() {
+    const scenarioByChallenge = {
+      "Aggression / hitting": "aggression",
+      "Speech / communication": "speech",
+      Meltdowns: "overwhelmed",
+      Transitions: "transition",
+      Sleep: "overwhelmed",
+      "Sensory overload": "sensory",
+    };
+    setActiveReset(scenarioByChallenge[mainChallenge] || "overwhelmed");
+    setOnboardingComplete(true);
+    setAppNotice("Preferences applied.");
+    window.setTimeout(() => goToSection("calm-reset"), 80);
+  }
 
-    const pendingSteps = schedule
-      .filter((item) => !item.done)
-      .map((item) => item.title);
+  function openFeedback() {
+    setFeedbackOpen(true);
+    window.history.replaceState(null, "", "#feedback");
+    window.setTimeout(() => {
+      feedbackHeadingRef.current?.focus();
+      goToSection("feedback");
+    }, 80);
+  }
 
-    const latestNotes = savedNotes
-      .slice(0, 3)
-      .map((item, index) => {
-        return [
-          `Note ${index + 1}:`,
-          `Before: ${item.before || "Not recorded"}`,
-          `During: ${item.during || "Not recorded"}`,
-          `Helped: ${item.helped || "Not recorded"}`,
-        ].join("");
-      })
-      .join("");
+  function closeFeedback() {
+    setFeedbackOpen(false);
+    window.history.replaceState(null, "", window.location.pathname);
+  }
 
-    const latestRewards = rewardLog
-      .slice(0, 3)
-      .map((item) => `${item.date}: ${item.stars}/5 stars`)
-      .join("");
+  function closeCommunicationBoard() {
+    setCommunicationBoardOpen(false);
+  }
 
-    const message = [
-      "Hi CJ, I used the APC Calm Companion and would like to share a short summary.",
-      "",
-      `Child name: ${childName || "Not added"}`,
-      `Main challenge: ${mainChallenge || "Not selected"}`,
-      `Selected date: ${todayLabel}`,
-      `Current timer: ${timerPurpose}, ${timerMinutes} minute(s)`,
-      "",
-      "Routine progress:",
-      `Completed: ${completedSteps.length ? completedSteps.join(", ") : "None yet"}`,
-      `Still working on: ${pendingSteps.length ? pendingSteps.join(", ") : "None"}`,
-      "",
-      "Latest pattern notes:",
-      latestNotes || "No pattern notes saved yet.",
-      "",
-      "Reward log:",
-      latestRewards || "No reward log saved yet.",
-      "",
-      "I understand this is not emergency support. I would like guidance on what to try next.",
-    ].join("");
-
-    window.open(
-      `https://wa.me/601172998168?text=${encodeURIComponent(message)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+  function trapCommunicationFocus(event) {
+    if (event.key !== "Tab" || !communicationDialogRef.current) return;
+    const focusable = [...communicationDialogRef.current.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+      .filter((element) => !element.disabled && !element.hidden);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   return (
     <main className={`min-h-screen text-slate-900 transition-all duration-300 ${bedtimeMode ? "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" : "bg-[#F7F3EB]"}`}>
-      <div className="mx-auto w-full max-w-[430px] px-4 py-6 md:max-w-7xl md:px-8 md:py-10">
+      <div id="app-content" inert={communicationBoardOpen ? true : undefined} aria-hidden={communicationBoardOpen ? "true" : undefined} className="mx-auto w-full max-w-[430px] px-4 py-6 md:max-w-7xl md:px-8 md:py-10">
+        <a href="#calm-reset" className="apc-skip-link">Skip to calm support</a>
+        <p className="sr-only" role="status" aria-live="polite">{appNotice}</p>
         <header className="mb-8 grid gap-4 lg:grid-cols-[1.45fr_0.95fr]">
           <Card className="border border-teal-100">
             <div className="p-6 md:p-8">
@@ -702,20 +744,7 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => goToSection("parent-support")} className="h-14 w-full text-base">Parent tools</Button>
                 <Button variant="outline" onClick={() => setFocusMode(true)} className="h-14 w-full text-base">Calm reset</Button>
                 <Button variant="outline" onClick={() => setBedtimeMode((value) => !value)} className="h-14 w-full text-base">{bedtimeMode ? "Exit bedtime mode" : "Bedtime"}</Button>
-                <a
-                  href="#install-guide"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    const guide = document.getElementById("install-guide");
-                    if (guide) {
-                      guide.scrollIntoView({ behavior: "smooth", block: "start" });
-                      window.history.replaceState(null, "", "#install-guide");
-                    }
-                  }}
-                  className="flex h-14 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-center text-base font-extrabold text-slate-900 no-underline shadow-sm transition hover:border-teal-200 hover:bg-teal-50"
-                >
-                  Install
-                </a>
+                <Button variant="outline" onClick={installApp} className="h-14 w-full text-base">Install</Button>
               </div>
             </div>
           </Card>
@@ -733,28 +762,20 @@ function resetSavedData() {
                 </div>
               </div>
 
-              <input value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-ios-date-compact mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
+              <label htmlFor="selected-date" className="sr-only">Choose the date</label>
+              <input id="selected-date" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" className="apc-ios-date-compact mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500" />
               <div className="mt-4 rounded-3xl bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
-  <p className="font-bold">{saveMessage}</p>
-  <p>Your child name, routines, notes, reward log, and timer settings are saved on this phone or computer.</p>
-  <button
-    type="button"
-    onClick={resetSavedData}
-    className="mt-2 text-xs font-bold text-emerald-800 underline"
-  >
-    Reset saved data
-  </button>
+  <p className="font-bold">{storageEnabled ? "Saved on this device" : "Private by default"}</p>
+  <p>{storageEnabled ? "Your optional name, routines, notes, rewards, and timer settings stay in this browser. Nothing is sent to APC." : "Nothing is saved after you close the app unless you choose device saving."}</p>
+  {storageEnabled ? (
+    <button type="button" onClick={resetSavedData} className="apc-inline-action mt-2 font-bold text-emerald-800 underline">Remove saved data</button>
+  ) : (
+    <button type="button" onClick={enableDeviceSaving} className="apc-inline-action mt-2 font-bold text-emerald-800 underline">Save on this device</button>
+  )}
 </div>
 
-              <div className="mt-5 rounded-3xl border border-teal-100 bg-[#F7F3EB] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName}'s progress</p><p className="text-sm font-bold text-teal-700">Small wins saved</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-[#1F6F66]" style={{ width: `${levelProgress}%` }} /></div><p className="mt-2 text-xs font-semibold text-teal-700">Small wins, calmer routines, and clearer communication can build confidence over time.</p></div>
+              <div className="mt-5 rounded-3xl border border-teal-100 bg-[#F7F3EB] p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-teal-900">{childName ? `${childName}'s routine` : "Routine progress"}</p><p className="text-sm font-bold text-teal-700">{completedCount}/{schedule.length} steps</p></div><div className="mt-3 h-3 overflow-hidden rounded-full bg-white" role="progressbar" aria-label="Routine progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}><div className="h-full rounded-full bg-[#1F6F66]" style={{ width: `${progress}%` }} /></div><p className="mt-2 text-xs font-semibold text-teal-800">Small steps can make the routine easier to follow.</p></div>
 
-              {showInstallHelp && (
-                <div className="mt-5 rounded-3xl bg-[#F0F7F3] p-5 text-sm leading-6 text-[#173936]">
-                  <p className="font-bold">Install APC Calm Companion on your phone</p>
-                  <p className="mt-2"><strong>iPhone:</strong> Open in Safari → Share → Add to Home Screen.</p>
-                  <p><strong>Android:</strong> Open in Chrome → Menu → Add to Home Screen or Install.</p>
-                </div>
-              )}
             </div>
           </Card>
         </header>
@@ -769,21 +790,17 @@ function resetSavedData() {
                 <h2 className="mt-3 text-3xl font-bold">Personalise this tool for your family</h2>
                 <p className="mt-2 max-w-2xl leading-7 text-slate-600">Optional. This helps the app prioritise the tools your family may need most.</p>
               </div>
-              <Button onClick={() => setOnboardingComplete(true)}>Save preferences</Button>
+              <Button onClick={savePreferences}>Apply preferences</Button>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div>
-                <label className="text-sm font-bold text-slate-700">Child name</label>
-                <input value={childName} onChange={(e) => setChildName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3" />
-                <label className="mt-4 block text-sm font-bold text-slate-700">Child photo</label>
-                <div className="mt-2 rounded-2xl border border-dashed border-teal-200 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-                  {childPhotoLabel}. For beta, parents can add a name first. Photo upload can be added when login/storage is ready.
-                </div>
+                <label htmlFor="child-name" className="text-sm font-bold text-slate-700">Optional name or nickname</label>
+                <input id="child-name" value={childName} maxLength="24" autoComplete="off" placeholder="Leave blank on a shared device" onChange={(e) => setChildName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3" />
               </div>
               <div>
-                <label className="text-sm font-bold text-slate-700">Biggest challenge right now</label>
-                <select value={mainChallenge} onChange={(e) => setMainChallenge(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
+                <label htmlFor="main-challenge" className="text-sm font-bold text-slate-700">Closest situation right now</label>
+                <select id="main-challenge" value={mainChallenge} onChange={(e) => setMainChallenge(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
                   <option>Aggression / hitting</option>
                   <option>Speech / communication</option>
                   <option>Meltdowns</option>
@@ -824,7 +841,7 @@ function resetSavedData() {
 
               <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-1">
                 {Object.entries(calmResets).map(([key, item]) => (
-                  <Button key={key} variant={activeReset === key ? "solid" : "outline"} className="min-h-16 w-full justify-center text-center text-base md:justify-start md:text-left" onClick={() => chooseScenario(key)}>
+                  <Button key={key} variant={activeReset === key ? "solid" : "outline"} className="min-h-16 w-full justify-center text-center text-base md:justify-start md:text-left" aria-pressed={activeReset === key} onClick={() => chooseScenario(key)}>
                     <span className="mr-2 text-xl">{item.icon}</span>{item.label}
                   </Button>
                 ))}
@@ -832,7 +849,7 @@ function resetSavedData() {
             </div>
 
             <div id="recommendation-panel" className="scroll-mt-6 rounded-[2rem] bg-[#F7F3EB] p-5">
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">I recommend</p>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">I recommend</p>
               <div className="mt-4 flex items-start gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white text-4xl shadow-sm">{reset.icon}</div>
                 <div className="min-w-0 flex-1">
@@ -844,7 +861,7 @@ function resetSavedData() {
                   </div>
 
                   <div className="mt-6 grid gap-4 md:grid-cols-2">
-                    <div className="rounded-3xl bg-white p-4 shadow-sm"><p className="text-xs font-bold uppercase tracking-wide text-teal-600">Say this</p><p className="mt-3 text-lg font-semibold leading-7 text-slate-800">“{reset.say}”</p></div>
+                    <div className="rounded-3xl bg-white p-4 shadow-sm"><p className="text-xs font-bold uppercase tracking-wide text-teal-700">Say this</p><p className="mt-3 text-lg font-semibold leading-7 text-slate-800">“{reset.say}”</p></div>
                     <div className="rounded-3xl bg-rose-50 p-4 shadow-sm"><p className="text-xs font-bold uppercase tracking-wide text-rose-600">Try not to say this</p><p className="mt-3 text-lg font-semibold leading-7 text-slate-800">“{reset.avoid}”</p></div>
                   </div>
 
@@ -858,7 +875,7 @@ function resetSavedData() {
                   </div>
 
                   <details className="mt-6 rounded-[2rem] border border-teal-100 bg-[#F7F3EB] p-5">
-                    <summary className="cursor-pointer text-sm font-bold uppercase tracking-wide text-teal-700">Why I recommend this</summary>
+                    <summary className="flex min-h-12 cursor-pointer items-center text-sm font-bold uppercase tracking-wide text-teal-700">Why I recommend this</summary>
                     <h4 className="mt-3 text-lg font-bold text-slate-800">{reset.insight}</h4>
                     <p className="mt-2 leading-7 text-slate-600">{reset.why}</p>
                   </details>
@@ -885,7 +902,9 @@ function resetSavedData() {
 
             {researchOpen && (
               <div className="mt-5">
+                <label htmlFor="research-topic" className="sr-only">Research topic</label>
                 <select
+                  id="research-topic"
                   value={openEvidence}
                   onChange={(event) => setOpenEvidence(event.target.value)}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500"
@@ -912,14 +931,15 @@ function resetSavedData() {
             <div className="p-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3"><IconBadge label="👆" /><div><p className="text-sm font-medium text-slate-500">Child independence mode</p><h2 className="text-2xl font-bold">Show the routine, then let your child tap</h2></div></div>
-                <select value={selectedTemplate} onChange={(event) => selectTemplate(event.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500">
+                <label htmlFor="routine-template" className="sr-only">Choose a routine</label>
+                <select id="routine-template" value={selectedTemplate} onChange={(event) => selectTemplate(event.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-500">
                   {Object.keys(routineTemplates).map((name) => <option key={name} value={name}>{name}</option>)}
                 </select>
               </div>
 
               <div className="grid gap-3 md:grid-cols-3">
                 {[['parent-guided','1. Parent shows phone'],['child-taps','2. Child taps step'],['fade-prompt','3. Fade prompts']].map(([key,label]) => (
-                  <button key={key} type="button" onClick={() => setChildMode(key)} className={`rounded-3xl p-4 text-left text-sm font-semibold ${childMode === key ? "bg-teal-600 text-white" : "bg-[#F0F7F3] text-[#173936]"}`}>{label}</button>
+                  <button key={key} type="button" aria-pressed={childMode === key} onClick={() => setChildMode(key)} className={`rounded-3xl p-4 text-left text-sm font-semibold ${childMode === key ? "bg-teal-700 text-white" : "bg-[#F0F7F3] text-[#173936]"}`}>{label}</button>
                 ))}
               </div>
               <div className="mt-4 rounded-3xl bg-[#F0F7F3] p-4 text-sm leading-6 text-[#173936]">
@@ -931,17 +951,25 @@ function resetSavedData() {
               <div className="mt-5 grid gap-3">
                 {schedule.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
-                    <button type="button" onClick={() => toggleTask(item.id)} className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-3xl shadow-sm transition-all ${item.done ? "bg-teal-100" : "bg-slate-100 hover:bg-[#F0F7F3]"}`}>{item.done ? "✅" : item.icon}</button>
-                    <button type="button" onClick={() => toggleTask(item.id)} className={`flex-1 text-left text-xl font-bold ${item.done ? "text-slate-400 line-through" : "text-slate-800"}`}>{item.title}</button>
-                    <button type="button" onClick={() => removeTask(item.id)} className="rounded-2xl p-3 text-slate-400 hover:bg-slate-100 hover:text-slate-700">🗑️</button>
+                    <button type="button" aria-label={`${item.done ? "Mark incomplete" : "Mark complete"}: ${item.title}`} aria-pressed={item.done} onClick={() => toggleTask(item.id)} className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-3xl shadow-sm transition-all ${item.done ? "bg-teal-100" : "bg-slate-100 hover:bg-[#F0F7F3]"}`}>{item.done ? "✅" : item.icon}</button>
+                    <button type="button" aria-pressed={item.done} onClick={() => toggleTask(item.id)} className={`min-h-12 flex-1 text-left text-xl font-bold ${item.done ? "text-slate-500 line-through" : "text-slate-800"}`}>{item.title}</button>
+                    <button type="button" aria-label={`Remove ${item.title}`} onClick={() => removeTask(item.id)} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-slate-600 hover:bg-slate-100 hover:text-slate-800">🗑️</button>
                   </div>
                 ))}
               </div>
+              {lastRemovedTask && (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-950" role="status">
+                  <span>{lastRemovedTask.item.title} removed.</span>
+                  <button type="button" onClick={undoRemoveTask} className="min-h-12 rounded-xl px-3 font-bold underline">Undo</button>
+                </div>
+              )}
 
               <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 md:grid-cols-[1fr_190px]">
-                  <input value={newTask} onChange={(event) => setNewTask(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") addTask(); }} placeholder="Add one simple step, e.g. brush teeth" className="min-w-0 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-teal-500" />
-                  <select value={selectedTaskIcon} onChange={(event) => setSelectedTaskIcon(event.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500">
+                  <label htmlFor="new-routine-step" className="sr-only">Add one routine step</label>
+                  <input id="new-routine-step" value={newTask} onChange={(event) => setNewTask(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") addTask(); }} placeholder="Add one simple step, e.g. brush teeth" className="min-w-0 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-teal-500" />
+                  <label htmlFor="new-routine-icon" className="sr-only">Choose a visual for the new step</label>
+                  <select id="new-routine-icon" value={selectedTaskIcon} onChange={(event) => setSelectedTaskIcon(event.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:ring-2 focus:ring-teal-500">
                     {visualChoices.map(([icon, label]) => (
                       <option key={label} value={icon}>{icon} {label}</option>
                     ))}
@@ -956,10 +984,10 @@ function resetSavedData() {
           <Card className="border border-slate-100">
             <div className="p-6">
               <div className="mb-5 flex items-center gap-3"><IconBadge label="💬" /><div><p className="text-sm font-medium text-slate-500">Child communication</p><h2 className="text-2xl font-bold">Quick communication board</h2></div></div>
-              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/70">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
+              <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed" role="status" aria-live="polite">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" aria-pressed={voiceEnabled} onClick={() => setVoiceEnabled((value) => !value)}>{voiceEnabled ? "🔊 Voice ON" : "🔈 Voice OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {essentialCommunicationCards.map((card) => (
-                  <button key={card.title} type="button" onClick={() => useCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
+                  <button key={card.title} type="button" onClick={() => speakCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
                     <div className="text-3xl">{card.icon}</div><h3 className="mt-1 text-base font-extrabold">{card.title}</h3><p className="text-xs font-semibold text-slate-700">{card.words}</p>
                   </button>
                 ))}
@@ -968,27 +996,27 @@ function resetSavedData() {
           </Card>
         </section>
 
-        {communicationBoardOpen && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-[#F7F3EB] p-4 text-slate-900">
+        {communicationBoardOpen && createPortal(
+          <div ref={communicationDialogRef} role="dialog" aria-modal="true" aria-labelledby="communication-board-title" onKeyDown={trapCommunicationFocus} className="fixed inset-0 z-50 overflow-y-auto bg-[#F7F3EB] p-4 text-slate-900">
             <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col gap-4">
               <div className="sticky top-0 z-10 rounded-[2rem] border border-teal-100 bg-white/95 p-4 shadow-sm backdrop-blur">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-teal-700">Child communication</p>
-                    <h2 className="text-3xl font-black md:text-5xl">Quick communication board</h2>
+                    <h2 id="communication-board-title" className="text-3xl font-black md:text-5xl">Quick communication board</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button variant="outline" onClick={() => setVoiceEnabled((value) => !value)}>
                       {voiceEnabled ? "Voice on" : "Voice off"}
                     </Button>
-                    <Button onClick={() => setCommunicationBoardOpen(false)}>Close board</Button>
+                    <Button ref={communicationCloseRef} onClick={closeCommunicationBoard}>Close board</Button>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/70">Selected phrase</p>
-                <p className="mt-2 text-4xl font-black leading-tight md:text-6xl">{communicationPhrase}</p>
+                <p className="mt-2 text-4xl font-black leading-tight md:text-6xl" role="status" aria-live="polite">{communicationPhrase}</p>
               </div>
 
               <div className="grid flex-1 grid-cols-2 gap-3 pb-6 sm:grid-cols-3 lg:grid-cols-4">
@@ -996,7 +1024,7 @@ function resetSavedData() {
                   <button
                     key={`fullscreen-${card.title}`}
                     type="button"
-                    onClick={() => useCommunicationCard(card)}
+                    onClick={() => speakCommunicationCard(card)}
                     className={`min-h-32 rounded-[2rem] bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-lg md:min-h-40`}
                   >
                     <div className="text-4xl md:text-5xl">{card.icon}</div>
@@ -1006,7 +1034,8 @@ function resetSavedData() {
                 ))}
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         <section id="quick-tools" className="mb-8 rounded-[2rem] bg-white p-6 shadow-sm">
@@ -1030,6 +1059,7 @@ function resetSavedData() {
                 key={toolType}
                 type="button"
                 onClick={() => setActiveQuickTool(toolType)}
+                aria-pressed={activeQuickTool === toolType}
                 className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${activeQuickTool === toolType ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 text-slate-700 hover:bg-[#F0F7F3]"}`}
               >
                 {label}
@@ -1045,12 +1075,14 @@ function resetSavedData() {
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-wide text-teal-700">First</p>
-                    <input value={firstTask} onChange={(e)=>setFirstTask(e.target.value)} className="mt-3 w-full rounded-2xl border p-3 text-center text-xl font-bold" />
+                    <label htmlFor="first-task" className="sr-only">First step</label>
+                    <input id="first-task" value={firstTask} onChange={(e)=>setFirstTask(e.target.value)} className="mt-3 w-full rounded-2xl border p-3 text-center text-xl font-bold" />
                     <div className="mt-4 text-6xl">{guessIcon(firstTask)}</div>
                   </div>
                   <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-wide text-teal-700">Then</p>
-                    <input value={thenTask} onChange={(e)=>setThenTask(e.target.value)} className="mt-3 w-full rounded-2xl border p-3 text-center text-xl font-bold" />
+                    <label htmlFor="then-task" className="sr-only">Then step</label>
+                    <input id="then-task" value={thenTask} onChange={(e)=>setThenTask(e.target.value)} className="mt-3 w-full rounded-2xl border p-3 text-center text-xl font-bold" />
                     <div className="mt-4 text-6xl">{guessIcon(thenTask)}</div>
                   </div>
                 </div>
@@ -1065,24 +1097,23 @@ function resetSavedData() {
                     <h3 className="text-2xl font-bold">Visual Timer</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">Set what the timer is for, then press start. Show this one screen to your child so they can see how much time is left.</p>
                   </div>
-                  <select value={timerVisualMode} onChange={(e)=>setTimerVisualMode(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
+                  <label htmlFor="timer-visual" className="sr-only">Timer visual style</label>
+                  <select id="timer-visual" value={timerVisualMode} onChange={(e)=>setTimerVisualMode(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
                     <option value="circle">Circle timer</option>
                     <option value="bar">Bar timer</option>
                   </select>
                 </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-[1fr_160px]">
-                  <input value={timerPurpose} onChange={(e)=>setTimerPurpose(e.target.value)} placeholder="What is this timer for?" className="rounded-2xl border border-slate-200 px-4 py-3 text-lg font-bold outline-none focus:ring-2 focus:ring-teal-500" />
-                  <select value={timerVisualMode} onChange={(e)=>setTimerVisualMode(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
-                    <option value="circle">Circle timer</option>
-                    <option value="bar">Bar timer</option>
-                  </select>
+                <div className="mt-5">
+                  <label htmlFor="timer-purpose" className="sr-only">What the timer is for</label>
+                  <input id="timer-purpose" value={timerPurpose} onChange={(e)=>setTimerPurpose(e.target.value)} placeholder="What is this timer for?" className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-lg font-bold outline-none focus:ring-2 focus:ring-teal-500" />
                 </div>
-                <input type="range" min="1" max="30" value={timerMinutes} onChange={(e)=>updateTimerMinutes(Number(e.target.value))} className="mt-6 w-full" />
+                <label htmlFor="timer-minutes" className="mt-5 block text-sm font-bold text-slate-700">Minutes: {timerMinutes}</label>
+                <input id="timer-minutes" aria-valuetext={`${timerMinutes} minute${timerMinutes === 1 ? "" : "s"}`} type="range" min="1" max="30" value={timerMinutes} onChange={(e)=>updateTimerMinutes(Number(e.target.value))} className="apc-range mt-2 w-full" />
                 {timerVisualMode === "circle" ? (
                   <div className="mt-6 flex justify-center">
                     <div className="relative flex h-56 w-56 items-center justify-center rounded-full bg-white shadow-inner" style={{ background: `conic-gradient(#0f766e ${(timerRemaining / (timerMinutes * 60 || 1)) * 360}deg, #dbeafe 0deg)` }}>
                       <div className="flex h-40 w-40 flex-col items-center justify-center rounded-full bg-white shadow-lg">
-                        <p className="text-5xl font-black text-teal-800">{Math.floor(timerRemaining / 60)}:{String(timerRemaining % 60).padStart(2, "0")}</p>
+                        <p className="text-5xl font-black text-teal-800" role="timer">{Math.floor(timerRemaining / 60)}:{String(timerRemaining % 60).padStart(2, "0")}</p>
                         <p className="text-sm font-bold uppercase tracking-wide text-slate-500">{timerPurpose}</p>
                       </div>
                     </div>
@@ -1097,9 +1128,10 @@ function resetSavedData() {
                   </div>
                 )}
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <Button onClick={() => setTimerRunning((value) => !value)}>{timerRunning ? "Pause timer" : "Start timer"}</Button>
+                  <Button onClick={() => { setTimerRunning((value) => !value); setTimerStatus(timerRunning ? "Timer paused." : "Timer started."); }}>{timerRunning ? "Pause timer" : "Start timer"}</Button>
                   <Button variant="outline" onClick={resetTimer}>Reset timer</Button>
                 </div>
+                <p className="sr-only" role="status" aria-live="polite">{timerStatus}</p>
               </div>
             )}
 
@@ -1144,7 +1176,7 @@ function resetSavedData() {
                   </div>
 
                   <div className="mt-8 flex flex-wrap justify-center gap-3">
-                    <Button onClick={() => setBreathingActive((value) => !value)}>{breathingActive ? "Stop breathing guide" : "Start breathing guide"}</Button>
+                    <Button onClick={toggleBreathingGuide}>{breathingActive ? "Stop breathing guide" : "Start breathing guide"}</Button>
                     <Button variant="outline" onClick={() => { setBreathingActive(false); setBreathingPhase("ready"); setBreathingCount(4); }}>Reset</Button>
                   </div>
 
@@ -1162,7 +1194,7 @@ function resetSavedData() {
                 <h3 className="text-2xl font-bold">Tiny Wins Reward Board</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">Use this for effort, communication, trying again, waiting, and flexibility.</p>
                 <div className="mt-6 rounded-[2rem] bg-amber-50 p-6 text-center">
-                  <div className="flex flex-wrap justify-center gap-2 text-5xl">{Array.from({ length: 5 }).map((_, i)=><button key={i} onClick={()=>setStars(i+1)}>{i < stars ? "⭐" : "☆"}</button>)}</div>
+                  <div className="flex flex-wrap justify-center gap-2 text-5xl">{Array.from({ length: 5 }).map((_, i)=><button key={i} type="button" aria-label={`Set ${i + 1} tiny win${i === 0 ? "" : "s"}`} aria-pressed={i < stars} className="flex h-14 w-14 items-center justify-center rounded-xl" onClick={()=>setStars(i+1)}>{i < stars ? "⭐" : "☆"}</button>)}</div>
                   <p className="mt-5 text-xl font-bold text-amber-900">{stars}/5 tiny wins today</p>
                   <div className="mt-4 grid gap-2 text-left">
                     {rewardDescriptions.map((description, index) => (
@@ -1198,14 +1230,14 @@ function resetSavedData() {
             <div className="p-6">
               <div className="mb-5 flex items-center gap-3"><IconBadge label="🧰" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div>
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-600 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white/85" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
+                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" aria-pressed={activeTool.title === tool.title} onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
                 <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
               </div>
             </div>
           </Card>
 
           <Card className="border border-slate-100">
-            <div className="p-6"><h2 className="text-2xl font-bold">Quick Pattern Note</h2><p className="mt-2 text-sm leading-6 text-slate-600">Write one or two lines so we can spot patterns later.</p><div className="mt-5 grid gap-3"><textarea value={note.before} onChange={(event) => setNote({ ...note, before: event.target.value })} placeholder="Before: what happened?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /><textarea value={note.during} onChange={(event) => setNote({ ...note, during: event.target.value })} placeholder="During: what did you notice?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /><textarea value={note.helped} onChange={(event) => setNote({ ...note, helped: event.target.value })} placeholder="What helped?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /></div><Button onClick={saveNote} disabled={!canSaveNote} className="mt-4 w-full">Save note + XP</Button>{savedNotes.length > 0 && <div className="mt-5 grid gap-3">{savedNotes.map((savedNote) => <div key={savedNote.id} className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-slate-100"><p className="font-bold">{savedNote.date}</p><p className="mt-2"><strong>Before:</strong> {savedNote.before || "Not recorded"}</p><p><strong>During:</strong> {savedNote.during || "Not recorded"}</p><p><strong>Helped:</strong> {savedNote.helped || "Not recorded"}</p></div>)}</div>}</div>
+            <div className="p-6"><h2 className="text-2xl font-bold">Quick Pattern Note</h2><p className="mt-2 text-sm leading-6 text-slate-600">Write one or two lines so we can spot patterns later.</p><div className="mt-5 grid gap-3"><label htmlFor="note-before" className="sr-only">What happened before</label><textarea id="note-before" value={note.before} onChange={(event) => setNote({ ...note, before: event.target.value })} placeholder="Before: what happened?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /><label htmlFor="note-during" className="sr-only">What you noticed during</label><textarea id="note-during" value={note.during} onChange={(event) => setNote({ ...note, during: event.target.value })} placeholder="During: what did you notice?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /><label htmlFor="note-helped" className="sr-only">What helped</label><textarea id="note-helped" value={note.helped} onChange={(event) => setNote({ ...note, helped: event.target.value })} placeholder="What helped?" className="min-h-24 rounded-2xl border border-slate-200 p-4 outline-none focus:ring-2 focus:ring-teal-500" /></div><Button onClick={saveNote} disabled={!canSaveNote} className="mt-4 w-full">Save note</Button>{savedNotes.length > 0 && <div className="mt-5 grid gap-3">{savedNotes.map((savedNote) => <div key={savedNote.id} className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-slate-100"><p className="font-bold">{savedNote.date}</p><p className="mt-2"><strong>Before:</strong> {savedNote.before || "Not recorded"}</p><p><strong>During:</strong> {savedNote.during || "Not recorded"}</p><p><strong>Helped:</strong> {savedNote.helped || "Not recorded"}</p></div>)}</div>}</div>
           </Card>
         </section>
 
@@ -1222,36 +1254,35 @@ function resetSavedData() {
               </div>
             </div>
 
-            <p className="mt-4 text-sm leading-7 text-slate-600">
-              Some mobile browsers do not allow one-tap install from inside the app. If the install prompt does not appear, use your browser menu instead.
-            </p>
+            <Button variant="outline" className="mt-5 w-full" aria-expanded={showInstallHelp} aria-controls="visual-install-steps" onClick={() => setShowInstallHelp((value) => !value)}>{showInstallHelp ? "Hide visual instructions" : "Show visual instructions"}</Button>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">iPhone or iPad</p>
-                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm font-semibold leading-6 text-slate-700">
-                  <li>Open this app in Safari if possible.</li>
-                  <li>Tap the Share button.</li>
-                  <li>Choose <strong>Add to Home Screen</strong>.</li>
-                  <li>Name it <strong>APC Calm Companion</strong>, then tap <strong>Add</strong>.</li>
-                </ol>
+            {showInstallHelp && (
+              <div id="visual-install-steps" className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="rounded-3xl bg-white p-4 shadow-sm">
+                  <p className="text-sm font-bold uppercase tracking-[0.12em] text-teal-800">iPhone or iPad</p>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm font-bold text-slate-700">
+                    <figure><img src="/install-safari.png" alt="Safari app logo" /><figcaption>Safari</figcaption></figure>
+                    <figure><img src="/install-apple-share.png" alt="Apple Share button" /><figcaption>Share</figcaption></figure>
+                    <figure><img src="/install-apple-home.png" alt="Add to Home Screen option" /><figcaption>Add</figcaption></figure>
+                  </div>
+                </div>
+                <div className="rounded-3xl bg-white p-4 shadow-sm">
+                  <p className="text-sm font-bold uppercase tracking-[0.12em] text-teal-800">Android</p>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm font-bold text-slate-700">
+                    <figure><img src="/install-chrome.png" alt="Google Chrome app logo" /><figcaption>Chrome</figcaption></figure>
+                    <figure><img src="/install-android-menu.svg" alt="Android browser menu button" /><figcaption>Menu</figcaption></figure>
+                    <figure><img src="/install-android-home.svg" alt="Install app or Add to Home Screen option" /><figcaption>Install</figcaption></figure>
+                  </div>
+                </div>
               </div>
-
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">Android or desktop</p>
-                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm font-semibold leading-6 text-slate-700">
-                  <li>Tap the browser menu.</li>
-                  <li>Look for <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
-                  <li>Confirm the install.</li>
-                  <li>Open it from your Home Screen or app list.</li>
-                </ol>
-              </div>
-            </div>
+            )}
           </div>
         </Card>
 
 
         </div>
+
+        {feedbackOpen && <FeedbackForm headingRef={feedbackHeadingRef} onClose={closeFeedback} hidden={false} />}
 
         <Card className="border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge label="💜" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">🧠</div><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">👨‍👩‍👧</div><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><div className="text-3xl">✨</div><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 
@@ -1268,7 +1299,8 @@ function resetSavedData() {
             <div className="grid gap-3">
               <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start with Free Call</a>
               
-              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
+              <button type="button" onClick={openFeedback} className="min-h-12 rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</button>
+              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
             </div>
           </div>
         </section>
@@ -1278,6 +1310,7 @@ function resetSavedData() {
           <p className="mt-2">APC Calm Companion provides educational parent support tools only. It does not replace therapy, diagnosis, medical advice, or crisis support.</p>
           <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
         </footer>
+        {!feedbackOpen && <button type="button" onClick={openFeedback} className="apc-floating-feedback" aria-label="Open feedback page">♡ <span>Feedback</span></button>}
       </div>
     </main>
   );
