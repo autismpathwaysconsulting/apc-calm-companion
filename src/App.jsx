@@ -883,7 +883,7 @@ function resetSavedData() {
               <PathMotif />
               <div className="apc-hero-utility mb-4">
                 <span className="apc-kicker">Practical parent support</span>
-                <button type="button" onClick={() => openView("help")} className="apc-help-link"><ApcIcon name="help" /> Help & install</button>
+                <button type="button" onClick={() => openView("help", "install-guide")} className="apc-help-link"><ApcIcon name="help" /> Help & install</button>
               </div>
 
               <div className="apc-hero-content grid gap-5 text-center md:grid-cols-[150px_minmax(0,1fr)] md:items-center md:gap-7 md:text-left">
@@ -1013,8 +1013,8 @@ function resetSavedData() {
 
               <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-1">
                 {Object.entries(calmResets).map(([key, item]) => (
-                  <Button key={key} variant={activeReset === key ? "solid" : "outline"} className="min-h-16 w-full justify-center text-center text-base md:justify-start md:text-left" aria-pressed={activeReset === key} onClick={() => chooseScenario(key)}>
-                    <span className="mr-2 text-xl">{item.icon}</span>{item.label}
+                  <Button key={key} variant={activeReset === key ? "solid" : "outline"} className="min-h-16 w-full justify-center gap-2 text-center text-base md:justify-start md:text-left" aria-label={item.label} aria-pressed={activeReset === key} onClick={() => chooseScenario(key)}>
+                    <span aria-hidden="true" className="text-xl">{item.icon}</span><span>{item.label}</span>
                   </Button>
                 ))}
               </div>
@@ -1023,7 +1023,7 @@ function resetSavedData() {
             <div id="recommendation-panel" className="scroll-mt-6 rounded-[2rem] bg-[#F7F3EB] p-5">
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">I recommend</p>
               <div className="mt-4 flex items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white text-4xl shadow-sm">{reset.icon}</div>
+                <div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-white text-4xl shadow-sm">{reset.icon}</div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-2xl font-bold">{reset.title}</h3>
                   <p className="mt-2 leading-7 text-slate-600">{reset.message}</p>
@@ -1104,8 +1104,8 @@ function resetSavedData() {
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3"><IconBadge icon="routine" /><div><p className="text-sm font-medium text-slate-500">Child independence mode</p><h2 className="text-2xl font-bold">Show the routine, then let your child tap</h2></div></div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button variant={routineEditMode ? "outline" : "solid"} aria-pressed={!routineEditMode} onClick={() => setRoutineEditMode(false)}>▶ Use routine</Button>
-                  <Button variant={routineEditMode ? "solid" : "outline"} aria-pressed={routineEditMode} onClick={() => setRoutineEditMode(true)}>✏️ Edit routine</Button>
+                  <Button variant={routineEditMode ? "outline" : "solid"} className="gap-2" aria-pressed={!routineEditMode} onClick={() => setRoutineEditMode(false)}><ApcIcon name="routine" /> Use routine</Button>
+                  <Button variant={routineEditMode ? "solid" : "outline"} className="gap-2" aria-pressed={routineEditMode} onClick={() => setRoutineEditMode(true)}><ApcIcon name="tools" /> Edit routine</Button>
                 </div>
               </div>
 
@@ -1175,8 +1175,8 @@ function resetSavedData() {
               <div className="mb-4 rounded-[2rem] bg-[#173936] p-5 text-center text-white shadow-lg"><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">Child selected</p><p className="mt-2 text-2xl font-bold leading-relaxed" role="status" aria-live="polite">{communicationPhrase}</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2"><Button variant="outline" className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" aria-pressed={voiceEnabled} onClick={() => setVoiceEnabled((value) => !value)}><ApcIcon name="volume" /> Voice {voiceEnabled ? "ON" : "OFF"}</Button><Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setCommunicationBoardOpen(true)}>Open child board</Button></div></div>
               <div className="grid grid-cols-2 gap-3">
                 {essentialCommunicationCards.map((card) => (
-                  <button key={card.title} type="button" onClick={() => speakCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
-                    <div className="text-3xl">{card.icon}</div><h3 className="mt-1 text-base font-extrabold">{card.title}</h3><p className="text-xs font-semibold text-slate-700">{card.words}</p>
+                  <button key={card.title} type="button" aria-label={`${card.title}: ${card.words}`} onClick={() => speakCommunicationCard(card)} className={`flex min-h-24 flex-col items-center justify-center rounded-3xl bg-gradient-to-br ${card.color} p-3 text-center shadow-sm ring-1 ring-white/60 transition-all hover:-translate-y-1 hover:shadow-lg`}>
+                    <div aria-hidden="true" className="text-3xl">{card.icon}</div><h3 className="mt-1 text-base font-extrabold">{card.title}</h3><p className="text-xs font-semibold text-slate-700">{card.words}</p>
                   </button>
                 ))}
               </div>
@@ -1212,10 +1212,11 @@ function resetSavedData() {
                   <button
                     key={`fullscreen-${card.title}`}
                     type="button"
+                    aria-label={`${card.title}: ${card.words}`}
                     onClick={() => speakCommunicationCard(card)}
                     className={`min-h-32 rounded-[2rem] bg-gradient-to-br ${card.color} p-4 text-center shadow-sm ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-lg md:min-h-40`}
                   >
-                    <div className="text-4xl md:text-5xl">{card.icon}</div>
+                    <div aria-hidden="true" className="text-4xl md:text-5xl">{card.icon}</div>
                     <h3 className="mt-2 text-xl font-black md:text-2xl">{card.title}</h3>
                     <p className="mt-1 text-sm font-bold text-slate-700 md:text-base">{card.words}</p>
                   </button>
@@ -1236,7 +1237,7 @@ function resetSavedData() {
             <Button variant="outline" aria-expanded={parentInstructionsOpen} aria-controls="parent-support" onClick={toggleParentInstructions}>{parentInstructionsOpen ? "Hide guidance" : "Guidance & notes"}</Button>
           </div>
 
-          <div className="mb-5 grid gap-2 sm:grid-cols-4">
+          <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-4">
             {[
               ["firstThen", "sequence", "First / Then"],
               ["timer", "timer", "Timer"],
@@ -1418,8 +1419,8 @@ function resetSavedData() {
             <div className="p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><IconBadge icon="tools" /><div><p className="text-sm font-medium text-slate-500">Parent support</p><h2 className="text-2xl font-bold">Click a tool and I’ll show you how to use it</h2></div></div><Button variant="outline" onClick={toggleParentInstructions}>Close guidance</Button></div>
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" aria-pressed={activeTool.title === tool.title} onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
-                <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
+                <div className="grid gap-3">{parentTools.map((tool) => <button key={tool.title} type="button" aria-label={`${tool.title}: ${tool.description}`} aria-pressed={activeTool.title === tool.title} onClick={() => openParentTool(tool)} className={`rounded-3xl p-4 text-left transition-all ${activeTool.title === tool.title ? "bg-teal-700 text-white shadow-lg" : "bg-slate-50 hover:bg-[#F0F7F3]"}`}><div className="flex items-center gap-3"><span aria-hidden="true" className="text-3xl">{tool.icon}</span><div><h3 className="font-bold">{tool.title}</h3><p className={`mt-1 text-sm leading-5 ${activeTool.title === tool.title ? "text-white" : "text-slate-600"}`}>{tool.description}</p></div></div></button>)}</div>
+                <div className="rounded-[2rem] bg-[#F7F3EB] p-5"><div aria-hidden="true" className="text-4xl">{activeTool.icon}</div><h3 className="mt-3 text-2xl font-bold">{activeTool.title}</h3><p className="mt-2 leading-7 text-slate-600">{activeTool.description}</p><div className="mt-5 grid gap-3">{activeTool.steps.map((step, index) => <div key={step} className="flex gap-3 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">{index + 1}</div><p className="text-sm font-semibold leading-6 text-slate-700">{step}</p></div>)}</div><Button className="mt-5 w-full" onClick={() => openQuickTool(activeTool.toolType)}>Open this tool</Button></div>
               </div>
             </div>
           </Card>

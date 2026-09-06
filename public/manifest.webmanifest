@@ -20,7 +20,7 @@
       "src": "/icon-512.png?v=apc3",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/apple-touch-icon.png?v=apc3",

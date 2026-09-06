@@ -6,6 +6,7 @@ const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "ut
 const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
 const styles = await readFile(new URL("../src/index.css", import.meta.url), "utf8");
 const buildScript = await readFile(new URL("../scripts/generate-sw.mjs", import.meta.url), "utf8");
+const manifest = JSON.parse(await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"));
 
 test("approved visual interface retains its primary tools", () => {
   for (const label of ["Calm Reset", "What should I do right now?", "Quick communication board", "First / Then Board", "Visual Timer"]) {
@@ -35,8 +36,8 @@ test("first visit presents visual choices and Calm Reset escalation access", () 
 });
 
 test("audience-test routine separates child use from parent editing", () => {
-  assert.ok(appSource.includes("▶ Use routine"));
-  assert.ok(appSource.includes("✏️ Edit routine"));
+  assert.ok(appSource.includes('name="routine" /> Use routine'));
+  assert.ok(appSource.includes('name="tools" /> Edit routine'));
   assert.ok(appSource.includes("routineEditMode && <button"));
   assert.ok(appSource.includes("Routine changes are not saved."));
   assert.ok(appSource.includes('Bedtime: ['));
@@ -99,7 +100,16 @@ test("install help uses exact visual assets and the native prompt path", () => {
     assert.ok(appSource.includes(asset), `missing install visual ${asset}`);
   }
   assert.ok(appSource.includes("installPrompt.prompt()"));
+  assert.ok(appSource.includes('openView("help", "install-guide")'));
+  assert.ok(manifest.icons.some((icon) => icon.purpose?.split(" ").includes("maskable")));
   assert.equal((appSource.match(/id="timer-visual"/g) || []).length, 1);
+});
+
+test("mobile tool selection is compact and decorative emoji stay out of accessible names", () => {
+  assert.ok(appSource.includes('className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-4"'));
+  assert.ok(appSource.includes('aria-label={item.label}'));
+  assert.ok(appSource.includes('aria-label={`${card.title}: ${card.words}`}'));
+  assert.ok(appSource.includes('aria-hidden="true" className="text-3xl">{card.icon}'));
 });
 
 test("motion reduction and offline caching are explicit", () => {
