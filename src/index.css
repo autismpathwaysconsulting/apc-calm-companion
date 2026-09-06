@@ -45,6 +45,105 @@ body {
   font-family: "Work Sans", system-ui, sans-serif;
 }
 
+.apc-app {
+  background:
+    radial-gradient(circle at 8% 2%, rgba(45, 212, 191, 0.13), transparent 28rem),
+    radial-gradient(circle at 96% 34%, rgba(232, 153, 122, 0.11), transparent 25rem),
+    linear-gradient(180deg, #fff9f1 0%, #f7f3eb 48%, #f1f7f3 100%);
+}
+
+.apc-app-shell {
+  position: relative;
+}
+
+.apc-section-stop {
+  position: relative;
+  scroll-margin-block: 14px 110px;
+  animation: apc-soft-arrival 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.apc-home-grid {
+  gap: clamp(0.8rem, 2.4vw, 1.4rem);
+}
+
+.apc-hero-card,
+.apc-date-card,
+.apc-home-panel,
+#install-guide > section {
+  overflow: hidden;
+  border-color: rgba(45, 212, 191, 0.34);
+  box-shadow: 0 14px 38px rgba(23, 57, 54, 0.075);
+}
+
+.apc-hero-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--apc-teal), var(--apc-sage), var(--apc-coral));
+  content: "";
+}
+
+.apc-home-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.apc-home-actions > button {
+  min-width: 0;
+  border-radius: 1.1rem;
+  padding-inline: 0.75rem;
+  line-height: 1.2;
+}
+
+.apc-home-primary,
+.apc-home-feedback {
+  grid-column: 1 / -1;
+}
+
+#install-guide.apc-section-stop {
+  margin-bottom: clamp(0.9rem, 3vw, 1.25rem);
+}
+
+.apc-nav-item,
+.apc-floating-feedback,
+.apc-home-actions > button {
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+@keyframes apc-soft-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .apc-home-actions > button:hover,
+  .apc-floating-feedback:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (min-width: 640px) {
+  .apc-home-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .apc-home-primary,
+  .apc-home-feedback {
+    grid-column: auto;
+  }
+}
+
 h1, h2, h3, h4 {
   font-family: "Outfit", "Work Sans", system-ui, sans-serif;
 }
@@ -553,6 +652,120 @@ summary:focus-visible {
 }
 
 @media (max-width: 760px) {
+  html {
+    scroll-padding-top: 12px;
+    scroll-padding-bottom: calc(98px + env(safe-area-inset-bottom));
+    scroll-snap-type: y proximity;
+  }
+
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  .apc-app-shell {
+    padding-top: max(0.75rem, env(safe-area-inset-top)) !important;
+    padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
+    padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+  }
+
+  .apc-section-stop {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .apc-home-grid {
+    margin-bottom: 0.9rem !important;
+  }
+
+  .apc-hero-card,
+  .apc-date-card,
+  .apc-home-panel,
+  #install-guide > section,
+  .feedback-section {
+    border-radius: 1.55rem !important;
+  }
+
+  .apc-hero-inner,
+  .apc-date-card-inner,
+  .apc-home-panel {
+    padding: 1.15rem !important;
+  }
+
+  .apc-hero-logo {
+    width: 6.5rem !important;
+    height: 4.75rem !important;
+    border-radius: 1.35rem !important;
+  }
+
+  .apc-hero-card h1 {
+    font-size: clamp(2rem, 9.5vw, 2.55rem) !important;
+    line-height: 1.04 !important;
+  }
+
+  .apc-hero-card h1 + p {
+    margin-top: 0.8rem !important;
+    font-size: 1rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .apc-home-actions {
+    margin-top: 1rem !important;
+  }
+
+  .apc-home-actions > button {
+    min-height: 3.25rem !important;
+    height: auto !important;
+    font-size: 0.9rem !important;
+  }
+
+  .apc-date-card-inner > .flex:first-child {
+    gap: 0.75rem !important;
+  }
+
+  .apc-date-heading {
+    max-width: 13rem;
+    font-size: clamp(1.3rem, 6.6vw, 1.65rem) !important;
+    line-height: 1.12 !important;
+  }
+
+  .apc-date-badge {
+    min-width: 5.15rem;
+    border-radius: 1.25rem !important;
+    padding: 0.75rem 0.85rem !important;
+  }
+
+  .apc-date-badge p:last-child {
+    font-size: 1.35rem !important;
+  }
+
+  .apc-date-card .apc-ios-date-compact {
+    margin-top: 0.8rem !important;
+  }
+
+  .apc-privacy-card {
+    margin-top: 0.8rem !important;
+    border-radius: 1.25rem !important;
+    padding: 0.9rem !important;
+  }
+
+  .apc-progress-card {
+    margin-top: 0.85rem !important;
+    border-radius: 1.25rem !important;
+    padding: 0.9rem !important;
+  }
+
+  .apc-nav-dock {
+    width: min(calc(100% - 16px), 720px);
+    border-radius: 22px;
+    padding: 5px;
+  }
+
+  .apc-nav-item {
+    min-height: 58px;
+    border-radius: 17px;
+  }
+
   .feedback-layout {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -590,6 +803,7 @@ summary:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+    scroll-snap-type: none;
   }
 
   *,

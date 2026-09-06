@@ -107,3 +107,13 @@ test("motion reduction and offline caching are explicit", () => {
   assert.ok(buildScript.includes('cache.addAll(CORE_FILES)'));
   assert.ok(buildScript.includes('caches.match("/index.html")'));
 });
+
+test("mobile home uses compact section stops and a visible feedback action", () => {
+  assert.ok(appSource.includes('className="apc-home-feedback h-14 w-full text-base"'));
+  assert.ok(appSource.includes("♡ Give feedback"));
+  assert.ok(appSource.includes("apc-section-stop"));
+  assert.ok(appSource.includes('activeView !== "home"'));
+  assert.ok(styles.includes("scroll-snap-type: y proximity"));
+  assert.ok(styles.includes("scroll-snap-stop: always"));
+  assert.ok(styles.includes(".apc-home-actions"));
+});

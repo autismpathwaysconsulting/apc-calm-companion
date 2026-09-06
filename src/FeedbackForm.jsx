@@ -210,7 +210,7 @@ export default function FeedbackForm({ headingRef, onClose, hidden = false }) {
   const submissionUnavailable = !TURNSTILE_SITE_KEY || securityState !== "ready" || !turnstileToken;
 
   return (
-    <section ref={sectionRef} id="feedback" className="section feedback-section more-panel" aria-labelledby="feedback-title" hidden={hidden}>
+    <section ref={sectionRef} id="feedback" className="section feedback-section more-panel apc-section-stop" aria-labelledby="feedback-title" hidden={hidden}>
       <div className="page-width feedback-layout">
         <div className="feedback-intro">
           <div className="feedback-title-row">
