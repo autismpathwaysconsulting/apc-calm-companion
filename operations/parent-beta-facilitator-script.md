@@ -37,6 +37,7 @@ Ask the participant to submit one short app-focused response without personal in
 4. Record Yes or No in Exactly one database row.
 5. Run the beta matcher from app:
    `npm run beta:verify <before-csv> <after-csv> <P1-ref> <P2-ref> <P3-ref> <P4-ref> <P5-ref>`
+   You can paste a file name only or a full path. From the app folder, the script also looks in `Feedback_Exports` and `../Feedback_Exports` automatically.
 6. Record Yes or No in Exactly one database row.
 7. Do not copy optional comments into the launch-testing workbook.
 8. Review the formula-driven decision on Launch Summary.

@@ -1,14 +1,20 @@
 import { readFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
+import { resolve } from "node:path";
 import { basename } from "node:path";
 import { inspect } from "node:util";
+import { fileURLToPath } from "node:url";
 
 const [, , beforePath, afterPath, ...referenceArgs] = process.argv;
+const scriptDirectory = fileURLToPath(new URL(".", import.meta.url));
+const projectRoot = resolve(scriptDirectory, "..");
 
 function usage(message) {
   if (message) {
     console.error(message);
   }
   console.error("Usage: node scripts/verify-beta-gate.mjs <before-export.csv> <after-export.csv> <P1-ref> <P2-ref> <P3-ref> <P4-ref> <P5-ref>");
+  console.error("Paths can be absolute, relative to the app folder, or file names located in Feedback_Exports/.");
   process.exit(2);
 }
 
@@ -19,6 +25,26 @@ if (!beforePath || !afterPath || referenceArgs.length !== 5) {
 const uniqueRefs = new Set(referenceArgs);
 if (uniqueRefs.size !== 5) {
   usage("All five participant references must be unique.");
+}
+
+async function resolveCsvPath(rawPath) {
+  if (!rawPath || typeof rawPath !== "string") return null;
+  const candidates = [];
+  const base = rawPath.trim();
+  candidates.push(base);
+  candidates.push(resolve(projectRoot, base));
+  candidates.push(resolve(projectRoot, "..", base));
+  candidates.push(resolve(projectRoot, "..", "Feedback_Exports", basename(base)));
+  candidates.push(resolve(projectRoot, "..", "outputs", basename(base)));
+  for (const candidate of candidates) {
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      // Keep looking.
+    }
+  }
+  return null;
 }
 
 function parseCsvRows(raw) {
@@ -97,7 +123,13 @@ function indexReferences(rawRows) {
 let before;
 let after;
 try {
-  [before, after] = await Promise.all([collectRows(beforePath), collectRows(afterPath)]);
+  const resolvedBefore = await resolveCsvPath(beforePath);
+  const resolvedAfter = await resolveCsvPath(afterPath);
+  if (!resolvedBefore || !resolvedAfter) {
+    console.error(`Could not find both CSV exports.`);
+    process.exit(1);
+  }
+  [before, after] = await Promise.all([collectRows(resolvedBefore), collectRows(resolvedAfter)]);
 } catch (error) {
   console.error(error.message || error);
   process.exit(1);
