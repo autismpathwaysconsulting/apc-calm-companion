@@ -10,7 +10,8 @@ Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.d
 
 Exact verified deployment: `https://cd5e5666.apc-calm-companion.pages.dev/`
 
-Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.
+Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.  
+For live execution, also use `operations/launch-operator-checklist-2026-09-06.md`.
 
 Public launch means a limited organic release of the free web app. Paid printable sales and broad promotion remain separate decisions.
 
