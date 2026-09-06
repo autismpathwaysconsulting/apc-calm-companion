@@ -5,7 +5,7 @@
 Approved workflow exception: physical-device gates may remain provisional while the controlled beta is organised because no test devices are available in this environment. This exception does not satisfy Phase 2 and does not authorise production promotion.
 
 - App interface candidate: `605af9d`, the last commit that changes the shipped interface. Later branch commits change launch records or verification tooling only.
-- Deployment evidence (6 September 2026): the exact interface candidate was verified at `https://cd5e5666.apc-calm-companion.pages.dev/`. The stable participant URL remains `https://codex-commercial-redesign.apc-calm-companion.pages.dev/`. The latest recorded operations snapshot is `https://3f7ae859.apc-calm-companion.pages.dev/` from source `2d92f38`.
+- Deployment evidence (6 September 2026): the exact interface candidate was verified at `https://cd5e5666.apc-calm-companion.pages.dev/`. The stable participant URL remains `https://codex-commercial-redesign.apc-calm-companion.pages.dev/` and was rechecked after the latest records-only branch deployment.
 - `export-feedback` and `export-preview-feedback` now run successfully from this environment with live Cloudflare auth.
 - Automated verification status: **pass**
   - `npm run check`: 56 tests passed, lint/build/release/build-verification passed.

@@ -10,8 +10,6 @@ Candidate preview: `https://codex-commercial-redesign.apc-calm-companion.pages.d
 
 Exact interface-verified deployment: `https://cd5e5666.apc-calm-companion.pages.dev/`
 
-Latest recorded branch deployment snapshot: `https://3f7ae859.apc-calm-companion.pages.dev/` from source `2d92f38`. This is an operations-record snapshot, not a replacement interface candidate.
-
 Use the stable branch-preview URL for participant sessions. Feedback is intentionally restricted to that hostname.  
 For live execution, also use `operations/launch-operator-checklist-2026-09-06.md`.
 
