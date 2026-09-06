@@ -107,10 +107,10 @@ test("the profile badge uses first and last initials", () => {
 
 test("visible button labels remain part of their accessible names", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  assert.ok(appSource.includes('<span className="sr-only">Open Actions</span>'));
-  assert.ok(appSource.includes('<span className="sr-only">Open profile settings</span>'));
-  assert.equal(appSource.includes('aria-label="Open Calm Companion actions"'), false);
-  assert.equal(appSource.includes("aria-label={`Open profile settings."), false);
+  for (const label of ["Calm support", "Visual tools", "Routine", "Communication", "Install"]) {
+    assert.ok(appSource.includes(`<span>${label}</span>`), `missing visible jump label: ${label}`);
+  }
+  assert.equal(appSource.includes('aria-label="Open Calm Companion'), false);
 });
 
 test("today uses the device date without storing a selected date", () => {
@@ -119,7 +119,7 @@ test("today uses the device date without storing a selected date", () => {
   assert.match(value, /2 September/);
 });
 
-test("profile data is not attached to feedback", async () => {
+test("the reel-reference interface does not collect child profile data", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   const profileSource = await readFile(new URL("../src/profile.js", import.meta.url), "utf8");
@@ -127,17 +127,18 @@ test("profile data is not attached to feedback", async () => {
     assert.equal(profileSource.includes(privateField), false, `unexpected profile field: ${privateField}`);
   }
   assert.equal(feedbackSource.includes("profileName"), false);
-  assert.ok(appSource.includes("It is never included with feedback"));
+  for (const privateField of ["childName", "childPhoto", "mainChallenge"]) {
+    assert.equal(appSource.includes(privateField), false, `unexpected app profile field: ${privateField}`);
+  }
 });
 
-test("the skip link target is focusable and action descriptions meet text contrast", async () => {
+test("the skip link target is focusable and semantic colours meet contrast", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
-  assert.ok(source.includes('<main id="main-content" tabIndex="-1">'));
+  assert.ok(source.includes('<main id="main-content" className="legacy-width" tabIndex="-1">'));
 
   const tokens = Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/gi)].map((match) => [match[1], match[2]]));
-  assert.ok(css.match(/\.guide-choice small\s*\{[^}]*color:\s*var\(--muted\)/i), "guide description must use the muted text token");
   const foreground = tokens.muted;
   const background = tokens.surface;
   assert.ok(foreground && background, "guide colours could not be read");
@@ -167,13 +168,14 @@ test("the skip link target is focusable and action descriptions meet text contra
   }
 });
 
-test("the app uses a focused three-view navigation model with restorable URLs", async () => {
+test("the app restores the reel-reference single-page visual structure", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  assert.ok(source.includes("parseAppHash(window.location.hash)"));
-  assert.ok(source.includes("window.history.pushState"));
-  assert.ok(source.includes('window.addEventListener("popstate", restoreRoute)'));
-  for (const label of ["Actions", "Tools", "More"]) assert.ok(source.includes(label));
-  assert.equal(source.includes('className="hero page-width"'), false);
+  for (const id of ["calm-reset", "quick-tools", "routine", "communication", "safety"]) {
+    assert.ok(source.includes(`id="${id}"`), `missing reel-reference section: ${id}`);
+  }
+  assert.ok(source.includes('className="legacy-jump-grid"'));
+  assert.ok(source.includes('className="legacy-card calm-reset-section"'));
+  assert.equal(source.includes("parseAppHash(window.location.hash)"), false);
 });
 
 test("navigation hashes are bounded, canonical and directly restorable", () => {
@@ -189,35 +191,25 @@ test("navigation hashes are bounded, canonical and directly restorable", () => {
   assert.equal(appHash({ view: "about", moreSection: "invalid" }), "#more/safety");
 });
 
-test("the app exposes five bounded tools including observation support", async () => {
+test("the app exposes the reel tools plus bounded choices and observation support", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  for (const tool of ["first-then", "choices", "timer", "communication", "observation"]) {
+  for (const tool of ["first-then", "choices", "timer", "calm", "communication", "observation"]) {
     assert.ok(source.includes(`id: "${tool}"`), `missing tool: ${tool}`);
   }
-  assert.ok(source.includes("Notice only what you can see, hear or verify."));
   assert.ok(source.includes("not assessment or proof of a cause"));
 });
 
-test("More shows one section at a time without discarding a feedback draft", async () => {
+test("secure feedback opens inside the single-page interface", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
-  assert.ok(appSource.includes("useState(initialRoute.moreSection)"));
-  for (const section of ["profile", "safety", "feedback", "privacy", "evidence", "install"]) {
-    assert.ok(appSource.includes(`id: "${section}"`), `missing More section: ${section}`);
-  }
-  assert.ok(appSource.includes('aria-label="More sections"'));
-  assert.ok(appSource.includes('hidden={activeMoreSection !== "safety"}'));
-  assert.ok(appSource.includes('hidden={activeMoreSection !== "feedback"}'));
+  assert.ok(appSource.includes("const [feedbackOpen, setFeedbackOpen] = useState(false)"));
+  assert.ok(appSource.includes("setFeedbackOpen(true)"));
+  assert.ok(appSource.includes('<FeedbackForm headingRef={feedbackHeadingRef} hidden={false} />'));
   assert.ok(feedbackSource.includes("hidden={hidden}"), "feedback must remain mounted while hidden");
-  assert.ok(appSource.includes('<div className="about-view" hidden={activeView !== "about"}>'), "More must remain mounted when another main view is open");
-  assert.ok(appSource.includes('openMoreSection("safety", true)'));
-  assert.ok(appSource.includes('openMoreSection("feedback", true)'));
-  assert.ok(appSource.includes("openMoreSection(section.id, true)"));
-  for (const rule of ["overflow-x: auto", "scroll-snap-type: inline proximity", "min-height: 44px", '.more-panel[hidden]']) {
-    assert.ok(css.includes(rule), `missing More mobile rule: ${rule}`);
-  }
+  assert.ok(appSource.includes('className="floating-feedback"'));
+  assert.ok(css.includes("min-height: 50px"));
 });
 
 test("mobile timing and safe-area behavior are explicit", async () => {
@@ -278,43 +270,41 @@ test("mobile Home Screen instructions open as an accessible visual guide", async
 
 test("action and tool details use progressive disclosure", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  for (const phrase of ["Try this now", "More guidance", "← All actions", "← All tools", "tool-menu"]) {
+  for (const phrase of ["Try this now", "More guidance", "recommendation-panel", "active-tool-view", "quick-tool-tabs"]) {
     assert.ok(source.includes(phrase), `missing progressive-disclosure element: ${phrase}`);
   }
-  assert.ok(source.includes('ref={toolPanelRef} className="tool-panel" tabIndex="-1"'));
-  assert.ok(source.includes("shouldFocusToolRef.current = true"));
-  assert.equal(source.includes("function ToolButton"), false);
+  assert.ok(source.includes('aria-pressed={activeTool === tool.id}'));
+  assert.ok(source.includes("setActiveTool(id)"));
 });
 
-test("the opening views stay visual-first and button-led", async () => {
+test("the opening interface stays faithful to the visual reel reference", async () => {
   const source = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
 
-  assert.ok(source.includes("function ToolIcon"));
-  assert.ok(source.includes("function NavIcon"));
+  assert.ok(source.includes("const routineTemplates"));
+  assert.ok(source.includes("Automatic Calm Breathing"));
+  assert.ok(source.includes("Quick communication board"));
   assert.ok(source.includes("<strong>{guide.label}</strong>"));
-  assert.ok(source.includes('<span className="sr-only">{guide.prompt}. {guide.short}</span>'));
   assert.equal(source.includes("<small>{guide.short}</small>"), false);
-  assert.match(css, /\.guide-choice\s*\{[^}]*min-height:\s*210px/i);
-  assert.ok(css.includes(".guide-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }"));
-  assert.ok(css.includes(".tool-menu { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }"));
+  assert.ok(css.includes(".legacy-hero, .legacy-card, .legacy-footer"));
+  assert.ok(css.includes(".scenario-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }"));
+  assert.ok(css.includes(".large-board { grid-template-columns: repeat(2,minmax(0,1fr)); }"));
 });
 
 test("feedback is voluntary, bounded and separated from urgent support", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
   const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
   for (const phrase of [
-    "Was this useful? Send feedback",
+    "Give app feedback",
     "Help improve this app",
     "Feedback is not monitored for urgent help",
     "Please do not include names, diagnoses, schools, contact details or private information about a child.",
     'maxLength="300"',
   ]) assert.ok(`${appSource}\n${feedbackSource}`.includes(phrase), `missing feedback safeguard: ${phrase}`);
   assert.equal(feedbackSource.includes("email"), true, "the no-email disclosure must remain visible");
-  assert.ok(appSource.includes('!(activeView === "about" && activeMoreSection === "feedback")'));
-  assert.ok(appSource.includes('className="feedback-entry"'));
-  assert.ok(appSource.includes('<button className="button secondary" type="button" onClick={openFeedback}>Send feedback</button>'));
-  assert.equal(appSource.includes('<div className="footer-links"><button'), false, "feedback must not wrap out of alignment in the footer link row");
+  assert.ok(appSource.includes('className="floating-feedback"'));
+  assert.ok(appSource.includes('<button className="button light" type="button" onClick={openFeedback}>Give app feedback</button>'));
+  assert.equal(appSource.includes("mailto:"), false, "feedback must not bypass the secure form");
 });
 
 test("feedback exposes secure loading, accessible errors and a removal reference", async () => {
@@ -340,7 +330,7 @@ test("interactive examples start empty and explain themselves with placeholders"
   for (const state of ["firstStep", "thenStep", "choiceA", "choiceB"]) {
     assert.ok(source.includes(`const [${state}, set${state[0].toUpperCase()}${state.slice(1)}] = useState(\"\")`));
   }
-  for (const placeholder of ["For example, shoes on", "For example, go to the car", "For example, blue shirt", "For example, green shirt"]) {
+  for (const placeholder of ["Shoes on", "Go to the car", "Blue shirt", "Green shirt"]) {
     assert.ok(source.includes(`placeholder=\"${placeholder}\"`), `missing placeholder: ${placeholder}`);
   }
 });
@@ -361,10 +351,7 @@ test("the interface includes APC brand tokens, self-hosted fonts and accessible 
   assert.ok(manifest.includes('"theme_color": "#0F766E"'));
 });
 
-test("repeated evidence links have unique accessible names and More cues horizontal overflow", async () => {
+test("repeated evidence links have unique accessible names", async () => {
   const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
-  const css = await readFile(new URL("../src/App.modern.css", import.meta.url), "utf8");
-  assert.ok(appSource.includes('aria-label={`Read the evidence brief: ${item.title}`}'));
-  assert.ok(appSource.includes('selectedButton?.scrollIntoView({ block: "nearest", inline: "center" })'));
-  assert.ok(css.includes("mask-image: linear-gradient"));
+  assert.ok(appSource.includes('aria-label={`Open source: ${item.title}`}'));
 });

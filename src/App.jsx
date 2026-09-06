@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import "./App.modern.css";
 import FeedbackForm from "./FeedbackForm.jsx";
 import { communicationOptions, evidenceNotes, formatTime, guideOptions, normaliseMinutes, parentPause, secondsUntilDeadline } from "./content.js";
-import { appHash, parseAppHash } from "./navigation.js";
-import { formatToday, loadProfileName, profileInitials, saveProfileName } from "./profile.js";
 
 const APC_URL = "https://autismpathwaysconsulting.com/";
 const PRIVACY_URL = "https://autismpathwaysconsulting.com/privacy";
@@ -11,24 +9,37 @@ const TERMS_URL = "https://autismpathwaysconsulting.com/terms";
 const EMERGENCY_URL = "https://www.malaysia.gov.my/en/categories/safety-and-community/public-safety/mers-999-emergency-line";
 const BEFRIENDERS_URL = "https://befrienders.org.my/contact-us/";
 
+const guideVisuals = {
+  "less-language": "💬",
+  "next-step": "1️⃣",
+  respond: "🙋",
+  situation: "👀",
+  "parent-pause": "🌿",
+};
+
 const toolOptions = [
-  { id: "first-then", label: "First, then", summary: "Show one step and what genuinely follows." },
-  { id: "choices", label: "Two choices", summary: "Show two options that are both available." },
-  { id: "timer", label: "Timer", summary: "Make the remaining time visible." },
-  { id: "communication", label: "Communication", summary: "Show simple ways to respond without requiring speech." },
-  { id: "observation", label: "Quick check", summary: "Notice one observable factor before changing one thing." },
+  { id: "first-then", label: "First / Then", icon: "1️⃣" },
+  { id: "choices", label: "Two choices", icon: "↔️" },
+  { id: "timer", label: "Timer", icon: "⏱️" },
+  { id: "calm", label: "Calm breathing", icon: "🌬️" },
+  { id: "communication", label: "Communication", icon: "💬" },
+  { id: "observation", label: "Quick check", icon: "👀" },
 ];
 
-const moreSections = [
-  { id: "profile", label: "Profile" },
-  { id: "safety", label: "Safety" },
-  { id: "feedback", label: "Feedback" },
-  { id: "privacy", label: "Privacy" },
-  { id: "evidence", label: "Evidence" },
-  { id: "install", label: "Install" },
-];
-
-const allGuides = [...guideOptions, parentPause];
+const routineTemplates = {
+  "Morning routine": [
+    ["🌤️", "Wake up"], ["🚽", "Toilet"], ["🪥", "Brush teeth"], ["🥣", "Breakfast"], ["🎒", "Pack bag"],
+  ],
+  "After school": [
+    ["🍎", "Snack"], ["🛋️", "Rest"], ["✏️", "Homework"], ["⚽", "Play"],
+  ],
+  Bedtime: [
+    ["🛁", "Bath"], ["👕", "Pyjamas"], ["📖", "Story"], ["🌙", "Sleep"],
+  ],
+  "Community outing": [
+    ["🗺️", "Look at plan"], ["🎧", "Bring support item"], ["🚶", "Go together"], ["🪪", "Ask for a break"],
+  ],
+};
 
 const installGuides = {
   apple: {
@@ -53,78 +64,12 @@ const installGuides = {
   },
 };
 
-function GuideIcon({ name }) {
-  if (name === "pause") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M9.5 8.5v7m5-7v7" />
-      </svg>
-    );
-  }
-  if (name === "words") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M5 6.5h14v9H9l-4 3v-12Z" />
-        <path d="M9 11h6" />
-      </svg>
-    );
-  }
-  if (name === "step") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="7" cy="12" r="2.5" />
-        <path d="M11 12h8m-3-3 3 3-3 3" />
-      </svg>
-    );
-  }
-  if (name === "respond") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M5 7.5h5v9H5zm9 0h5v9h-5zM10 12h4" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M3.5 12s3-5 8.5-5 8.5 5 8.5 5-3 5-8.5 5-8.5-5-8.5-5Z" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
-  );
+function makeRoutine(name) {
+  return routineTemplates[name].map(([icon, title], index) => ({ id: `${name}-${index}`, icon, title, done: false }));
 }
 
-function ToolIcon({ name }) {
-  if (name === "first-then") {
-    return <svg viewBox="0 0 96 72" aria-hidden="true"><rect x="7" y="12" width="31" height="48" rx="10" /><rect x="58" y="12" width="31" height="48" rx="10" /><path d="M42 36h12m-5-6 6 6-6 6" /><path d="M18 28h10M18 36h10M69 32h10M69 40h10" /></svg>;
-  }
-  if (name === "choices") {
-    return <svg viewBox="0 0 96 72" aria-hidden="true"><rect x="8" y="12" width="34" height="48" rx="12" /><rect x="54" y="12" width="34" height="48" rx="12" /><circle cx="25" cy="31" r="7" /><path d="m21 31 3 3 6-7M65 31h12M65 40h8" /></svg>;
-  }
-  if (name === "timer") {
-    return <svg viewBox="0 0 96 72" aria-hidden="true"><circle cx="48" cy="38" r="25" /><path d="M40 7h16M48 13v5M48 38V24M48 38l11 7" /><path d="M27 16 20 23M69 16l7 7" /></svg>;
-  }
-  if (name === "communication") {
-    return <svg viewBox="0 0 96 72" aria-hidden="true"><path d="M10 14h47v35H29L15 60V49h-5z" /><path d="M46 26h40v29H72l-10 8v-8H46z" /><path d="M22 28h23M22 36h16M58 38h16M58 46h11" /></svg>;
-  }
-  return <svg viewBox="0 0 96 72" aria-hidden="true"><circle cx="40" cy="32" r="21" /><path d="m55 47 20 17M29 32s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" /><circle cx="40" cy="32" r="3" /><path d="M71 14v17M63 22h17" /></svg>;
-}
-
-function NavIcon({ name }) {
-  if (name === "actions") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17l9-10" /><circle cx="12" cy="12" r="9" /></svg>;
-  if (name === "tools") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 15 8M14 5l2-2 5 5-2 2M5 14l5 5M7 12l5 5" /></svg>;
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>;
-}
-
-function MoreIcon({ name }) {
-  const icons = { profile: "☺", safety: "＋", feedback: "♡", privacy: "○", evidence: "✓", install: "↓" };
-  return <span aria-hidden="true">{icons[name]}</span>;
-}
-
-function focusHeading(headingRef) {
-  window.requestAnimationFrame(() => {
-    headingRef?.current?.focus();
-    headingRef?.current?.scrollIntoView({ block: "start" });
-  });
+function guideVisual(guide) {
+  return guideVisuals[guide.id];
 }
 
 function isRunningInstalled() {
@@ -136,11 +81,9 @@ function defaultInstallPlatform() {
 }
 
 export default function App() {
-  const [initialRoute] = useState(() => parseAppHash(window.location.hash));
-  const [activeView, setActiveView] = useState(initialRoute.view);
-  const [activeGuide, setActiveGuide] = useState(() => allGuides.find((guide) => guide.id === initialRoute.guideId) || null);
-  const [activeTool, setActiveTool] = useState(initialRoute.toolId || null);
-  const [activeMoreSection, setActiveMoreSection] = useState(initialRoute.moreSection);
+  const allGuides = [...guideOptions, parentPause];
+  const [activeGuide, setActiveGuide] = useState(guideOptions[0]);
+  const [activeTool, setActiveTool] = useState("calm");
   const [firstStep, setFirstStep] = useState("");
   const [thenStep, setThenStep] = useState("");
   const [choiceA, setChoiceA] = useState("");
@@ -148,71 +91,29 @@ export default function App() {
   const [minutes, setMinutes] = useState(5);
   const [remaining, setRemaining] = useState(300);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [selectedPhrase, setSelectedPhrase] = useState("Choose a communication option");
   const [voiceOn, setVoiceOn] = useState(false);
+  const [selectedPhrase, setSelectedPhrase] = useState("Tap a card");
+  const [breathingActive, setBreathingActive] = useState(false);
+  const [breathingPhase, setBreathingPhase] = useState("ready");
+  const [breathingCount, setBreathingCount] = useState(4);
+  const [routineName, setRoutineName] = useState("Morning routine");
+  const [routine, setRoutine] = useState(() => makeRoutine("Morning routine"));
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [researchOpen, setResearchOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(isRunningInstalled);
   const [installPlatform, setInstallPlatform] = useState(defaultInstallPlatform);
-  const [today, setToday] = useState(() => new Date());
-  const [profileName, setProfileName] = useState(loadProfileName);
-  const [profileDraft, setProfileDraft] = useState(profileName);
-  const [profileStatus, setProfileStatus] = useState("");
-  const actionsHeadingRef = useRef(null);
-  const toolsHeadingRef = useRef(null);
-  const moreHeadingRef = useRef(null);
-  const guidePanelRef = useRef(null);
-  const toolPanelRef = useRef(null);
-  const safetyHeadingRef = useRef(null);
+  const timerDeadlineRef = useRef(null);
   const feedbackHeadingRef = useRef(null);
-  const privacyHeadingRef = useRef(null);
-  const evidenceHeadingRef = useRef(null);
-  const installHeadingRef = useRef(null);
   const installDialogRef = useRef(null);
   const installDialogHeadingRef = useRef(null);
   const installDialogTriggerRef = useRef(null);
-  const profileHeadingRef = useRef(null);
-  const moreNavRef = useRef(null);
-  const shouldMoveFocusRef = useRef(false);
-  const shouldFocusToolRef = useRef(false);
-  const shouldFocusMoreSectionRef = useRef(null);
-  const timerDeadlineRef = useRef(null);
   const speechAvailable = "speechSynthesis" in window;
-
-  useEffect(() => {
-    const clockId = window.setInterval(() => setToday(new Date()), 60_000);
-    return () => window.clearInterval(clockId);
-  }, []);
-
-  useEffect(() => {
-    const canonicalHash = appHash(initialRoute);
-    if (window.location.hash !== canonicalHash) window.history.replaceState(null, "", canonicalHash);
-
-    function restoreRoute() {
-      const route = parseAppHash(window.location.hash);
-      setActiveView(route.view);
-      setActiveGuide(allGuides.find((guide) => guide.id === route.guideId) || null);
-      setActiveTool(route.toolId || null);
-      setActiveMoreSection(route.moreSection);
-      if (route.view === "tools" && route.toolId) shouldFocusToolRef.current = true;
-      else if (route.view === "about") shouldFocusMoreSectionRef.current = route.moreSection;
-      else shouldMoveFocusRef.current = true;
-      window.scrollTo({ top: 0 });
-    }
-
-    window.addEventListener("popstate", restoreRoute);
-    window.addEventListener("hashchange", restoreRoute);
-    return () => {
-      window.removeEventListener("popstate", restoreRoute);
-      window.removeEventListener("hashchange", restoreRoute);
-    };
-  }, [initialRoute]);
 
   useEffect(() => {
     if (!timerRunning) return undefined;
     function updateTimer() {
-      const deadline = timerDeadlineRef.current;
-      if (!Number.isFinite(deadline)) return;
-      const nextRemaining = secondsUntilDeadline(deadline);
+      const nextRemaining = secondsUntilDeadline(timerDeadlineRef.current);
       setRemaining(nextRemaining);
       if (nextRemaining === 0) {
         timerDeadlineRef.current = null;
@@ -227,6 +128,23 @@ export default function App() {
       document.removeEventListener("visibilitychange", updateTimer);
     };
   }, [timerRunning]);
+
+  useEffect(() => {
+    if (!breathingActive) return undefined;
+    let phase = "inhale";
+    let count = 4;
+    const interval = window.setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        if (phase === "inhale") { phase = "hold"; count = 2; }
+        else if (phase === "hold") { phase = "exhale"; count = 6; }
+        else { phase = "inhale"; count = 4; }
+      }
+      setBreathingPhase(phase);
+      setBreathingCount(count);
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [breathingActive]);
 
   useEffect(() => {
     function captureInstallPrompt(event) {
@@ -251,140 +169,26 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!shouldMoveFocusRef.current) return;
-    shouldMoveFocusRef.current = false;
-    if (activeView === "actions" && activeGuide) guidePanelRef.current?.focus();
-    else if (activeView === "actions") actionsHeadingRef.current?.focus();
-    else if (activeView === "tools") toolsHeadingRef.current?.focus();
-    else moreHeadingRef.current?.focus();
-  }, [activeGuide, activeTool, activeView]);
-
-  useEffect(() => {
-    if (!shouldFocusToolRef.current || activeView !== "tools" || !activeTool) return;
-    shouldFocusToolRef.current = false;
-    toolPanelRef.current?.focus();
-  }, [activeTool, activeView]);
-
-  useEffect(() => {
-    const requestedSection = shouldFocusMoreSectionRef.current;
-    if (!requestedSection || activeView !== "about" || requestedSection !== activeMoreSection) return;
-    shouldFocusMoreSectionRef.current = null;
-    const headingBySection = {
-      profile: profileHeadingRef,
-      safety: safetyHeadingRef,
-      feedback: feedbackHeadingRef,
-      privacy: privacyHeadingRef,
-      evidence: evidenceHeadingRef,
-      install: installHeadingRef,
-    };
-    focusHeading(headingBySection[requestedSection]);
-  }, [activeMoreSection, activeView]);
-
-  useEffect(() => {
-    if (activeView !== "about") return;
-    const selectedButton = moreNavRef.current?.querySelector('[aria-current="page"]');
-    selectedButton?.scrollIntoView({ block: "nearest", inline: "center" });
-  }, [activeMoreSection, activeView]);
-
-  function pushRoute(route) {
-    const nextHash = appHash(route);
-    if (window.location.hash !== nextHash) window.history.pushState(null, "", nextHash);
+  function goTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function chooseGuide(guide) {
-    shouldMoveFocusRef.current = true;
     setActiveGuide(guide);
-    setActiveView("actions");
-    pushRoute({ view: "actions", guideId: guide.id });
+    window.requestAnimationFrame(() => goTo("recommendation-panel"));
   }
 
-  function openView(view) {
-    shouldMoveFocusRef.current = true;
-    setActiveView(view);
-    if (view === "actions") setActiveGuide(null);
-    if (view === "tools") setActiveTool(null);
-    pushRoute({ view, moreSection: activeMoreSection });
-    window.scrollTo({ top: 0 });
-  }
-
-  function openMoreSection(section, moveFocus = false) {
-    if (moveFocus && activeView === "about" && activeMoreSection === section) {
-      const headingBySection = {
-        profile: profileHeadingRef,
-        safety: safetyHeadingRef,
-        feedback: feedbackHeadingRef,
-        privacy: privacyHeadingRef,
-        evidence: evidenceHeadingRef,
-        install: installHeadingRef,
-      };
-      focusHeading(headingBySection[section]);
-      return;
-    }
-    if (moveFocus) shouldFocusMoreSectionRef.current = section;
-    setActiveMoreSection(section);
-    setActiveView("about");
-    pushRoute({ view: "about", moreSection: section });
-    if (!moveFocus) window.scrollTo({ top: 0 });
-  }
-
-  function openRelatedTool(tool) {
-    shouldFocusToolRef.current = true;
-    setActiveTool(tool);
-    setActiveView("tools");
-    pushRoute({ view: "tools", toolId: tool });
-    window.scrollTo({ top: 0 });
-  }
-
-  function openTool(tool) {
-    shouldFocusToolRef.current = true;
-    setActiveTool(tool);
-    pushRoute({ view: "tools", toolId: tool });
-  }
-
-  function returnToTools() {
-    shouldMoveFocusRef.current = true;
-    setActiveTool(null);
-    pushRoute({ view: "tools" });
-  }
-
-  function openFeedback() {
-    openMoreSection("feedback", true);
-  }
-
-  function openProfile() {
-    setProfileDraft(profileName);
-    setProfileStatus("");
-    openMoreSection("profile", true);
-  }
-
-  function updateProfile(event) {
-    event.preventDefault();
-    const savedName = saveProfileName(profileDraft);
-    setProfileName(savedName);
-    setProfileDraft(savedName);
-    setProfileStatus(savedName ? "Saved on this device." : "The app is now being used without a name.");
-  }
-
-  function removeProfile() {
-    saveProfileName("");
-    setProfileName("");
-    setProfileDraft("");
-    setProfileStatus("Name removed from this device.");
+  function chooseTool(id) {
+    setActiveTool(id);
+    window.requestAnimationFrame(() => goTo("active-tool-view"));
   }
 
   function updateMinutes(value) {
-    const nextMinutes = normaliseMinutes(value);
+    const next = normaliseMinutes(value);
     timerDeadlineRef.current = null;
-    setMinutes(nextMinutes);
-    setRemaining(nextMinutes * 60);
+    setMinutes(next);
+    setRemaining(next * 60);
     setTimerRunning(false);
-  }
-
-  function resetTimer() {
-    timerDeadlineRef.current = null;
-    setTimerRunning(false);
-    setRemaining(minutes * 60);
   }
 
   function toggleTimer() {
@@ -399,7 +203,13 @@ export default function App() {
     setTimerRunning(true);
   }
 
-  function selectCommunicationOption(option) {
+  function resetTimer() {
+    timerDeadlineRef.current = null;
+    setTimerRunning(false);
+    setRemaining(minutes * 60);
+  }
+
+  function selectPhrase(option) {
     setSelectedPhrase(option.phrase);
     if (!voiceOn || !speechAvailable) return;
     window.speechSynthesis.cancel();
@@ -408,11 +218,43 @@ export default function App() {
     window.speechSynthesis.speak(utterance);
   }
 
-  async function installApp() {
-    if (!installPrompt) {
-      openMoreSection("install", true);
+  function toggleBreathing() {
+    if (breathingActive) {
+      setBreathingActive(false);
+      setBreathingPhase("ready");
+      setBreathingCount(4);
       return;
     }
+    setBreathingPhase("inhale");
+    setBreathingCount(4);
+    setBreathingActive(true);
+  }
+
+  function resetBreathing() {
+    setBreathingActive(false);
+    setBreathingPhase("ready");
+    setBreathingCount(4);
+  }
+
+  function changeRoutine(name) {
+    setRoutineName(name);
+    setRoutine(makeRoutine(name));
+  }
+
+  function toggleRoutineStep(id) {
+    setRoutine((items) => items.map((item) => item.id === id ? { ...item, done: !item.done } : item));
+  }
+
+  function openFeedback() {
+    setFeedbackOpen(true);
+    window.requestAnimationFrame(() => {
+      feedbackHeadingRef.current?.focus();
+      goTo("feedback");
+    });
+  }
+
+  async function installApp() {
+    if (!installPrompt) return;
     installPrompt.prompt();
     await installPrompt.userChoice;
     setInstallPrompt(null);
@@ -424,402 +266,69 @@ export default function App() {
     window.requestAnimationFrame(() => installDialogHeadingRef.current?.focus());
   }
 
-  function closeVisualInstallGuide() {
-    installDialogRef.current?.close();
-  }
-
-  const timerProgress = Math.max(0, Math.min(100, (remaining / (minutes * 60)) * 100));
-  const todayLabel = formatToday(today);
-  const profileLabel = profileName || "My child";
+  const timerProgress = Math.max(0, Math.min(100, remaining / (minutes * 60) * 100));
+  const phaseLabel = breathingPhase === "inhale" ? "Breathe in" : breathingPhase === "hold" ? "Hold" : breathingPhase === "exhale" ? "Breathe out" : "Ready";
 
   return (
-    <div className="app-shell">
+    <div className="legacy-app">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-
       <aside className="safety-bar" aria-labelledby="safety-title">
-        <div className="page-width safety-inner">
-          <div>
-            <strong id="safety-title">Not for emergencies.</strong>{" "}
-            Immediate danger or serious injury: <a className="safety-call" href="tel:999">call 999 in Malaysia</a>.
-          </div>
-          <button className="safety-detail" type="button" onClick={() => openMoreSection("safety", true)}>Safety information</button>
-        </div>
+        <div className="legacy-width safety-inner"><div><strong id="safety-title">Not for emergencies.</strong> Immediate danger or serious injury: <a className="safety-call" href="tel:999">call 999 in Malaysia</a>.</div><button className="safety-detail" type="button" onClick={() => goTo("safety")}>Safety information</button></div>
       </aside>
 
-      <header className="site-header">
-        <div className="page-width header-inner">
-          <button className="brand" type="button" onClick={() => openView("actions")}>
-            <img src="/icon-192.png" alt="" />
-            <span><strong>APC Calm Companion</strong><small>One clear next step</small></span>
-            <span className="sr-only">Open Actions</span>
-          </button>
-          <nav className="app-nav" aria-label="Main navigation">
-            <button type="button" aria-current={activeView === "actions" ? "page" : undefined} onClick={() => openView("actions")}><NavIcon name="actions" /><span>Actions</span></button>
-            <button type="button" aria-current={activeView === "tools" ? "page" : undefined} onClick={() => openView("tools")}><NavIcon name="tools" /><span>Tools</span></button>
-            <button type="button" aria-current={activeView === "about" ? "page" : undefined} onClick={() => openView("about")}><NavIcon name="more" /><span>More</span></button>
+      <main id="main-content" className="legacy-width" tabIndex="-1">
+        <header className="legacy-hero">
+          <div className="legacy-brand-line"><img src="/icon-192.png" alt="" /><span>Autism Pathways Consulting</span></div>
+          <div className="legacy-hero-copy"><img className="legacy-logo" src="/icon-512.png" alt="Autism Pathways Consulting logo" /><div><h1>APC Calm Companion</h1><p>One visual step for the moment you are in.</p></div></div>
+          <nav className="legacy-jump-grid" aria-label="Jump to a support area">
+            <button type="button" onClick={() => goTo("calm-reset")}>🌿 <span>Calm support</span></button><button type="button" onClick={() => goTo("quick-tools")}>🧰 <span>Visual tools</span></button><button type="button" onClick={() => goTo("routine")}>✅ <span>Routine</span></button><button type="button" onClick={() => goTo("communication")}>💬 <span>Communication</span></button><button type="button" onClick={openVisualInstallGuide}>📲 <span>Install</span></button>
           </nav>
-        </div>
-      </header>
+        </header>
 
-      <main id="main-content" tabIndex="-1">
-        {activeView === "actions" && <section id="choose" className="section page-width view-section" aria-labelledby="choose-title">
-          <div className="action-heading-row">
-            <div className="section-heading">
-              <p className="today-label"><span>Today</span>{todayLabel}</p>
-              <h1 id="choose-title" ref={!activeGuide ? actionsHeadingRef : undefined} tabIndex="-1">{profileName ? `What would help ${profileName} right now?` : "What would help right now?"}</h1>
-            </div>
-            <button className="profile-shortcut" type="button" onClick={openProfile}>
-              <span className="profile-avatar" aria-hidden="true">{profileName ? profileInitials(profileName) : "＋"}</span>
-              <span><small>Supporting</small><strong>{profileLabel}</strong></span>
-              <span className="profile-edit">Edit</span>
-              <span className="sr-only">Open profile settings</span>
-            </button>
-          </div>
-          {!activeGuide ? (
-            <>
-              <div className="guide-grid" aria-label="Parent action choices">
-                {guideOptions.map((guide) => (
-                  <button type="button" key={guide.id} className="guide-choice" onClick={() => chooseGuide(guide)}>
-                    <span className="guide-icon-wrap"><GuideIcon name={guide.icon} /></span>
-                    <strong>{guide.label}</strong>
-                    <span className="sr-only">{guide.prompt}. {guide.short}</span>
-                  </button>
-                ))}
-              </div>
-              <button type="button" className="parent-pause" onClick={() => chooseGuide(parentPause)}>
-                <span className="pause-visual" aria-hidden="true"><span></span></span>
-                <strong>{parentPause.label}</strong>
-                <span className="sr-only">{parentPause.prompt}. {parentPause.short}</span>
-              </button>
-              {!isInstalled && (
-                <aside className="home-install-callout" aria-labelledby="home-install-title">
-                  <span className="install-visual" aria-hidden="true">＋</span>
-                  <div>
-                    <h2 id="home-install-title">Add to Home Screen</h2>
-                    <p className="sr-only">Add Calm Companion to your phone Home Screen. Open it like an app when you need it. No App Store or Google Play download is needed.</p>
-                  </div>
-                  <button className="button secondary" type="button" onClick={openVisualInstallGuide}>See pictures</button>
-                </aside>
-              )}
-            </>
-          ) : (
-            <article ref={guidePanelRef} className="guide-panel focused-guide" tabIndex="-1" aria-live="polite" aria-labelledby="guide-panel-title">
-              <button type="button" className="back-button" onClick={() => { shouldMoveFocusRef.current = true; setActiveGuide(null); pushRoute({ view: "actions" }); }}>← All actions</button>
-              <div className="guide-title-row">
-                <span className="guide-icon-wrap detail-icon"><GuideIcon name={activeGuide.icon} /></span>
-                <div><p className="guide-kicker">One option to try</p><h2 id="guide-panel-title">{activeGuide.title}</h2></div>
-              </div>
-              <div className="now-box"><span>Try this now</span><strong>{activeGuide.now}</strong></div>
-              <div className="say-box"><span>You could say</span><strong>“{activeGuide.say}”</strong></div>
-              {activeGuide.tools?.length > 0 && (
-                <div className="related-tools" aria-label="Related visual tools">
-                  {activeGuide.tools.map((toolId) => {
-                    const tool = toolOptions.find((item) => item.id === toolId);
-                    return <button type="button" className="text-button" key={toolId} onClick={() => openRelatedTool(toolId)}>Open {tool?.label}</button>;
-                  })}
-                </div>
-              )}
-              <details className="more-guidance">
-                <summary>More guidance</summary>
-                <ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol>
-                <p className="notice-line"><strong>Notice:</strong> {activeGuide.notice}</p>
-              </details>
-              <button type="button" className="feedback-link" onClick={openFeedback}>Was this useful? Send feedback</button>
+        <section id="calm-reset" className="legacy-card calm-reset-section" aria-labelledby="calm-reset-title">
+          <div className="legacy-section-heading"><span className="legacy-kicker">APC Calm Reset</span><h2 id="calm-reset-title">What might help right now?</h2></div>
+          <div className="calm-reset-grid">
+            <div className="scenario-grid" aria-label="Choose the closest situation">{allGuides.map((guide) => <button key={guide.id} type="button" aria-pressed={activeGuide === guide} onClick={() => chooseGuide(guide)}><span aria-hidden="true">{guideVisual(guide)}</span><strong>{guide.label}</strong></button>)}</div>
+            <article id="recommendation-panel" className="recommendation-panel" aria-live="polite">
+              <div className="recommendation-title"><span aria-hidden="true">{guideVisual(activeGuide)}</span><div><small>One option to try</small><h3>{activeGuide.title}</h3></div></div>
+              <div className="try-now"><small>Try this now</small><strong>{activeGuide.now}</strong></div><div className="say-this"><small>You could say</small><strong>“{activeGuide.say}”</strong></div>
+              {activeGuide.tools?.length > 0 && <div className="recommendation-tools">{activeGuide.tools.map((id) => <button type="button" key={id} onClick={() => chooseTool(id)}>Open {toolOptions.find((tool) => tool.id === id)?.label}</button>)}</div>}
+              <details><summary>More guidance</summary><ol>{activeGuide.steps.map((step) => <li key={step}>{step}</li>)}</ol><p><strong>Notice:</strong> {activeGuide.notice}</p></details>
             </article>
-          )}
-        </section>}
-
-        {activeView === "tools" && <section id="tools" className="section tools-section view-section" aria-labelledby="tools-title">
-          <div className="page-width">
-            <div className="section-heading">
-              <h1 id="tools-title" ref={toolsHeadingRef} tabIndex="-1">Choose a tool</h1>
-            </div>
-            {!activeTool ? (
-              <div className="tool-menu" aria-label="Visual tool choices">
-                {toolOptions.map((tool) => (
-                  <button type="button" key={tool.id} onClick={() => openTool(tool.id)}>
-                    <span className="tool-marker"><ToolIcon name={tool.id} /></span>
-                    <strong>{tool.label}</strong>
-                    <span className="sr-only">{tool.summary}</span>
-                  </button>
-                ))}
-              </div>
-            ) : (<>
-            <button type="button" className="all-tools-button" onClick={returnToTools}>← All tools</button>
-            <div ref={toolPanelRef} className="tool-panel" tabIndex="-1">
-              {activeTool === "first-then" && (
-                <div id="first-then-panel" className="tool-content">
-                  <div className="tool-intro"><h2>First, then</h2><p>Use two short, concrete steps. “Then” should be accurate and realistically available.</p></div>
-                  <div className="field-grid">
-                    <label>First<input value={firstStep} maxLength="40" placeholder="For example, shoes on" onChange={(event) => setFirstStep(event.target.value)} /></label>
-                    <label>Then<input value={thenStep} maxLength="40" placeholder="For example, go to the car" onChange={(event) => setThenStep(event.target.value)} /></label>
-                  </div>
-                  <div className="visual-board two-part" aria-label={`First ${firstStep || "blank"}, then ${thenStep || "blank"}`}>
-                    <div><span>First</span><strong>{firstStep || "Add one step"}</strong></div>
-                    <div><span>Then</span><strong>{thenStep || "Add what follows"}</strong></div>
-                  </div>
-                </div>
-              )}
-
-              {activeTool === "choices" && (
-                <div id="choices-panel" className="tool-content">
-                  <div className="tool-intro"><h2>Two manageable choices</h2><p>Offer only options that are genuinely available. A point, reach, look, gesture or spoken response can all communicate a choice.</p></div>
-                  <div className="field-grid">
-                    <label>Choice one<input value={choiceA} maxLength="40" placeholder="For example, blue shirt" onChange={(event) => setChoiceA(event.target.value)} /></label>
-                    <label>Choice two<input value={choiceB} maxLength="40" placeholder="For example, green shirt" onChange={(event) => setChoiceB(event.target.value)} /></label>
-                  </div>
-                  <div className="visual-board two-part choices" aria-label={`Choice one ${choiceA || "blank"}, choice two ${choiceB || "blank"}`}>
-                    <div><span>Choice 1</span><strong>{choiceA || "Add a choice"}</strong></div>
-                    <div><span>Choice 2</span><strong>{choiceB || "Add a choice"}</strong></div>
-                  </div>
-                </div>
-              )}
-
-              {activeTool === "timer" && (
-                <div id="timer-panel" className="tool-content timer-content">
-                  <div className="tool-intro"><h2>Visual timer</h2><p>Use a timer only when knowing the remaining time is likely to help. Explain what will happen when it ends.</p></div>
-                  <label className="minutes-field">Minutes<input type="number" min="1" max="60" inputMode="numeric" value={minutes} onChange={(event) => updateMinutes(event.target.value)} /></label>
-                  <div className="timer-display" role="timer" aria-label={`${formatTime(remaining)} remaining`}>
-                    <div className="timer-track" aria-hidden="true"><span style={{ width: `${timerProgress}%` }} /></div>
-                    <strong>{formatTime(remaining)}</strong><span>remaining</span>
-                  </div>
-                  <p className="timer-note">This timer has no alarm or notification. Return to this screen to check it.</p>
-                  <p className="sr-only" aria-live="polite">{remaining === 0 ? "Timer finished." : ""}</p>
-                  <div className="button-row">
-                    <button className="button primary" type="button" onClick={toggleTimer} disabled={remaining === 0}>{timerRunning ? "Pause" : "Start"}</button>
-                    <button className="button secondary" type="button" onClick={resetTimer}>Reset</button>
-                  </div>
-                </div>
-              )}
-
-              {activeTool === "communication" && (
-                <div id="communication-panel" className="tool-content">
-                  <div className="tool-intro split-heading">
-                    <div><h2>Simple communication options</h2><p>Model or show a response without requiring speech. Keep the child’s existing communication system available.</p></div>
-                    <label className="toggle-label"><input type="checkbox" checked={voiceOn} disabled={!speechAvailable} onChange={(event) => setVoiceOn(event.target.checked)} /> Speak selected words</label>
-                  </div>
-                  <p className="selected-phrase" aria-live="polite">{selectedPhrase}</p>
-                  {!speechAvailable && <p className="voice-note">Spoken playback is not available in this browser. The communication buttons still show the selected words.</p>}
-                  <div className="communication-grid">
-                    {communicationOptions.map((option) => (
-                      <button type="button" key={option.label} aria-pressed={selectedPhrase === option.phrase} onClick={() => selectCommunicationOption(option)}>
-                        <span aria-hidden="true">{option.icon}</span><strong>{option.label}</strong><small>{option.phrase}</small>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="medical-note">Pain, illness, breathing difficulty, injury or a sudden concerning change may need medical assessment. Do not use the board to delay urgent care.</p>
-                </div>
-              )}
-
-              {activeTool === "observation" && (
-                <div id="observation-panel" className="tool-content">
-                  <div className="tool-intro">
-                    <h2>Quick observation check</h2>
-                    <p>Notice only what you can see, hear or verify. This check cannot identify why something is happening.</p>
-                  </div>
-                  <div className="observation-grid" aria-label="Observable factors to check">
-                    <article>
-                      <span>1</span>
-                      <h3>Safety and health</h3>
-                      <p>Check for immediate danger, breathing difficulty, injury, pain, illness or a sudden concerning change. Stop using the app and seek appropriate help when needed.</p>
-                    </article>
-                    <article>
-                      <span>2</span>
-                      <h3>Communication access</h3>
-                      <p>Is the person’s usual device, picture, object, sign, gesture or other response method available?</p>
-                    </article>
-                    <article>
-                      <span>3</span>
-                      <h3>Surroundings</h3>
-                      <p>Notice what is observable about noise, light, crowding, temperature, clothing and available space.</p>
-                    </article>
-                    <article>
-                      <span>4</span>
-                      <h3>Task and timing</h3>
-                      <p>Is one next step visible? Could the task be made shorter, clearer or easier to begin?</p>
-                    </article>
-                  </div>
-                  <p className="observation-note">Change one reasonable factor, then notice what becomes easier, stays difficult or changes. This is observation, not assessment or proof of a cause.</p>
-                </div>
-              )}
-
-            </div>
-            </>)}
           </div>
-        </section>}
+        </section>
 
-        <div className="about-view" hidden={activeView !== "about"}>
-          <section id="about" className="more-header" aria-labelledby="about-title">
-            <div className="page-width">
-              <div className="section-heading more-heading">
-                <h1 id="about-title" ref={moreHeadingRef} tabIndex="-1">More</h1>
-                <p>Safety, feedback and app information.</p>
-              </div>
-              <nav ref={moreNavRef} className="more-section-nav" aria-label="More sections">
-                {moreSections.map((section) => (
-                  <button
-                    key={section.id}
-                    type="button"
-                    data-more-section={section.id}
-                    aria-current={activeMoreSection === section.id ? "page" : undefined}
-                    onClick={() => openMoreSection(section.id, true)}
-                  >
-                    <MoreIcon name={section.id} />
-                    <span>{section.label}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </section>
+        <section id="quick-tools" className="legacy-card" aria-labelledby="quick-tools-title">
+          <div className="legacy-section-heading"><span className="legacy-kicker">Everyday support tools</span><h2 id="quick-tools-title">Choose a visual tool</h2></div>
+          <div className="quick-tool-tabs" aria-label="Visual tools">{toolOptions.map((tool) => <button type="button" key={tool.id} aria-pressed={activeTool === tool.id} onClick={() => chooseTool(tool.id)}><span aria-hidden="true">{tool.icon}</span><strong>{tool.label}</strong></button>)}</div>
+          <div id="active-tool-view" className="active-tool-view">
+            {activeTool === "first-then" && <section aria-labelledby="first-then-title"><h3 id="first-then-title">First / Then Board</h3><div className="field-grid"><label>First<input value={firstStep} maxLength="40" placeholder="Shoes on" onChange={(event) => setFirstStep(event.target.value)} /></label><label>Then<input value={thenStep} maxLength="40" placeholder="Go to the car" onChange={(event) => setThenStep(event.target.value)} /></label></div><div className="visual-board two-part"><div><small>First</small><span aria-hidden="true">1️⃣</span><strong>{firstStep || "One step"}</strong></div><div><small>Then</small><span aria-hidden="true">➡️</span><strong>{thenStep || "What follows"}</strong></div></div></section>}
+            {activeTool === "choices" && <section aria-labelledby="choices-title"><h3 id="choices-title">Two manageable choices</h3><div className="field-grid"><label>Choice one<input value={choiceA} maxLength="40" placeholder="Blue shirt" onChange={(event) => setChoiceA(event.target.value)} /></label><label>Choice two<input value={choiceB} maxLength="40" placeholder="Green shirt" onChange={(event) => setChoiceB(event.target.value)} /></label></div><div className="visual-board two-part choices"><div><small>Choice 1</small><span aria-hidden="true">🟦</span><strong>{choiceA || "One choice"}</strong></div><div><small>Choice 2</small><span aria-hidden="true">🟩</span><strong>{choiceB || "One choice"}</strong></div></div></section>}
+            {activeTool === "timer" && <section className="timer-tool" aria-labelledby="timer-title"><h3 id="timer-title">Visual Timer</h3><label className="minutes-field">Minutes<input type="number" min="1" max="60" inputMode="numeric" value={minutes} onChange={(event) => updateMinutes(event.target.value)} /></label><div className="legacy-timer" role="timer" aria-label={`${formatTime(remaining)} remaining`} style={{ "--timer-progress": `${timerProgress * 3.6}deg` }}><div><strong>{formatTime(remaining)}</strong><span>remaining</span></div></div><p className="timer-note">This timer has no alarm or notification. Return to this screen to check it.</p><div className="button-row"><button className="button primary" type="button" onClick={toggleTimer} disabled={remaining === 0}>{timerRunning ? "Pause timer" : "Start timer"}</button><button className="button secondary" type="button" onClick={resetTimer}>Reset</button></div></section>}
+            {activeTool === "calm" && <section className="breathing-tool" aria-labelledby="breathing-title"><h3 id="breathing-title">Automatic Calm Breathing</h3><p>Follow only if this feels comfortable. Ordinary breathing is enough.</p><div className={`breathing-stage phase-${breathingPhase}`}><div className="breathing-ring"></div><div className="breathing-core"><small>{phaseLabel}</small><strong>{breathingActive ? breathingCount : ""}</strong></div></div><div className="button-row"><button className="button primary" type="button" onClick={toggleBreathing}>{breathingActive ? "Stop" : "Start breathing guide"}</button><button className="button secondary" type="button" onClick={resetBreathing}>Reset</button></div><div className="breathing-steps" aria-label="Breathing sequence"><span className={breathingPhase === "inhale" ? "active" : ""}>🌬️ Breathe in 4</span><span className={breathingPhase === "hold" ? "active" : ""}>⏸️ Hold 2</span><span className={breathingPhase === "exhale" ? "active" : ""}>🍃 Breathe out 6</span></div></section>}
+            {activeTool === "communication" && <section aria-labelledby="tool-communication-title"><h3 id="tool-communication-title">Quick communication board</h3><p className="selected-phrase" aria-live="polite">{selectedPhrase}</p><div className="button-row"><label className="toggle-label"><input type="checkbox" checked={voiceOn} disabled={!speechAvailable} onChange={(event) => setVoiceOn(event.target.checked)} /> Voice on</label></div><div className="communication-grid">{communicationOptions.map((option) => <button type="button" key={option.label} aria-pressed={selectedPhrase === option.phrase} onClick={() => selectPhrase(option)}><span aria-hidden="true">{option.icon}</span><strong>{option.label}</strong><small>{option.phrase}</small></button>)}</div><p className="medical-note">Pain, illness, breathing difficulty, injury or a sudden concerning change may need medical assessment. Do not use the board to delay urgent care.</p></section>}
+            {activeTool === "observation" && <section aria-labelledby="observation-title"><h3 id="observation-title">Quick observation check</h3><div className="observation-grid"><article><span>1</span><h4>Safety and health</h4><p>Check for danger, breathing difficulty, injury, pain, illness or a sudden change.</p></article><article><span>2</span><h4>Communication</h4><p>Keep the person’s usual device, picture, object, sign or gesture available.</p></article><article><span>3</span><h4>Surroundings</h4><p>Notice noise, light, crowding, temperature, clothing and space.</p></article><article><span>4</span><h4>Task and timing</h4><p>Could one next step be shorter, clearer or easier to begin?</p></article></div><p className="observation-note">Change one reasonable factor, then notice what changes. This is observation, not assessment or proof of a cause.</p></section>}
+          </div>
+        </section>
 
-          <section id="more-profile" className="section page-width more-panel" aria-labelledby="more-profile-title" hidden={activeMoreSection !== "profile"}>
-            <div className="profile-layout">
-              <div className="section-heading compact-heading">
-                <p className="section-label">Optional profile</p>
-                <h2 id="more-profile-title" ref={profileHeadingRef} tabIndex="-1">Make the app feel familiar</h2>
-                <p>Add only a name or nickname if seeing it helps. The app works exactly the same without one.</p>
-              </div>
-              <form className="profile-card" onSubmit={updateProfile}>
-                <label htmlFor="profile-name">Name or nickname</label>
-                <input id="profile-name" value={profileDraft} maxLength="24" autoComplete="off" onChange={(event) => setProfileDraft(event.target.value)} placeholder="For example, Aina" />
-                <p className="profile-privacy">Saved only in this browser on this device. It is never included with feedback. Avoid using a full legal name on a shared device.</p>
-                <div className="button-row profile-actions">
-                  <button className="button primary" type="submit">Save profile</button>
-                  {profileName && <button className="button secondary" type="button" onClick={removeProfile}>Remove name</button>}
-                </div>
-                <p className="profile-status" role="status" aria-live="polite">{profileStatus}</p>
-              </form>
-            </div>
-          </section>
+        <section id="routine" className="legacy-card routine-section" aria-labelledby="routine-title"><div className="legacy-section-heading icon-heading"><span aria-hidden="true">✅</span><div><small>Visual routine</small><h2 id="routine-title">Show the routine, then tap</h2></div></div><select value={routineName} onChange={(event) => changeRoutine(event.target.value)} aria-label="Choose a routine">{Object.keys(routineTemplates).map((name) => <option key={name}>{name}</option>)}</select><div className="routine-list">{routine.map((item) => <button type="button" key={item.id} aria-pressed={item.done} onClick={() => toggleRoutineStep(item.id)}><span aria-hidden="true">{item.done ? "✅" : item.icon}</span><strong>{item.title}</strong></button>)}</div><p className="privacy-inline">Routine taps stay on this page and clear when it is refreshed.</p></section>
 
-          <section id="more-safety" className="section page-width more-panel" aria-labelledby="more-safety-title" hidden={activeMoreSection !== "safety"}>
-            <div className="section-heading compact-heading">
-              <p className="section-label">Safety</p>
-              <h2 id="more-safety-title" ref={safetyHeadingRef} tabIndex="-1">Know when to stop using the app</h2>
-              <p className="working-boundary">This is general educational support for everyday situations. It is not therapy, diagnosis, assessment, medical advice or crisis support.</p>
-            </div>
-            <aside className="emergency-card" aria-labelledby="emergency-card-title">
-              <h3 id="emergency-card-title">When not to use this app</h3>
-              <p>If anyone is in immediate danger, seriously injured, unable to breathe, at risk of running into danger, or you cannot keep people safe, call 999 in Malaysia or your local emergency service.</p>
-              <div className="button-row"><a className="button emergency" href="tel:999">Call 999</a><a className="button secondary" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a></div>
-            </aside>
-          </section>
+        <section id="communication" className="legacy-card communication-section" aria-labelledby="communication-title"><div className="legacy-section-heading icon-heading"><span aria-hidden="true">💬</span><div><small>Communication</small><h2 id="communication-title">Quick communication board</h2></div></div><p className="selected-phrase" aria-live="polite">{selectedPhrase}</p><div className="communication-grid large-board">{communicationOptions.map((option, index) => <button type="button" key={option.label} data-tone={index % 4} aria-pressed={selectedPhrase === option.phrase} onClick={() => selectPhrase(option)}><span aria-hidden="true">{option.icon}</span><strong>{option.label}</strong><small>{option.phrase}</small></button>)}</div></section>
 
-          <FeedbackForm headingRef={feedbackHeadingRef} hidden={activeMoreSection !== "feedback"} />
+        {!isInstalled && <section className="legacy-card install-card" aria-labelledby="install-title"><span className="install-card-icon" aria-hidden="true">📲</span><div><small>Keep it close</small><h2 id="install-title">Add to Home Screen</h2></div>{installPrompt && <button className="button primary" type="button" onClick={installApp}>Install now</button>}<button className="button secondary" type="button" onClick={openVisualInstallGuide}>See pictures</button><span className="sr-only">Add Calm Companion to your phone Home Screen. No App Store or Google Play download is needed.</span></section>}
 
-          <section id="more-privacy" className="section page-width more-panel" aria-labelledby="more-privacy-title" hidden={activeMoreSection !== "privacy"}>
-            <div className="section-heading compact-heading">
-              <p className="section-label">Privacy</p>
-              <h2 id="more-privacy-title" ref={privacyHeadingRef} tabIndex="-1">Tool entries stay on this page</h2>
-              <p>The optional profile name stays in this browser on this device. First-Then, Choices, Timer and Communication entries are not saved or sent.</p>
-            </div>
-            <aside className="privacy-note" aria-labelledby="feedback-destination-title">
-              <div>
-                <p className="section-label">Where feedback goes</p>
-                <h3 id="feedback-destination-title">Submitted feedback goes to APC</h3>
-                <p>When you press Submit, your answers and optional comment go to APC’s feedback database on Cloudflare, together with the app version and date. They are not posted publicly or emailed automatically. APC does not ask for your name or email, and its feedback database does not store your IP address.</p>
-              </div>
-              <div className="privacy-links"><a href={PRIVACY_URL}>Read APC privacy information</a><a href={TERMS_URL}>Read APC terms</a></div>
-            </aside>
-          </section>
+        <section className="legacy-card research-card" aria-labelledby="research-title"><button type="button" onClick={() => setResearchOpen((value) => !value)} aria-expanded={researchOpen}><span aria-hidden="true">📚</span><span><small>Optional</small><strong id="research-title">Research notes</strong></span><span aria-hidden="true">{researchOpen ? "−" : "+"}</span></button>{researchOpen && <div className="evidence-grid">{evidenceNotes.map((item) => <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer" aria-label={`Open source: ${item.title}`}>Open source</a></article>)}</div>}</section>
 
-          <section id="more-evidence" className="section page-width more-panel evidence-section" aria-labelledby="more-evidence-title" hidden={activeMoreSection !== "evidence"}>
-            <div className="section-heading compact-heading">
-              <p className="section-label">Evidence</p>
-              <h2 id="more-evidence-title" ref={evidenceHeadingRef} tabIndex="-1">Why these ideas are included</h2>
-              <p>These sources support the general use of visual, communication and antecedent-based supports. They do not establish why a particular situation occurred or guarantee an outcome.</p>
-            </div>
-            <div className="evidence-grid">
-              {evidenceNotes.map((item) => (
-                <article key={item.title}><h3>{item.title}</h3><p>{item.summary}</p><a href={item.url} target="_blank" rel="noreferrer" aria-label={`Read the evidence brief: ${item.title}`}>Read the evidence brief</a></article>
-              ))}
-            </div>
-          </section>
+        <section id="safety" className="legacy-card safety-section" aria-labelledby="safety-section-title"><div><small>Safety</small><h2 id="safety-section-title">Know when to stop using the app</h2><p>It is not therapy, diagnosis, assessment, medical advice or crisis support.</p></div><div className="button-row"><a className="button emergency" href="tel:999">Call 999</a><a className="button secondary" href={EMERGENCY_URL} target="_blank" rel="noreferrer">Emergency information</a></div></section>
 
-          <section id="more-install" className="section page-width more-panel" aria-labelledby="more-install-title" hidden={activeMoreSection !== "install"}>
-            <div className="section-heading compact-heading">
-              <p className="section-label">Install and support</p>
-              <h2 id="more-install-title" ref={installHeadingRef} tabIndex="-1">Keep the companion easy to reach</h2>
-            </div>
-            <div className="more-install-grid">
-              <article className="more-card install-card">
-                <div><h3>Add to your Home Screen</h3><p>Calm Companion currently works as a web app. You do not need to download it from the App Store or Google Play. No account is needed, and anything you type into the tools is not saved.</p></div>
-                {isInstalled
-                  ? <p className="installed-state" role="status">Installed on this device</p>
-                  : installPrompt && <button className="button primary" type="button" onClick={installApp}>Add to Home Screen now</button>}
-                <button className="button secondary" type="button" onClick={openVisualInstallGuide}>See pictures</button>
-                <p className="install-offline-note">After the app has loaded online once, its main tools may be reopened on this device without internet.</p>
-              </article>
-              <article className="more-card support-card">
-                <div><h3>Need personalised support?</h3><p>If the same difficulties keep happening, general tips may not be enough. APC can look with you at routines, communication, surroundings and support needs. The app itself is not an assessment.</p></div>
-                <a className="button secondary" href={`${APC_URL}start`} target="_blank" rel="noreferrer">View APC support</a>
-              </article>
-            </div>
-          </section>
-        </div>
+        {feedbackOpen ? <FeedbackForm headingRef={feedbackHeadingRef} hidden={false} /> : <section className="legacy-cta"><div><small>Your experience matters</small><h2>Help improve Calm Companion</h2></div><button className="button light" type="button" onClick={openFeedback}>Give app feedback</button><a className="button ghost" href={`${APC_URL}start`} target="_blank" rel="noreferrer">View parent support</a></section>}
 
-        {!(activeView === "about" && activeMoreSection === "feedback") && (
-          <aside className="feedback-entry" aria-label="Feedback">
-            <div className="page-width feedback-entry-inner">
-              <button className="button secondary" type="button" onClick={openFeedback}>Send feedback</button>
-            </div>
-          </aside>
-        )}
+        <footer className="legacy-footer"><strong>APC Calm Companion</strong><p>General educational parent support from Autism Pathways Consulting. No outcome is guaranteed.</p><nav><a href={APC_URL}>APC website</a><a href={PRIVACY_URL}>Privacy</a><a href={TERMS_URL}>Terms</a><a href={BEFRIENDERS_URL}>Befrienders KL</a></nav><p>Tool entries stay on this page. Feedback is submitted separately and is not monitored for urgent help.</p></footer>
       </main>
 
-      <dialog
-        ref={installDialogRef}
-        className="install-dialog"
-        aria-labelledby="visual-install-title"
-        onClose={() => installDialogTriggerRef.current?.focus()}
-      >
-        <div className="install-dialog-shell">
-          <div className="install-dialog-heading">
-            <h2 id="visual-install-title" ref={installDialogHeadingRef} tabIndex="-1">Add to Home Screen</h2>
-            <button className="dialog-close" type="button" onClick={closeVisualInstallGuide} aria-label="Close visual instructions">×</button>
-          </div>
+      {!feedbackOpen && <button className="floating-feedback" type="button" onClick={openFeedback}>♡ <span>Feedback</span></button>}
 
-          <div className="platform-switch" aria-label="Choose phone type">
-            {Object.entries(installGuides).map(([id, guide]) => (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={installPlatform === id}
-                onClick={() => setInstallPlatform(id)}
-              >
-                <img src={guide.icon} alt="" aria-hidden="true" />
-                <span>{guide.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <section className="visual-install-guide" aria-label={`${installGuides[installPlatform].label} Home Screen instructions`}>
-            <ol className="visual-step-list">
-              {installGuides[installPlatform].steps.map((step, index) => (
-                <li key={step.label}>
-                  <div className="step-number" aria-hidden="true">{index + 1}</div>
-                  <div className="step-visual" aria-hidden="true">
-                    <img className={`step-image step-image-${step.kind}`} src={step.image} alt="" />
-                  </div>
-                  <strong className="step-label">{step.label}</strong>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          <div className="install-dialog-footer">
-            <button className="button primary" type="button" onClick={closeVisualInstallGuide}>Done</button>
-          </div>
-        </div>
-      </dialog>
-
-      <footer className="site-footer">
-        <div className="page-width footer-grid">
-          <div><strong>APC Calm Companion</strong><p>General educational parent support from Autism Pathways Consulting.</p></div>
-          <div className="footer-links"><a href={APC_URL}>APC website</a><a href={PRIVACY_URL}>Privacy</a><a href={TERMS_URL}>Terms</a><a href={BEFRIENDERS_URL} target="_blank" rel="noreferrer">Befrienders KL</a></div>
-          <p className="footer-boundary">Not therapy, diagnosis, assessment, medical advice or emergency support. No outcome is guaranteed.</p>
-        </div>
-      </footer>
+      <dialog ref={installDialogRef} className="install-dialog" aria-labelledby="visual-install-title" onClose={() => installDialogTriggerRef.current?.focus()}><div className="install-dialog-shell"><div className="install-dialog-heading"><h2 id="visual-install-title" ref={installDialogHeadingRef} tabIndex="-1">Add to Home Screen</h2><button className="dialog-close" type="button" onClick={() => installDialogRef.current?.close()} aria-label="Close visual instructions">×</button></div><div className="platform-switch" aria-label="Choose phone type">{Object.entries(installGuides).map(([id, guide]) => <button key={id} type="button" aria-pressed={installPlatform === id} onClick={() => setInstallPlatform(id)}><img src={guide.icon} alt="" /><span>{guide.label}</span></button>)}</div><section className="visual-install-guide" aria-label={`${installGuides[installPlatform].label} Home Screen instructions`}><ol className="visual-step-list">{installGuides[installPlatform].steps.map((step, index) => <li key={step.label}><span className="step-number">{index + 1}</span><span className="step-visual"><img className={`step-image step-image-${step.kind}`} src={step.image} alt="" /></span><strong className="step-label">{step.label}</strong></li>)}</ol></section><div className="install-dialog-footer"><button className="button primary" type="button" onClick={() => installDialogRef.current?.close()}>Done</button></div></div></dialog>
     </div>
   );
 }
