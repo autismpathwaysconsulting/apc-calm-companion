@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import APC_LOGO from "./assets/apc-logo.webp";
 import ApcIcon from "./ApcIcon.jsx";
+import { hasDeviceConsent, remainingSeconds, restoreViewFocus } from "./reliability.mjs";
 
 const FeedbackForm = lazy(() => import("./FeedbackForm.jsx"));
 
@@ -335,6 +336,8 @@ const [selectedDate, setSelectedDate] = useState(() => {
 const [timerMinutes, setTimerMinutes] = useState(savedAppData?.timerMinutes || 5);  const [timerPurpose, setTimerPurpose] = useState(savedAppData?.timerPurpose || "Homework time");
   const [timerRemaining, setTimerRemaining] = useState(() => (savedAppData?.timerMinutes || 5) * 60);
   const [timerRunning, setTimerRunning] = useState(false);
+  const timerDeadlineRef = useRef(null);
+  const timerPausedMsRef = useRef((savedAppData?.timerMinutes || 5) * 60000);
   const [selectedTaskIcon, setSelectedTaskIcon] = useState("✅");
 const [rewardLog, setRewardLog] = useState(savedAppData?.rewardLog || []);
   const [communicationPhrase, setCommunicationPhrase] = useState("Tap a card to speak");
@@ -354,7 +357,7 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   const [timerVisualMode, setTimerVisualMode] = useState("circle");
   const [storageEnabled, setStorageEnabled] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("apc-calm-companion-storage-consent") === "yes";
+    return hasDeviceConsent(window);
   });
   const [appNotice, setAppNotice] = useState("");
   const [lastRemovedTask, setLastRemovedTask] = useState(null);
@@ -370,6 +373,7 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
     }
   });
   const feedbackHeadingRef = useRef(null);
+  const feedbackTriggerRef = useRef(null);
   const communicationDialogRef = useRef(null);
   const communicationCloseRef = useRef(null);
   const previousFocusRef = useRef(null);
@@ -554,18 +558,28 @@ const [mainChallenge, setMainChallenge] = useState(savedAppData?.mainChallenge |
   useEffect(() => {
     if (!timerRunning) return;
 
-    const interval = window.setInterval(() => {
-      setTimerRemaining((seconds) => {
-        if (seconds <= 1) {
-          setTimerRunning(false);
-          setTimerStatus("Timer finished.");
-          return 0;
-        }
-        return seconds - 1;
-      });
-    }, 1000);
+    const reconcile = () => {
+      if (timerDeadlineRef.current === null) return;
+      const seconds = remainingSeconds(timerDeadlineRef.current, Date.now());
+      setTimerRemaining(seconds);
+      if (seconds === 0) {
+        timerDeadlineRef.current = null;
+        timerPausedMsRef.current = 0;
+        setTimerRunning(false);
+        setTimerStatus("Timer finished.");
+      }
+    };
+    const interval = window.setInterval(reconcile, 250);
+    window.addEventListener("pageshow", reconcile);
+    window.addEventListener("focus", reconcile);
+    document.addEventListener("visibilitychange", reconcile);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("pageshow", reconcile);
+      window.removeEventListener("focus", reconcile);
+      document.removeEventListener("visibilitychange", reconcile);
+    };
   }, [timerRunning]);
 
   async function installApp() {
@@ -592,9 +606,13 @@ function resetSavedData() {
   const confirmReset = window.confirm("Remove saved APC Calm Companion data from this device?");
   if (!confirmReset) return;
 
-  window.localStorage.removeItem("apc-calm-companion-data");
-  window.localStorage.removeItem("apc-calm-companion-storage-consent");
-  window.location.reload();
+  try {
+    window.localStorage.removeItem("apc-calm-companion-data");
+    window.localStorage.removeItem("apc-calm-companion-storage-consent");
+    window.location.reload();
+  } catch {
+    setAppNotice("Saved data could not be cleared. Please try again or clear this site's data in your browser settings.");
+  }
 }
   function goToSection(id) {
     const element = document.getElementById(id);
@@ -704,12 +722,16 @@ function resetSavedData() {
   }
 
   function resetTimer() {
+    timerDeadlineRef.current = null;
+    timerPausedMsRef.current = timerMinutes * 60000;
     setTimerRunning(false);
     setTimerRemaining(timerMinutes * 60);
     setTimerStatus("Timer reset.");
   }
 
   function updateTimerMinutes(value) {
+    timerDeadlineRef.current = null;
+    timerPausedMsRef.current = value * 60000;
     setTimerMinutes(value);
     setTimerRemaining(value * 60);
     setTimerRunning(false);
@@ -807,7 +829,25 @@ function resetSavedData() {
     window.setTimeout(() => goToSection("calm-reset"), 80);
   }
 
-  function openFeedback() {
+  function toggleTimer() {
+    if (timerRunning) {
+      const milliseconds = Math.max(0, (timerDeadlineRef.current ?? Date.now()) - Date.now());
+      timerPausedMsRef.current = milliseconds;
+      timerDeadlineRef.current = null;
+      setTimerRemaining(Math.ceil(milliseconds / 1000));
+      setTimerRunning(false);
+      setTimerStatus(milliseconds > 0 ? "Timer paused." : "Timer finished.");
+    } else {
+      const milliseconds = timerPausedMsRef.current > 0 ? timerPausedMsRef.current : timerMinutes * 60000;
+      timerDeadlineRef.current = Date.now() + milliseconds;
+      setTimerRemaining(Math.ceil(milliseconds / 1000));
+      setTimerRunning(true);
+      setTimerStatus("Timer started.");
+    }
+  }
+
+  function openFeedback(event) {
+    feedbackTriggerRef.current = event?.currentTarget || document.activeElement;
     if (activeView !== "feedback") previousViewRef.current = activeView;
     setActiveView("feedback");
     setFeedbackOpen(true);
@@ -824,7 +864,12 @@ function resetSavedData() {
     setActiveView(nextView);
     const hashes = { calm: "#calm-reset", routine: "#independence", communication: "#communication", tools: "#quick-tools", help: "#help" };
     window.history.replaceState(null, "", `${window.location.pathname}${hashes[nextView] || ""}`);
-    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "auto" }), 80);
+    window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      const fallback = [...document.querySelectorAll("[data-feedback-trigger]")]
+        .find((element) => element.getClientRects().length > 0);
+      restoreViewFocus(feedbackTriggerRef.current, fallback);
+    }, 80);
   }
 
   function closeCommunicationBoard() {
@@ -866,7 +911,11 @@ function resetSavedData() {
   return (
     <main className="apc-app min-h-screen bg-[#F7F3EB] text-slate-900 transition-all duration-300">
       <div id="app-content" inert={communicationBoardOpen || firstVisitOpen ? true : undefined} aria-hidden={communicationBoardOpen || firstVisitOpen ? "true" : undefined} className="apc-app-shell mx-auto w-full max-w-[430px] px-4 pb-32 pt-6 md:max-w-7xl md:px-8 md:pb-32 md:pt-10">
-        <a href="#calm-reset" onClick={(event) => { event.preventDefault(); openView("calm"); }} className="apc-skip-link">Skip to Calm Reset</a>
+        <a href="#calm-reset" onClick={(event) => {
+          event.preventDefault();
+          openView("calm", "calm-reset");
+          window.setTimeout(() => document.getElementById("calm-reset-title")?.focus({ preventScroll: true }), 80);
+        }} className="apc-skip-link">Skip to Calm Reset</a>
         <p className="sr-only" role="status" aria-live="polite">{appNotice}</p>
         {activeView !== "home" && activeView !== "feedback" && (
           <header className="apc-view-header apc-section-stop">
@@ -877,7 +926,7 @@ function resetSavedData() {
             </div>
             <div className="apc-view-actions">
               {activeView !== "help" && <button type="button" className="apc-header-utility" aria-label="Open help and app information" title="Help" onClick={() => openView("help")}><ApcIcon name="help" /> <span>Help</span></button>}
-              <button type="button" className="apc-header-utility apc-header-feedback" aria-label="Open feedback page" title="Feedback" onClick={openFeedback}><ApcIcon name="feedback" /> <span>Feedback</span></button>
+              <button type="button" data-feedback-trigger className="apc-header-utility apc-header-feedback" aria-label="Open feedback page" title="Feedback" onClick={openFeedback}><ApcIcon name="feedback" /> <span>Feedback</span></button>
             </div>
           </header>
         )}
@@ -915,7 +964,7 @@ function resetSavedData() {
                 <Button variant="outline" onClick={() => openView("routine")} className="h-14 w-full gap-2 text-base"><ApcIcon name="routine" /> Routine</Button>
                 <Button variant="outline" onClick={() => openView("communication")} className="h-14 w-full gap-2 text-base"><ApcIcon name="communication" /> Communication</Button>
                 <Button variant="outline" onClick={() => openView("tools")} className="h-14 w-full gap-2 text-base"><ApcIcon name="tools" /> Tools</Button>
-                <Button variant="feedback" onClick={openFeedback} className="apc-home-feedback h-14 w-full gap-2 text-base"><ApcIcon name="feedback" /> Give feedback</Button>
+                <Button variant="feedback" data-feedback-trigger onClick={openFeedback} className="apc-home-feedback h-14 w-full gap-2 text-base"><ApcIcon name="feedback" /> Give feedback</Button>
               </div>
             </div>
           </Card>
@@ -1011,7 +1060,7 @@ function resetSavedData() {
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.3fr]">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">APC Calm Reset</div>
-              <h2 className="text-2xl font-bold md:text-3xl">What should I do right now?</h2>
+              <h2 id="calm-reset-title" tabIndex="-1" className="text-2xl font-bold md:text-3xl">What should I do right now?</h2>
               <p className="mt-3 text-base leading-7 text-slate-600">Choose the closest situation. I’ll give you what to say, what to avoid, what to do, and which tool to open.</p>
 
               <Button variant="urgent" className="mt-5 min-h-16 w-full gap-2 text-base" onClick={() => setFocusMode(true)}><ApcIcon name="alert" /> Things are escalating</Button>
@@ -1322,7 +1371,7 @@ function resetSavedData() {
                   </div>
                 )}
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <Button onClick={() => { setTimerRunning((value) => !value); setTimerStatus(timerRunning ? "Timer paused." : "Timer started."); }}>{timerRunning ? "Pause timer" : "Start timer"}</Button>
+                  <Button onClick={toggleTimer}>{timerRunning ? "Pause timer" : "Start timer"}</Button>
                   <Button variant="outline" onClick={resetTimer}>Reset timer</Button>
                 </div>
                 <p className="sr-only" role="status" aria-live="polite">{timerStatus}</p>
@@ -1500,7 +1549,7 @@ function resetSavedData() {
             <div className="grid gap-3">
               <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start with Free Call</a>
               
-              <button type="button" onClick={openFeedback} className="min-h-12 rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</button>
+              <button type="button" data-feedback-trigger onClick={openFeedback} className="min-h-12 rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</button>
               <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
             </div>
           </div>
