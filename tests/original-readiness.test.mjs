@@ -6,6 +6,7 @@ const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "ut
 const feedbackSource = await readFile(new URL("../src/FeedbackForm.jsx", import.meta.url), "utf8");
 const styles = await readFile(new URL("../src/index.css", import.meta.url), "utf8");
 const buildScript = await readFile(new URL("../scripts/generate-sw.mjs", import.meta.url), "utf8");
+const responseHeaders = await readFile(new URL("../public/_headers", import.meta.url), "utf8");
 const manifest = JSON.parse(await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"));
 
 test("approved visual interface retains its primary tools", () => {
@@ -116,6 +117,20 @@ test("motion reduction and offline caching are explicit", () => {
   assert.ok(styles.includes("prefers-reduced-motion: reduce"));
   assert.ok(buildScript.includes('cache.addAll(CORE_FILES)'));
   assert.ok(buildScript.includes('caches.match("/index.html")'));
+});
+
+test("public discovery and initial image delivery are production-ready", async () => {
+  const robots = await readFile(new URL("../public/robots.txt", import.meta.url), "utf8");
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+
+  assert.equal(robots.trim(), "User-agent: *\nAllow: /");
+  assert.ok(html.includes('rel="preload" as="image"'));
+  assert.ok(html.includes('/src/assets/apc-logo.webp'));
+  assert.ok(appSource.includes('import APC_LOGO from "./assets/apc-logo.webp"'));
+  assert.ok(appSource.includes('fetchPriority="high"'));
+  assert.ok(appSource.includes('const FeedbackForm = lazy(() => import("./FeedbackForm.jsx"))'));
+  assert.ok(feedbackSource.includes('headingRef.current?.focus()'));
+  assert.ok(responseHeaders.includes("Cache-Control: public, max-age=0, must-revalidate, no-transform"));
 });
 
 test("mobile home uses compact section stops and a visible feedback action", () => {

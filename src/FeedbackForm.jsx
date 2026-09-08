@@ -38,6 +38,10 @@ export default function FeedbackForm({ headingRef, onClose, hidden = false }) {
   const submitInFlightRef = useRef(false);
 
   useEffect(() => {
+    if (!hidden) headingRef.current?.focus();
+  }, [headingRef, hidden]);
+
+  useEffect(() => {
     if (hidden || !TURNSTILE_SITE_KEY || !sectionRef.current) return undefined;
     if (!("IntersectionObserver" in window)) {
       const frame = window.requestAnimationFrame(() => setShouldLoadSecurity(true));

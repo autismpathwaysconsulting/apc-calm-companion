@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import APC_LOGO from "./assets/apc-logo.png";
+import APC_LOGO from "./assets/apc-logo.webp";
 import ApcIcon from "./ApcIcon.jsx";
-import FeedbackForm from "./FeedbackForm.jsx";
+
+const FeedbackForm = lazy(() => import("./FeedbackForm.jsx"));
 
 
 const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
@@ -894,6 +895,10 @@ function resetSavedData() {
                   <img
                     src={APC_LOGO}
                     alt="Autism Pathways Consulting logo"
+                    width="320"
+                    height="180"
+                    fetchPriority="high"
+                    decoding="async"
                     className="h-full w-full object-contain"
                   />
                 </div>
@@ -1474,7 +1479,11 @@ function resetSavedData() {
 
         </div>
 
-        {feedbackOpen && <FeedbackForm headingRef={feedbackHeadingRef} onClose={closeFeedback} hidden={false} />}
+        {feedbackOpen && (
+          <Suspense fallback={<p className="apc-feedback-loading" role="status">Opening feedback...</p>}>
+            <FeedbackForm headingRef={feedbackHeadingRef} onClose={closeFeedback} hidden={false} />
+          </Suspense>
+        )}
 
         <Card hidden={activeView !== "help"} className="apc-section-stop border border-teal-100 bg-[#F7F3EB]"><div className="p-6"><div className="flex items-center gap-3"><IconBadge icon="feedback" /><div><p className="text-sm font-medium text-slate-500">APC Support Philosophy</p><h2 className="text-2xl font-bold">Support that stays practical</h2></div></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="brain" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Reduce overwhelm first</h3><p className="mt-2 text-sm leading-6 text-slate-600">During hard moments, parents need one clear next step, not more pressure.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="family" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Built for real families</h3><p className="mt-2 text-sm leading-6 text-slate-600">The app keeps support simple enough to use at home, in the moment.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm"><ApcIcon name="spark" className="h-8 w-8 text-teal-700" /><h3 className="mt-3 text-lg font-bold">Practical over perfect</h3><p className="mt-2 text-sm leading-6 text-slate-600">Small wins and easier communication matter more than perfect behaviour.</p></div></div></div></Card>
 

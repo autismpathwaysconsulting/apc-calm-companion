@@ -68,6 +68,17 @@ body {
   position: relative;
 }
 
+.apc-feedback-loading {
+  margin: 2rem auto;
+  max-width: 40rem;
+  border-radius: var(--apc-radius-card);
+  background: var(--apc-color-surface);
+  padding: 1.5rem;
+  color: var(--apc-ink);
+  font-weight: 700;
+  box-shadow: var(--apc-shadow-card);
+}
+
 .apc-section-stop {
   position: relative;
   scroll-margin-block: 14px 110px;
