@@ -874,7 +874,10 @@ function resetSavedData() {
               <p>APC Calm Companion</p>
               <h1>{activeView === "calm" ? "Calm Reset" : activeView === "routine" ? "Visual Routine" : activeView === "communication" ? "Communication" : activeView === "help" ? "Help & app info" : "Tools"}</h1>
             </div>
-            {activeView !== "help" && <button type="button" className="apc-header-utility" onClick={() => openView("help")}><ApcIcon name="help" /> <span>Help</span></button>}
+            <div className="apc-view-actions">
+              {activeView !== "help" && <button type="button" className="apc-header-utility" aria-label="Open help and app information" title="Help" onClick={() => openView("help")}><ApcIcon name="help" /> <span>Help</span></button>}
+              <button type="button" className="apc-header-utility apc-header-feedback" aria-label="Open feedback page" title="Feedback" onClick={openFeedback}><ApcIcon name="feedback" /> <span>Feedback</span></button>
+            </div>
           </header>
         )}
         <header hidden={activeView !== "home"} className="apc-home-grid mb-8 grid gap-4 lg:grid-cols-[1.45fr_0.95fr]">
@@ -896,11 +899,8 @@ function resetSavedData() {
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">APC Calm Companion</h1>
-                  <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">
-                    Quick support for routines, communication, transitions, emotional regulation, and difficult moments at home.
-                  </p>
-                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-teal-700">
-                    Start with the closest situation, then choose one calm next step.
+                  <p className="apc-home-prompt mt-3 max-w-2xl text-base font-semibold leading-6 text-teal-700">
+                    Choose the closest situation for one calm next step.
                   </p>
                 </div>
               </div>
@@ -1505,26 +1505,27 @@ function resetSavedData() {
         {!firstVisitOpen && (
           <nav className="apc-nav-dock" aria-label="Main app sections">
             {[
-              ["home", "home", "Home"],
-              ["calm", "calm", "Calm"],
-              ["routine", "routine", "Routine"],
-              ["communication", "communication", "Communicate"],
-              ["tools", "tools", "Tools"],
-            ].map(([view, icon, label]) => (
+              ["home", "home", "Home", ""],
+              ["calm", "calm", "Calm", ""],
+              ["routine", "routine", "Routine", ""],
+              ["communication", "communication", "Communicate", "Connect"],
+              ["tools", "tools", "Tools", ""],
+            ].map(([view, icon, label, shortLabel]) => (
               <button
                 key={view}
                 type="button"
-                className="apc-nav-item"
+                className={`apc-nav-item ${shortLabel ? "apc-nav-item-has-short" : ""}`}
+                aria-label={view === "communication" ? "Communication" : label}
                 aria-current={activeView === view ? "page" : undefined}
                 onClick={() => openView(view)}
               >
                 <ApcIcon name={icon} className="apc-nav-icon" />
-                <span>{label}</span>
+                <span className="apc-nav-label-long" aria-hidden="true">{label}</span>
+                {shortLabel && <span className="apc-nav-label-short" aria-hidden="true">{shortLabel}</span>}
               </button>
             ))}
           </nav>
         )}
-        {!feedbackOpen && !firstVisitOpen && activeView !== "home" && <button type="button" onClick={openFeedback} className="apc-floating-feedback" aria-label="Open feedback page"><ApcIcon name="feedback" /> <span>Feedback</span></button>}
       </div>
 
       {firstVisitOpen && createPortal(

@@ -126,6 +126,25 @@ test("mobile home uses compact section stops and a visible feedback action", () 
   assert.ok(styles.includes("scroll-snap-type: y proximity"));
   assert.ok(styles.includes("scroll-snap-stop: always"));
   assert.ok(styles.includes(".apc-home-actions"));
+  assert.ok(appSource.includes("Choose the closest situation for one calm next step."));
+  assert.equal(appSource.includes("Quick support for routines, communication, transitions, emotional regulation, and difficult moments at home."), false);
+  assert.equal(styles.includes(".apc-home-actions > button:nth-child(4)"), false);
+});
+
+test("feedback access stays in the page header without a floating content overlay", () => {
+  assert.ok(appSource.includes('className="apc-header-utility apc-header-feedback"'));
+  assert.ok(appSource.includes('aria-label="Open feedback page"'));
+  assert.ok(styles.includes(".apc-view-actions"));
+  assert.ok(styles.includes(".apc-header-feedback"));
+  assert.equal(appSource.includes("apc-floating-feedback"), false);
+  assert.equal(styles.includes(".apc-floating-feedback"), false);
+});
+
+test("narrow mobile navigation keeps labels distinct without changing accessible names", () => {
+  assert.ok(appSource.includes('["communication", "communication", "Communicate", "Connect"]'));
+  assert.ok(appSource.includes('aria-label={view === "communication" ? "Communication" : label}'));
+  assert.ok(styles.includes(".apc-nav-item-has-short .apc-nav-label-long"));
+  assert.ok(styles.includes(".apc-nav-item-has-short .apc-nav-label-short"));
 });
 
 test("brand refinement uses the shared typography, tokens, and APC icon system", async () => {
