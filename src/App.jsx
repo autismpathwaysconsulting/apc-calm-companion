@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import APC_LOGO from "./assets/apc-logo.png";
 
 
-const APC_FREE_CALL_URL = "https://cal.com/autismpathwaysconsulting/free-discovery-call";
-const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/services.html";
+const APC_PARENT_OPTIONS_URL = "https://autismpathwaysconsulting.com/parents";
 const APC_WEBSITE_URL = "https://autismpathwaysconsulting.com";
 
 
@@ -1266,9 +1265,38 @@ function resetSavedData() {
               </p>
             </div>
             <div className="grid gap-3">
-              <a href="https://autismpathwaysconsulting.com/start" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Start with Free Call</a>
-              
-              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
+              <a href="https://autismpathwaysconsulting.com/big-reactions-quick-check" target="_blank" rel="noreferrer" className="rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Get the free 2-page meltdown guide</a>
+              <div>
+                <a href="https://cal.com/autismpathwaysconsulting/first-step-call" target="_blank" rel="noreferrer" className="block rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Book a free 15-minute call</a>
+                <p className="mt-2 text-xs leading-5 text-white/70">A fit check to choose the right support. Not advice, assessment or therapy.</p>
+              </div>
+              <a href="mailto:cjlim@autismpathwaysconsulting.com?subject=APC%20Calm%20Companion%20Feedback&body=Hi%20CJ%2C%0A%0AI%20tried%20APC%20Calm%20Companion.%0A%0AWhat%20helped%20most%3A%0A%0AWhat%20felt%20confusing%3A%0A%0AWhat%20I%20wish%20the%20app%20had%3A%0A%0A" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</a>
+              <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
+            </div>
+          </div>
+        </section>
+
+        <section aria-label="If someone is in danger" className="mt-8 rounded-[2rem] border border-rose-200 bg-white p-6 shadow-sm">
+          <p className="text-sm font-bold uppercase tracking-wide text-rose-600">If someone is in danger</p>
+          <p className="mt-3 leading-7 text-slate-700">
+            This app is not crisis support. If anyone is in danger or badly hurt, use the numbers below.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl bg-[#F7F3EB] p-4">
+              <p className="text-sm font-bold text-slate-900">Emergency</p>
+              <a href="tel:999" className="mt-2 inline-block font-bold text-teal-700 underline">999</a>
+            </div>
+            <div className="rounded-2xl bg-[#F7F3EB] p-4">
+              <p className="text-sm font-bold text-slate-900">Befrienders KL, 24 hours</p>
+              <a href="tel:0376272929" className="mt-2 inline-block font-bold text-teal-700 underline">03-7627 2929</a>
+            </div>
+            <div className="rounded-2xl bg-[#F7F3EB] p-4">
+              <p className="text-sm font-bold text-slate-900">Talian HEAL</p>
+              <a href="tel:15555" className="mt-2 inline-block font-bold text-teal-700 underline">15555</a>
+            </div>
+            <div className="rounded-2xl bg-[#F7F3EB] p-4">
+              <p className="text-sm font-bold text-slate-900">Talian Kasih</p>
+              <a href="tel:15999" className="mt-2 inline-block font-bold text-teal-700 underline">15999</a>
             </div>
           </div>
         </section>
@@ -1277,6 +1305,7 @@ function resetSavedData() {
           <p className="font-bold text-slate-900">© Autism Pathways Consulting</p>
           <p className="mt-2">APC Calm Companion provides educational parent support tools only. It does not replace therapy, diagnosis, medical advice, or crisis support.</p>
           <p className="mt-2">For professional support, visit <a href="https://autismpathwaysconsulting.com" target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">autismpathwaysconsulting.com</a>.</p>
+          <p className="mt-2 text-xs text-slate-400">Teaching young children? See <a href="https://autismpathwaysconsulting.com/teacher-talk" target="_blank" rel="noreferrer" className="font-semibold text-teal-700 underline">Hanen Teacher Talk</a>, 3 online sessions for preschool teachers.</p>
         </footer>
       </div>
     </main>
