@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 backups/
 backups/
+
+# Local dev secrets / state
+.dev.vars
+.dev.vars.save
+.wrangler/
