@@ -1552,7 +1552,6 @@ function resetSavedData() {
                 <a href="https://cal.com/autismpathwaysconsulting/first-step-call" target="_blank" rel="noreferrer" className="block rounded-2xl bg-white/10 px-5 py-4 text-center font-bold text-white ring-1 ring-white/30">Book a free 15-minute call</a>
                 <p className="mt-2 text-xs leading-5 text-white/70">A fit check to choose the right support. Not advice, assessment or therapy.</p>
               </div>
-              
               <button type="button" data-feedback-trigger onClick={openFeedback} className="min-h-12 rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">Give app feedback</button>
               <a href={APC_PARENT_OPTIONS_URL} target="_blank" rel="noopener noreferrer" className="rounded-2xl bg-white px-5 py-4 text-center font-bold text-teal-800 shadow-lg">View Parent Support Options</a>
             </div>
